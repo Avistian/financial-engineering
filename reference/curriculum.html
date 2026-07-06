@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expert Curriculum — Quant Research (3-year)</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    .hero { border: 1px solid var(--accent); background: var(--accent-light); padding: 1rem 1.25rem; border-radius: 4px; margin: 1rem 0 1.75rem; font-size: 0.92rem; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.75rem; margin: 1.25rem 0 1.75rem; }
+    .stat { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; text-align: center; }
+    .stat-num { font-family: var(--font-sans); font-size: 1.5rem; font-weight: 700; color: var(--accent); display: block; }
+    .stat-label { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .toc { columns: 2; column-gap: 2rem; font-family: var(--font-sans); font-size: 0.88rem; margin: 1rem 0 2rem; }
+    @media (max-width: 640px) { .toc { columns: 1; } }
+    .year-block { margin: 2.5rem 0; padding-top: 0.5rem; border-top: 2px solid var(--accent); }
+    .year-title { font-size: 1.35rem; margin: 0 0 0.25rem; color: var(--accent); }
+    .year-goal { font-size: 0.9rem; color: var(--muted); margin: 0 0 1rem; }
+    .q-title { font-family: var(--font-sans); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gold); margin: 1.5rem 0 0.5rem; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0.5rem 0 1rem; }
+    td { padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    td.u { font-family: var(--font-mono); color: var(--accent); white-space: nowrap; width: 3rem; }
+    td.src { color: var(--muted); font-family: var(--font-sans); font-size: 0.78rem; }
+    .chk { background: var(--accent-light); }
+    .exit { background: #fef9e7; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Reference · full plan</p>
+  <h1>Expert Curriculum — Quantitative Research</h1>
+  <p class="subtitle">3 years · 120 units · systematic-alpha track</p>
+
+  <div class="hero">
+    A <strong>unit ≠ a day.</strong> Each row is a concept <em>plus</em> its lab/reproduction
+    <em>plus</em> its quiz. Reading is ~5% of the ~2,000 hours; hands-on labs, validation, and the
+    Year-3 capstone are where expertise forms. Finish each quarter's checkpoint before advancing.
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="stat-num">3</span><span class="stat-label">Years</span></div>
+    <div class="stat"><span class="stat-num">12</span><span class="stat-label">Quarters</span></div>
+    <div class="stat"><span class="stat-num">120</span><span class="stat-label">Units</span></div>
+    <div class="stat"><span class="stat-num">~2000</span><span class="stat-label">Hours</span></div>
+  </div>
+
+  <p><strong>Legend:</strong> shaded <span class="chk">blue</span> = quarter checkpoint ·
+  shaded <span class="exit">yellow</span> = year exit exam. Sources in grey; full list in
+  <code>RESOURCES.md</code>.</p>
+
+  <nav class="toc">
+    <a href="#y1">Year 1 — Foundations</a><br>
+    <a href="#y2">Year 2 — Researcher's Craft</a><br>
+    <a href="#y3">Year 3 — Alpha, Execution &amp; Interview</a>
+  </nav>
+
+  <!-- YEAR 1 -->
+  <section class="year-block" id="y1">
+    <h2 class="year-title">Year 1 — Foundations: Markets, the Math Bridge &amp; Honest ML</h2>
+    <p class="year-goal">Speak markets from zero, rebuild the stats, acquire the stochastic-calculus toolkit, and internalize leakage/labeling discipline.</p>
+
+    <div class="q-title">Q1 · Markets &amp; statistical foundations</div>
+    <table>
+      <tr><td class="u">001</td><td>The quant landscape: buy/sell side, QR/QT/QD, HFT vs mid vs low freq, what "alpha" means</td><td class="src">Bouchaud Ch.1</td></tr>
+      <tr><td class="u">002</td><td>Instruments &amp; mechanics: equities, futures, options, ETFs; order → trade</td><td class="src">Hull Ch.1–2</td></tr>
+      <tr><td class="u">003</td><td>Market structure &amp; the limit order book: matching, price-time priority (FIFO)</td><td class="src">Bouchaud Ch.3</td></tr>
+      <tr><td class="u">004</td><td>Returns &amp; stylized facts: log returns, fat tails, vol clustering</td><td class="src">Cont 2001</td></tr>
+      <tr><td class="u">005</td><td>Probability refresher: RVs, moments, key distributions</td><td class="src">Wasserman 1–5</td></tr>
+      <tr><td class="u">006</td><td>Estimation &amp; inference: MLE, bootstrap, confidence intervals</td><td class="src">Wasserman 6–9</td></tr>
+      <tr><td class="u">007</td><td>Hypothesis testing &amp; multiple-testing traps</td><td class="src">Harvey-Liu-Zhu 2016</td></tr>
+      <tr><td class="u">008</td><td>Linear algebra for quants: covariance, eigendecomposition, PCA</td><td class="src">Strang</td></tr>
+      <tr><td class="u">009</td><td>Regression done right: OLS, heteroskedasticity, Newey-West</td><td class="src">Wooldridge</td></tr>
+      <tr class="chk"><td class="u">010</td><td><strong>Q1 checkpoint</strong> — statistical hygiene: reproduce a returns notebook; catch a planted spurious signal</td><td class="src">—</td></tr>
+    </table>
+
+    <div class="q-title">Q2 · Stochastic calculus &amp; derivatives pricing (the math bridge)</div>
+    <table>
+      <tr><td class="u">011</td><td>Measure-theoretic probability (lite): filtrations, conditional expectation</td><td class="src">Shreve II 1–2</td></tr>
+      <tr><td class="u">012</td><td>Random walks → Brownian motion; quadratic variation</td><td class="src">Shreve II 3</td></tr>
+      <tr><td class="u">013</td><td>The Itô integral &amp; Itô's lemma</td><td class="src">Shreve II 4</td></tr>
+      <tr><td class="u">014</td><td>SDEs: GBM, Ornstein-Uhlenbeck</td><td class="src">Shreve II 4–5</td></tr>
+      <tr><td class="u">015</td><td>Risk-neutral pricing &amp; the Girsanov theorem</td><td class="src">Shreve II 5</td></tr>
+      <tr><td class="u">016</td><td>The Black-Scholes PDE &amp; Feynman-Kac</td><td class="src">Shreve II 6</td></tr>
+      <tr><td class="u">017</td><td>Greeks &amp; dynamic hedging; the P&amp;L of a hedged option</td><td class="src">Hull 19</td></tr>
+      <tr><td class="u">018</td><td>Jump-diffusion &amp; Poisson processes (Merton)</td><td class="src">Merton 1976</td></tr>
+      <tr><td class="u">019</td><td>Numerical methods: Monte Carlo, finite differences, variance reduction</td><td class="src">Glasserman</td></tr>
+      <tr class="chk"><td class="u">020</td><td><strong>Q2 checkpoint</strong> — price &amp; hedge a European option three ways; reconcile</td><td class="src">Shreve II</td></tr>
+    </table>
+
+    <div class="q-title">Q3 · Financial time series &amp; volatility</div>
+    <table>
+      <tr><td class="u">021</td><td>Stationarity &amp; unit roots</td><td class="src">Tsay 2</td></tr>
+      <tr><td class="u">022</td><td>ARMA/ARIMA and the limits of linear models on returns</td><td class="src">Tsay 2</td></tr>
+      <tr><td class="u">023</td><td>Volatility I — ARCH/GARCH</td><td class="src">Tsay 3</td></tr>
+      <tr><td class="u">024</td><td>Realized volatility &amp; quadratic variation theory</td><td class="src">ABDL 2003</td></tr>
+      <tr><td class="u">025</td><td>The HAR-RV model: long memory, a strong baseline</td><td class="src">Corsi 2009</td></tr>
+      <tr><td class="u">026</td><td>Jumps &amp; the leverage effect: bipower variation, jump detection</td><td class="src">BN-Shephard 2004</td></tr>
+      <tr><td class="u">027</td><td>Cointegration &amp; pairs; spurious regression</td><td class="src">Engle-Granger 1987</td></tr>
+      <tr><td class="u">028</td><td>Statistical arbitrage: OU signals, half-life, trade lifecycle</td><td class="src">Avellaneda-Lee 2010</td></tr>
+      <tr><td class="u">029</td><td>Multivariate volatility &amp; covariance (DCC, EWMA)</td><td class="src">Tsay 10</td></tr>
+      <tr class="chk"><td class="u">030</td><td><strong>Q3 checkpoint</strong> — validate a HAR-RV forecaster vs GARCH out-of-sample</td><td class="src">Corsi 2009</td></tr>
+    </table>
+
+    <div class="q-title">Q4 · Financial ML I — data &amp; labeling (AFML core)</div>
+    <table>
+      <tr><td class="u">031</td><td>Why standard ML fails on finance: non-IID, low SNR, regimes, adversaries</td><td class="src">AFML 1</td></tr>
+      <tr><td class="u">032</td><td>The bar zoo: time, tick, volume, dollar bars</td><td class="src">AFML 2</td></tr>
+      <tr><td class="u">033</td><td>Information-driven bars: imbalance &amp; run bars</td><td class="src">AFML 2</td></tr>
+      <tr><td class="u">034</td><td>The CUSUM filter &amp; event-based sampling</td><td class="src">AFML 2.5</td></tr>
+      <tr><td class="u">035</td><td>The triple-barrier labeling method</td><td class="src">AFML 3.4</td></tr>
+      <tr><td class="u">036</td><td>Meta-labeling: side vs size; precision boosting</td><td class="src">AFML 3.6</td></tr>
+      <tr><td class="u">037</td><td>Fractional differentiation: stationarity with memory</td><td class="src">AFML 5</td></tr>
+      <tr><td class="u">038</td><td>Sample weights &amp; overlapping outcomes (uniqueness)</td><td class="src">AFML 4</td></tr>
+      <tr><td class="u">039</td><td>Sequential bootstrap</td><td class="src">AFML 4.5</td></tr>
+      <tr class="exit"><td class="u">040</td><td><strong>Year-1 exit exam</strong> — end-to-end: bars → frac-diff → triple-barrier → weighted sample, zero leakage</td><td class="src">AFML 2–5</td></tr>
+    </table>
+  </section>
+
+  <!-- YEAR 2 -->
+  <section class="year-block" id="y2">
+    <h2 class="year-title">Year 2 — The Researcher's Craft: ML That Survives Markets</h2>
+    <p class="year-goal">Master modeling, validation, and microstructure. The difference between "great backtest" and "an edge I can stake capital on."</p>
+
+    <div class="q-title">Q1 · Financial ML II — features &amp; ensembles</div>
+    <table>
+      <tr><td class="u">041</td><td>Feature importance done right: MDI, MDA, and finance failure modes</td><td class="src">AFML 8</td></tr>
+      <tr><td class="u">042</td><td>Orthogonal features &amp; clustered feature importance</td><td class="src">MLfAM 6</td></tr>
+      <tr><td class="u">043</td><td>Entropy features: information content as signal</td><td class="src">AFML 18</td></tr>
+      <tr><td class="u">044</td><td>Structural break tests: CUSUM, SADF, regimes &amp; bubbles</td><td class="src">AFML 17</td></tr>
+      <tr><td class="u">045</td><td>Bagging vs boosting in finance: why bagging is safer on noisy labels</td><td class="src">AFML 6; ESL</td></tr>
+      <tr><td class="u">046</td><td>Random forests for finance: OOB, pitfalls under low uniqueness</td><td class="src">Breiman 2001</td></tr>
+      <tr><td class="u">047</td><td>Gradient boosting (XGBoost/LightGBM/CatBoost) for tabular alpha</td><td class="src">Chen 2016; Ke 2017</td></tr>
+      <tr><td class="u">048</td><td>Hyperparameter search without leaking: nested CV</td><td class="src">AFML 9</td></tr>
+      <tr><td class="u">049</td><td>Ensemble stacking &amp; model diversity</td><td class="src">Wolpert 1992</td></tr>
+      <tr class="chk"><td class="u">050</td><td><strong>Q1 checkpoint</strong> — feature-importance study: separate real from noise features</td><td class="src">AFML 8</td></tr>
+    </table>
+
+    <div class="q-title">Q2 · Backtesting &amp; the war on overfitting (the differentiator)</div>
+    <table>
+      <tr><td class="u">051</td><td>Why backtesting is hard: selection bias, the overfitting epidemic</td><td class="src">Bailey-LdP 2014</td></tr>
+      <tr><td class="u">052</td><td>Purged K-Fold cross-validation</td><td class="src">AFML 7.4</td></tr>
+      <tr><td class="u">053</td><td>The embargo mechanism</td><td class="src">AFML 7</td></tr>
+      <tr><td class="u">054</td><td>Combinatorial Purged Cross-Validation (CPCV)</td><td class="src">AFML 12.4</td></tr>
+      <tr><td class="u">055</td><td>The Deflated &amp; Probabilistic Sharpe Ratio</td><td class="src">Bailey-LdP 2012/14</td></tr>
+      <tr><td class="u">056</td><td>Probability of Backtest Overfitting (PBO)</td><td class="src">Bailey et al. 2015</td></tr>
+      <tr><td class="u">057</td><td>Minimum backtest length; false discovery under many trials</td><td class="src">Bailey-LdP 2014</td></tr>
+      <tr><td class="u">058</td><td>Walk-forward vs CPCV vs cross-sectional</td><td class="src">AFML 11–12</td></tr>
+      <tr><td class="u">059</td><td>Strategy risk &amp; bet sizing: Kelly, drawdown control</td><td class="src">AFML 10; Thorp</td></tr>
+      <tr class="chk"><td class="u">060</td><td><strong>Q2 checkpoint</strong> — take a "great" backtest; prove/debunk with CPCV + PBO + deflated Sharpe</td><td class="src">AFML 11–12</td></tr>
+    </table>
+
+    <div class="q-title">Q3 · Market microstructure &amp; LOB dynamics</div>
+    <table>
+      <tr><td class="u">061</td><td>LOB mechanics in depth: queue position, price-time priority revisited</td><td class="src">Bouchaud 3–4</td></tr>
+      <tr><td class="u">062</td><td>Order Flow Imbalance (OFI) &amp; price impact</td><td class="src">Cont-Kukanov-Stoikov 2014</td></tr>
+      <tr><td class="u">063</td><td>Multi-Level OFI &amp; integrated OFI; cross-impact</td><td class="src">Cont-Cucuringu-Zhang 2023</td></tr>
+      <tr><td class="u">064</td><td>Price impact models: linear, square-root law, permanent vs temporary</td><td class="src">Almgren 2005</td></tr>
+      <tr><td class="u">065</td><td>Hawkes processes I: self-exciting point processes, branching ratio</td><td class="src">Bacry et al. 2015</td></tr>
+      <tr><td class="u">066</td><td>Hawkes processes II: state-dependent &amp; multivariate arrivals</td><td class="src">Bacry et al. 2015</td></tr>
+      <tr><td class="u">067</td><td>Adverse selection: Glosten-Milgrom, Kyle's lambda</td><td class="src">Kyle 1985</td></tr>
+      <tr><td class="u">068</td><td>Bid-ask spread decomposition: inventory vs adverse selection</td><td class="src">O'Hara</td></tr>
+      <tr><td class="u">069</td><td>Agent-based models &amp; LOB simulators</td><td class="src">ABIDES</td></tr>
+      <tr class="chk"><td class="u">070</td><td><strong>Q3 checkpoint</strong> — fit OFI→impact and a Hawkes intensity on LOB data</td><td class="src">Cont et al.</td></tr>
+    </table>
+
+    <div class="q-title">Q4 · Modern deep learning &amp; NLP for markets</div>
+    <table>
+      <tr><td class="u">071</td><td>Sequence models: RNN/LSTM/GRU and vanishing gradients</td><td class="src">Goodfellow 10</td></tr>
+      <tr><td class="u">072</td><td>Attention &amp; transformers</td><td class="src">Vaswani 2017</td></tr>
+      <tr><td class="u">073</td><td>Deep LOB models: DeepLOB (CNN+LSTM)</td><td class="src">Zhang-Zohren-Roberts 2019</td></tr>
+      <tr><td class="u">074</td><td>Autoregressive &amp; generative sequence models</td><td class="src">—</td></tr>
+      <tr><td class="u">075</td><td>NLP for finance I: text as data (earnings calls, 10-K/10-Q, news)</td><td class="src">Loughran-McDonald 2011</td></tr>
+      <tr><td class="u">076</td><td>NLP for finance II: embeddings, transformer sentiment, LLM features</td><td class="src">FinBERT 2019</td></tr>
+      <tr><td class="u">077</td><td>Tabular deep learning: FT-Transformer, and where GBDTs still win</td><td class="src">Grinsztajn 2022</td></tr>
+      <tr><td class="u">078</td><td>Tabular foundation models: TabPFN, TabDPT, in-context learning</td><td class="src">TabPFN 2023; TabDPT 2024</td></tr>
+      <tr><td class="u">079</td><td>Practical DL: regularization, early stopping, not fooling yourself</td><td class="src">Goodfellow 7–8</td></tr>
+      <tr class="exit"><td class="u">080</td><td><strong>Year-2 exit exam</strong> — reproduce a DeepLOB-style predictor with correct temporal splits; beat/match a GBDT honestly</td><td class="src">Zhang 2019</td></tr>
+    </table>
+  </section>
+
+  <!-- YEAR 3 -->
+  <section class="year-block" id="y3">
+    <h2 class="year-title">Year 3 — Alpha, Execution, Systems &amp; the Interview</h2>
+    <p class="year-goal">Turn signals into a deployable, capacity-aware strategy; understand execution and its systems; then convert everything into an offer and a defended capstone.</p>
+
+    <div class="q-title">Q1 · Portfolio construction &amp; risk</div>
+    <table>
+      <tr><td class="u">081</td><td>Mean-variance optimization &amp; its instability</td><td class="src">Markowitz 1952</td></tr>
+      <tr><td class="u">082</td><td>Random Matrix Theory: Marčenko-Pastur, eigenvalue cleaning</td><td class="src">Laloux 1999</td></tr>
+      <tr><td class="u">083</td><td>Ledoit-Wolf covariance shrinkage &amp; denoising</td><td class="src">Ledoit-Wolf 2004</td></tr>
+      <tr><td class="u">084</td><td>Factor models &amp; risk decomposition</td><td class="src">Grinold-Kahn 3</td></tr>
+      <tr><td class="u">085</td><td>The Fundamental Law of Active Management: IC, breadth</td><td class="src">Grinold-Kahn 6</td></tr>
+      <tr><td class="u">086</td><td>Signal combination &amp; alpha blending</td><td class="src">Grinold-Kahn 11–14</td></tr>
+      <tr><td class="u">087</td><td>Hierarchical Risk Parity (HRP)</td><td class="src">LdP 2016</td></tr>
+      <tr><td class="u">088</td><td>Transaction costs &amp; capacity: turnover, slippage, alpha decay</td><td class="src">Grinold-Kahn</td></tr>
+      <tr><td class="u">089</td><td>Risk management &amp; drawdown: VaR/ES caveats, regime-aware sizing</td><td class="src">McNeil et al.</td></tr>
+      <tr class="chk"><td class="u">090</td><td><strong>Q1 checkpoint</strong> — denoised, cost-aware portfolio from multiple signals; net Sharpe &amp; capacity</td><td class="src">Grinold-Kahn</td></tr>
+    </table>
+
+    <div class="q-title">Q2 · Optimal execution, market making &amp; RL</div>
+    <table>
+      <tr><td class="u">091</td><td>The execution problem: implementation shortfall, benchmarks</td><td class="src">Cartea et al. 1</td></tr>
+      <tr><td class="u">092</td><td>The Almgren-Chriss framework: permanent vs temporary impact</td><td class="src">Almgren-Chriss 2000</td></tr>
+      <tr><td class="u">093</td><td>Scheduling: TWAP, VWAP, POV, IS algos</td><td class="src">Cartea et al. 7</td></tr>
+      <tr><td class="u">094</td><td>Market making &amp; inventory control: Avellaneda-Stoikov</td><td class="src">Avellaneda-Stoikov 2008</td></tr>
+      <tr><td class="u">095</td><td>Markov Decision Processes for trading</td><td class="src">Sutton-Barto 3</td></tr>
+      <tr><td class="u">096</td><td>Value-based RL: Q-learning, DQN, Double DQN</td><td class="src">Mnih 2015; vanHasselt 2016</td></tr>
+      <tr><td class="u">097</td><td>Policy-gradient &amp; actor-critic: PPO</td><td class="src">Schulman 2017</td></tr>
+      <tr><td class="u">098</td><td>RL pitfalls: reward hacking, non-stationarity, sim-to-real</td><td class="src">Cartea et al.</td></tr>
+      <tr><td class="u">099</td><td>Backtesting execution &amp; MM agents against a LOB simulator</td><td class="src">ABIDES</td></tr>
+      <tr class="chk"><td class="u">100</td><td><strong>Q2 checkpoint</strong> — Almgren-Chriss vs RL agent vs TWAP/VWAP; explain the winner</td><td class="src">—</td></tr>
+    </table>
+
+    <div class="q-title">Q3 · Research infrastructure &amp; low-latency awareness (C++/Rust here)</div>
+    <table>
+      <tr><td class="u">101</td><td>The research stack: market-data engineering, point-in-time, survivorship bias</td><td class="src">LdP; data-eng</td></tr>
+      <tr><td class="u">102</td><td>Building a backtest engine: event-driven vs vectorized, look-ahead safety</td><td class="src">Zipline docs</td></tr>
+      <tr><td class="u">103</td><td>Performance in Python: vectorization, numba, profiling</td><td class="src">HP Python</td></tr>
+      <tr><td class="u">104</td><td>The tick-to-trade loop &amp; latency budget (awareness)</td><td class="src">firm talks</td></tr>
+      <tr><td class="u">105</td><td>C++ for quants I: memory model, RAII, compile-time dispatch</td><td class="src">Meyers</td></tr>
+      <tr><td class="u">106</td><td>C++/Rust II: cache locality, lock-free queues, LMAX Disruptor</td><td class="src">Disruptor paper</td></tr>
+      <tr><td class="u">107</td><td>Kernel bypass &amp; networking: DPDK, zero-copy, RDMA (concepts)</td><td class="src">DPDK docs</td></tr>
+      <tr><td class="u">108</td><td>Determinism &amp; tail latency: P99, jitter</td><td class="src">Dean-Barroso 2013</td></tr>
+      <tr><td class="u">109</td><td>Reproducible research: tracking, config, seeds, the audit</td><td class="src">MLflow/W&amp;B</td></tr>
+      <tr class="chk"><td class="u">110</td><td><strong>Q3 checkpoint</strong> — leakage-safe event-driven backtester; profile &amp; optimize a hot path</td><td class="src">—</td></tr>
+    </table>
+
+    <div class="q-title">Q4 · Interview mastery &amp; capstone</div>
+    <table>
+      <tr><td class="u">111</td><td>Mental math &amp; rapid estimation under pressure</td><td class="src">Green Book</td></tr>
+      <tr><td class="u">112</td><td>Probability brainteasers: expectation, conditioning, symmetry</td><td class="src">Heard on the Street</td></tr>
+      <tr><td class="u">113</td><td>Market-making &amp; betting games: EV, variance, adverse selection</td><td class="src">Green Book</td></tr>
+      <tr><td class="u">114</td><td>Stochastic-calculus &amp; pricing derivations for interviews</td><td class="src">Shreve; Green Book</td></tr>
+      <tr><td class="u">115</td><td>Statistics/ML interview questions &amp; "why" reasoning</td><td class="src">Green Book</td></tr>
+      <tr><td class="u">116</td><td>Coding interviews I: arrays, hashing, two-pointer, DP</td><td class="src">EPI; LeetCode</td></tr>
+      <tr><td class="u">117</td><td>Coding interviews II: graphs, trees, quant-flavored problems</td><td class="src">EPI; LeetCode</td></tr>
+      <tr><td class="u">118</td><td>System design for trading: data → signal → execution → risk</td><td class="src">DDIA</td></tr>
+      <tr><td class="u">119</td><td>Behavioral, research presentation, "walk me through a project"</td><td class="src">—</td></tr>
+      <tr class="exit"><td class="u">120</td><td><strong>Year-3 exit — Capstone:</strong> end-to-end project (data → signal → CPCV-validated backtest → cost-aware sizing → write-up), defended to a PM</td><td class="src">everything</td></tr>
+    </table>
+  </section>
+
+  <div class="callout">
+    <strong>Interview prep runs the whole way.</strong> From Year 1: weekly mental-math + brainteasers
+    and 3–5 LeetCode problems. Year 3 Q4 is the concentration, not the start.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="study-roadmap.html">Study roadmap (summary)</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

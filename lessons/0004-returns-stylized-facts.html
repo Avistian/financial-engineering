@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 004 — Returns &amp; the Stylized Facts</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>Returns &amp; the Stylized Facts</h1>
+  <p class="subtitle">Lesson 004 · Foundations · ~40 min · has lab</p>
+
+  <p>
+    Prices are non-stationary and awkward to model; <strong>returns</strong> are the currency of quant
+    research. But returns are not the tame Gaussian variables intro stats assumes — they obey a set of
+    stubborn empirical regularities called the <strong>stylized facts</strong> (Cont 2001). Every model
+    you build must respect them, and half of all beginner mistakes come from ignoring them.
+  </p>
+  <p>
+    This lesson's single skill: <strong>compute log returns and identify the stylized facts in real
+    data</strong> — fat tails, absent linear autocorrelation, and volatility clustering.
+  </p>
+
+  <h2>Simple vs log returns</h2>
+  <div class="formula">R_t = (P_t − P_{t−1}) / P_{t−1} &nbsp;&nbsp;·&nbsp;&nbsp; r_t = ln(P_t / P_{t−1}) = ln(1 + R_t)</div>
+  <p>
+    <strong>Log returns</strong> add across time (a k-period return is the sum of the one-period log
+    returns), are symmetric around zero, and play nicely with the Brownian-motion models of Q2. Simple
+    returns add across <em>assets</em> (portfolio return = weighted sum). Quants default to log returns
+    for time-series modeling. For small moves, <code>r_t ≈ R_t</code>.
+  </p>
+
+  <h2>The stylized facts you must respect</h2>
+  <table>
+    <thead><tr><th>Fact</th><th>Observation</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Fat tails</strong></td><td>excess kurtosis ≫ 0; crashes far more likely than Gaussian says</td><td>normal-based risk models undercount tail loss</td></tr>
+      <tr><td><strong>No linear autocorr.</strong></td><td>corr(r_t, r_{t+k}) ≈ 0</td><td>naïve momentum on raw returns fails</td></tr>
+      <tr><td><strong>Volatility clustering</strong></td><td>corr(\|r_t\|, \|r_{t+k}\|) &gt; 0, decays slowly</td><td>vol is forecastable → GARCH, HAR-RV</td></tr>
+      <tr><td><strong>Leverage effect</strong></td><td>down moves raise future vol more than up moves</td><td>asymmetric vol models (Q3)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The tension here is the entire game: <strong>direction</strong> is nearly unpredictable from past
+    returns alone (no linear autocorrelation), yet <strong>volatility</strong> is quite predictable
+    (clustering). Much of quant research is finding the nonlinear/cross-sectional structure that raw
+    autocorrelation misses, while modeling volatility separately.
+  </p>
+
+  <h2>How to see them (the lab does this)</h2>
+  <pre>import numpy as np
+r = np.log(px).diff().dropna()
+r.kurtosis()            # &gt;&gt; 0   → fat tails
+r.autocorr(lag=1)       # ~ 0    → no linear predictability
+r.abs().autocorr(lag=1) # &gt; 0    → volatility clustering</pre>
+
+  <div class="trap">
+    <strong>Trap.</strong> Reporting Sharpe ratios and t-statistics as if returns were IID normal. Fat
+    tails and volatility clustering violate both assumptions, inflating apparent significance and making
+    overfit strategies look "statistically real." This is the first leak through which false edges
+    enter — and the reason the deflated Sharpe ratio (Year 2 Q2) exists. Distrust any single-number
+    performance claim that ignores the stylized facts.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    Cont (2001), <em>Empirical properties of asset returns: stylized facts and statistical issues</em>,
+    <em>Quantitative Finance</em> 1(2). The founding catalog of the stylized facts — short and
+    foundational. Pair it with the <a href="../reference/stylized-facts.html">stylized-facts cheat sheet</a>.
+  </p>
+
+  <h2>Lab — measure the stylized facts on real data</h2>
+  <p>
+    Notebook: <code>0004-returns-stylized-facts.ipynb</code>. You'll load a real daily price series,
+    compute log returns, and <em>verify</em> fat tails, absent linear autocorrelation, and volatility
+    clustering — then compare against a simulated Gaussian series to see what's missing.
+    <a href="../labs/README.md">How labs work</a>.
+  </p>
+
+  <div class="ask-teacher">
+    Kurtosis, autocorrelation, or the log-vs-simple choice unclear? Ask your teacher for a worked toy example on 5 numbers.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0003-limit-order-book.html">← Lesson 003</a></li>
+      <li><a href="0005-probability-refresher.html">Lesson 005 — Probability Refresher →</a></li>
+      <li><a href="../reference/stylized-facts.html">Cheat sheet</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script>
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "Quants prefer log returns for time series because they:",
+    options: [
+      { label: "Add cleanly across time periods", value: "a" },
+      { label: "Are always larger than simple returns", value: "b" },
+      { label: "Remove all volatility from the data", value: "c" },
+      { label: "Guarantee a normal distribution shape", value: "d" }
+    ],
+    correct: "a",
+    explain: "Log returns are time-additive (k-period return = sum of one-period logs) and fit the Brownian-motion models of Q2."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "Volatility clustering shows up empirically as:",
+    options: [
+      { label: "Positive autocorrelation of |returns|", value: "a" },
+      { label: "Positive autocorrelation of raw returns", value: "b" },
+      { label: "Zero kurtosis in the return series", value: "c" },
+      { label: "A perfectly normal return histogram", value: "d" }
+    ],
+    correct: "a",
+    explain: "Raw returns show ~0 autocorrelation, but |returns| (or squared returns) are positively autocorrelated — big moves cluster."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Fat tails imply that a Gaussian risk model will:",
+    options: [
+      { label: "Underestimate extreme-loss probability", value: "a" },
+      { label: "Overestimate extreme-loss probability", value: "b" },
+      { label: "Perfectly capture crash frequencies", value: "c" },
+      { label: "Remove volatility clustering effects", value: "d" }
+    ],
+    correct: "a",
+    explain: "Real returns have far more extreme moves than a normal distribution predicts, so Gaussian VaR undercounts tail risk."
+  });
+</script>
+</body>
+</html>

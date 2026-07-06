@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": 1,
+      "slug": "0001-quant-landscape",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": false,
+      "labPath": null,
+      "title": "The Quant Landscape",
+      "published": true
+    },
+    {
+      "id": 2,
+      "slug": "0002-instruments-mechanics",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": false,
+      "labPath": null,
+      "title": "Instruments & Market Mechanics",
+      "published": true
+    },
+    {
+      "id": 3,
+      "slug": "0003-limit-order-book",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": false,
+      "labPath": null,
+      "title": "The Limit Order Book & Price-Time Priority",
+      "published": true
+    },
+    {
+      "id": 4,
+      "slug": "0004-returns-stylized-facts",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": false,
+      "labPath": "labs/0004-returns-stylized-facts.ipynb",
+      "title": "Returns & the Stylized Facts",
+      "published": true
+    },
+    {
+      "id": 5,
+      "slug": "0005-probability-refresher",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": false,
+      "labPath": null,
+      "title": "Probability Refresher for Quants",
+      "published": true
+    }
+  ]
+}

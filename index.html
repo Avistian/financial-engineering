@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="feq-manifest-version" content="1">
+  <title>Financial Engineering — Quant Research Track</title>
+  <link rel="stylesheet" href="assets/lesson.css">
+  <style>
+    .continue-banner { margin: 1.25rem 0 1.75rem; }
+    .continue-banner a {
+      display: block;
+      padding: 1rem 1.15rem;
+      background: var(--accent-light);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .continue-label {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+    .continue-title { display: block; font-weight: 600; margin-top: 0.25rem; font-size: 0.95rem; }
+    .year-block {
+      margin: 1rem 0 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem 0.75rem;
+      background: #fff;
+    }
+    .year-summary {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 0.35rem 0.25rem;
+      color: var(--accent);
+    }
+    .quarter-section { margin: 0.75rem 0 0.25rem 0.5rem; }
+    .quarter-head {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin: 0 0 0.5rem;
+      font-weight: 600;
+    }
+    .lesson-list { list-style: none; padding: 0; margin: 0 0 0.75rem; }
+    .lesson-list li { margin: 0.5rem 0; position: relative; }
+    .lesson-list a {
+      display: block;
+      padding: 0.75rem 1rem;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+    }
+    .lesson-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+    .lesson-list .num { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .lesson-list .title { display: block; font-weight: 600; margin-top: 0.15rem; }
+    .lab-link { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); font-family: var(--font-mono); font-size: 0.72rem; }
+    .lab-link a { color: var(--accent); padding: 0; border: none; background: none; display: inline; }
+    .ref-links { font-family: var(--font-sans); font-size: 0.9rem; }
+    .ref-links ul { list-style: none; padding: 0; }
+    .ref-links li { margin: 0.4rem 0; }
+    .mission-blurb { font-size: 0.92rem; color: var(--muted); margin: 0 0 1.5rem; }
+    .nav-error { font-size: 0.9rem; color: var(--muted); }
+    .stat-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1rem 0 1.5rem; }
+    .stat { flex: 1 1 6rem; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem; text-align: center; }
+    .stat-num { font-family: var(--font-sans); font-size: 1.35rem; font-weight: 700; color: var(--accent); display: block; }
+    .stat-label { font-family: var(--font-sans); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · 3-year track</p>
+  <h1>Financial Engineering</h1>
+  <p class="subtitle">Interactive lessons · phone-friendly · ~1.5–2 h/day baseline</p>
+
+  <p class="mission-blurb" id="mission">
+    Become a Quantitative Researcher at a top systematic trading firm — by building foundations
+    in order: markets &amp; math → honest ML &amp; validation → alpha, execution, and the interview.
+  </p>
+
+  <div class="stat-row">
+    <div class="stat"><span class="stat-num">3</span><span class="stat-label">Years</span></div>
+    <div class="stat"><span class="stat-num">120</span><span class="stat-label">Units</span></div>
+    <div class="stat"><span class="stat-num">~40</span><span class="stat-label">Core papers</span></div>
+    <div class="stat"><span class="stat-num">~2000</span><span class="stat-label">Hours</span></div>
+  </div>
+
+  <p>
+    Each unit is a concept + its lab + its quiz. A unit is "done" only when the lab runs and the
+    checkpoint passes — the calendar is set by hands-on reproduction and validation, not reading speed.
+    Bookmark this page on your phone and pick up where you left off.
+  </p>
+
+  <div id="continue-nav"></div>
+
+  <h2>Lessons</h2>
+  <div id="lesson-nav"><p class="nav-error">Loading…</p></div>
+
+  <h2>Reference</h2>
+  <nav class="ref-links">
+    <ul>
+      <li><a href="reference/curriculum.html">Expert Curriculum (3-year plan · all 120 units)</a></li>
+      <li><a href="reference/study-roadmap.html">Study Roadmap (summary)</a></li>
+      <li><a href="reference/stylized-facts.html">Cheat sheet: Returns &amp; Stylized Facts</a></li>
+    </ul>
+  </nav>
+
+  <h2>Labs</h2>
+  <p class="ref-links">
+    Each lab is a fill-in Jupyter notebook in <a href="labs/README.md"><code>labs/</code></a>
+    (PROVIDED / TODO / CHECK / EXIT TICKET cells). Python-first; C++/Rust only in the Year-3
+    systems track. See the lesson list above for per-lesson lab links.
+  </p>
+
+  <div class="ask-teacher">
+    Questions or stuck on a quiz? Ask your teacher in Cursor chat.
+  </div>
+</article>
+<script src="assets/home.js"></script>
+<script>HomeNav.mount({ navId: "lesson-nav", continueId: "continue-nav" });</script>
+</body>
+</html>

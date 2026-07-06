@@ -1,0 +1,17 @@
+# Core scientific / ML stack for the labs (Python-first).
+# Pin loosely; refresh at each quarterly currency check.
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+scikit-learn>=1.4
+statsmodels>=0.14
+matplotlib>=3.8
+jupyter>=1.0
+ipykernel>=6.29
+
+# Added as the curriculum reaches them (kept here so the env is future-proof):
+# arch>=6.3          # GARCH / realized-vol models (Year 1 Q3)
+# yfinance>=0.2      # optional real market data for early labs
+# torch>=2.2         # deep learning: DeepLOB, transformers (Year 2 Q4+)
+# xgboost>=2.0       # gradient boosting (Year 2 Q1)
+# lightgbm>=4.3

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 005 — Probability Refresher for Quants</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>Probability Refresher for Quants</h1>
+  <p class="subtitle">Lesson 005 · Foundations · ~40 min</p>
+
+  <p>
+    You have solid undergrad probability; this lesson sharpens it into the <strong>quant working set</strong>
+    and the four distributions you'll reach for constantly. It's also the on-ramp to the
+    measure-theoretic view (Lesson 011) — think of moments and conditioning now, filtrations later.
+  </p>
+  <p>
+    This lesson's single skill: <strong>pick the right distribution for a modeling job and reason with
+    the first four moments</strong>.
+  </p>
+
+  <h2>The four moments you actually use</h2>
+  <table>
+    <thead><tr><th>Moment</th><th>Meaning</th><th>In markets</th></tr></thead>
+    <tbody>
+      <tr><td>Mean (μ)</td><td>center / expected value</td><td>drift, expected return</td></tr>
+      <tr><td>Variance (σ²)</td><td>spread</td><td>risk / volatility (σ)</td></tr>
+      <tr><td>Skewness</td><td>asymmetry</td><td>crash risk (equities: negative skew)</td></tr>
+      <tr><td>Kurtosis</td><td>tail heaviness</td><td>fat tails (Lesson 004)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    A normal distribution has skew 0 and kurtosis 3 ("excess kurtosis" 0). Real returns have negative
+    skew and excess kurtosis &gt; 0 — which is exactly why the next distribution matters.
+  </p>
+
+  <h2>The four distributions to know cold</h2>
+  <table>
+    <thead><tr><th>Distribution</th><th>Use it for</th><th>Key property</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Normal</strong></td><td>errors, CLT limits, Brownian increments</td><td>thin tails; sums of it stay normal</td></tr>
+      <tr><td><strong>Lognormal</strong></td><td>prices (if log returns are normal, price is lognormal)</td><td>positive, right-skewed</td></tr>
+      <tr><td><strong>Student-t</strong></td><td>fat-tailed returns; robust models</td><td>heavier tails; ν → ∞ gives normal</td></tr>
+      <tr><td><strong>Poisson</strong></td><td>counts of events (trades, jumps) per interval</td><td>underlies Poisson/Hawkes processes (Q2, Y2)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Conditioning: the idea everything is built on</h2>
+  <p>
+    A <strong>conditional expectation</strong> <code>E[X | information]</code> is your best forecast of
+    <code>X</code> given what you know. Almost every model — a regression, a signal, an option price —
+    is a conditional expectation of a payoff given current information. In Lesson 011 you'll see the
+    formal version: conditioning on a <em>filtration</em> (the information available up to time t) and
+    the fact that <code>E[·|ℱ]</code> is a projection. Get comfortable now with the plain idea:
+    <em>expectation given what you currently observe</em>.
+  </p>
+  <div class="formula">Tower rule: E[ E[X | ℱ] ] = E[X]</div>
+
+  <div class="trap">
+    <strong>Trap.</strong> Reaching for the normal distribution by default. It underlies the CLT and
+    Brownian motion, but it badly models returns (too-thin tails) and prices (which can't go negative).
+    Using a normal where a Student-t or lognormal belongs is how risk gets systematically
+    underestimated. Match the distribution to the quantity: normal for <em>increments/errors</em>,
+    lognormal for <em>prices</em>, Student-t for <em>fat-tailed returns</em>, Poisson for <em>counts</em>.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    Wasserman, <em>All of Statistics</em>, Chapters 1–5 — probability, random variables, expectation,
+    and the key distributions. This book is your Q1 statistics anchor; you'll use Ch. 6–9 in
+    Lessons 006–007.
+  </p>
+
+  <div class="ask-teacher">
+    Want a refresher on skewness/kurtosis formulas or the tower rule with a worked example? Ask your teacher.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0004-returns-stylized-facts.html">← Lesson 004</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 006 — Estimation &amp; inference (curriculum) →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script>
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "If log returns are normal, the price level is:",
+    options: [
+      { label: "Lognormally distributed and positive", value: "a" },
+      { label: "Normally distributed around its mean", value: "b" },
+      { label: "Uniformly spread over an interval", value: "c" },
+      { label: "Poisson distributed as a count", value: "d" }
+    ],
+    correct: "a",
+    explain: "Price = P₀·exp(sum of log returns); the exponential of a normal is lognormal — positive and right-skewed."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "To model fat-tailed returns you'd reach for the:",
+    options: [
+      { label: "Student-t distribution", value: "a" },
+      { label: "Standard normal distribution", value: "b" },
+      { label: "Discrete Poisson distribution", value: "c" },
+      { label: "Continuous uniform distribution", value: "d" }
+    ],
+    correct: "a",
+    explain: "The Student-t has heavier tails than the normal (and approaches normal as degrees of freedom → ∞)."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "A model's forecast is best thought of as a:",
+    options: [
+      { label: "Conditional expectation given information", value: "a" },
+      { label: "Unconditional average of all history", value: "b" },
+      { label: "Single realized draw from the past", value: "c" },
+      { label: "Variance of the observed target values", value: "d" }
+    ],
+    correct: "a",
+    explain: "E[X | information] is the optimal (MSE) forecast given what you know — the backbone of regression, signals, and pricing."
+  });
+</script>
+</body>
+</html>

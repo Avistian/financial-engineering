@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — Returns &amp; Stylized Facts</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  </style>
+</head>
+<body>
+<article>
+  <h1>Returns &amp; Stylized Facts</h1>
+  <p class="subtitle">Reference · print-friendly cheat sheet · Unit 004</p>
+
+  <h2>Returns: definitions</h2>
+  <div class="formula">simple: R_t = (P_t − P_{t−1}) / P_{t−1} &nbsp;&nbsp;·&nbsp;&nbsp; log: r_t = ln(P_t / P_{t−1})</div>
+  <p>
+    Log returns are <strong>additive across time</strong> (r over k periods = sum of r's) and
+    symmetric around 0; simple returns are additive <strong>across assets</strong> (portfolio return =
+    weighted sum). Quants default to <strong>log returns</strong> for time-series modeling. For small
+    moves r_t ≈ R_t.
+  </p>
+
+  <h2>The stylized facts (Cont 2001)</h2>
+  <p>Empirical regularities that hold across markets, assets, and eras. Any model of returns must respect them.</p>
+  <table>
+    <thead><tr><th>Fact</th><th>What you observe</th><th>Kills the assumption that…</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Fat tails</strong></td><td>Kurtosis ≫ 3; extreme moves far more common than a Gaussian predicts</td><td>returns are normal</td></tr>
+      <tr><td><strong>No linear autocorrelation</strong></td><td>corr(r_t, r_{t+k}) ≈ 0 for k ≥ 1 (beyond microstructure lags)</td><td>you can predict direction from past returns alone</td></tr>
+      <tr><td><strong>Volatility clustering</strong></td><td>corr(\|r_t\|, \|r_{t+k}\|) &gt; 0 and decays slowly — big moves follow big moves</td><td>volatility is constant (homoskedastic)</td></tr>
+      <tr><td><strong>Leverage effect</strong></td><td>negative returns raise future volatility more than positive ones</td><td>vol responds symmetrically to up/down moves</td></tr>
+      <tr><td><strong>Aggregational Gaussianity</strong></td><td>as the horizon grows (daily→monthly), the distribution looks more normal</td><td>the shape is scale-invariant</td></tr>
+      <tr><td><strong>Gain/loss asymmetry</strong></td><td>large drawdowns sharper than equally large run-ups (equities)</td><td>the series is time-reversible</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Measuring them (Python)</h2>
+  <pre>import numpy as np, pandas as pd
+r = np.log(px).diff().dropna()          # log returns
+
+r.kurtosis()                            # fat tails: ≫ 0 (excess kurtosis)
+r.autocorr(lag=1)                       # ~0 for raw returns
+r.abs().autocorr(lag=1)                 # &gt; 0: volatility clustering
+(r.rolling(21).std()).plot()            # clustering, visually</pre>
+
+  <div class="callout">
+    <strong>Why it matters.</strong> Fat tails mean risk models built on the normal distribution
+    systematically <em>underestimate</em> tail losses. Zero linear autocorrelation is why naïve
+    "yesterday went up so buy" strategies fail — yet <em>nonlinear</em> and cross-sectional structure
+    is where alpha hides. Volatility clustering is the entire reason GARCH and realized-volatility
+    models (Units 023–025) exist.
+  </div>
+
+  <div class="trap">
+    <strong>Trap.</strong> Reporting a Sharpe ratio or a t-stat as if returns were IID normal. Fat
+    tails + volatility clustering inflate apparent significance. This is the first crack through
+    which overfit "edges" leak in — the whole of Year 2 Q2 exists to close it.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="../lessons/0004-returns-stylized-facts.html">Lesson 004</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

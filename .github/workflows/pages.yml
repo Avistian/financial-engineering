@@ -1,0 +1,62 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build site
+        run: |
+          # Cache-bust the manifest by stamping index.html with the manifest version.
+          VER=$(python3 -c "import json; print(json.load(open('lessons/manifest.json'))['version'])")
+          sed -i "s/name=\"feq-manifest-version\" content=\"[0-9]*\"/name=\"feq-manifest-version\" content=\"$VER\"/" index.html
+          mkdir -p public/labs
+          cp index.html .nojekyll public/
+          cp -r assets lessons reference public/
+          # Lab notebooks for the web: sources (download / Colab / Binder) + README.
+          cp labs/*.ipynb public/labs/ 2>/dev/null || true
+          cp labs/README.md public/labs/ 2>/dev/null || true
+          # Rendered lab HTML, if any have been generated.
+          if [ -d labs/html ] && [ -n "$(ls -A labs/html 2>/dev/null)" ]; then
+            cp -r labs/html public/labs/
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # GitHub Pages deploy occasionally fails with a transient "try again later"
+      # even when the artifact is valid. Retry a few times before surfacing an error.
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: Wandalen/wretry.action@v3.8.0
+        with:
+          action: actions/deploy-pages@v5
+          attempt_limit: 3
+          attempt_delay: 30000

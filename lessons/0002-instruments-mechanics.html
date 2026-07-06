@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 002 — Instruments &amp; Market Mechanics</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>Instruments &amp; Market Mechanics</h1>
+  <p class="subtitle">Lesson 002 · Foundations · ~40 min</p>
+
+  <p>
+    You start with near-zero finance, so this lesson buys you the <strong>vocabulary of what actually
+    trades</strong>. Every model later prices, forecasts, or trades one of these instruments; if the
+    instrument is fuzzy, the model is fuzzy.
+  </p>
+  <p>
+    This lesson's single skill: <strong>describe the four core instrument classes and the anatomy of a
+    trade</strong> — long/short, bid/ask, and how an intention becomes a fill.
+  </p>
+
+  <h2>The four core instruments</h2>
+  <table>
+    <thead><tr><th>Instrument</th><th>What it is</th><th>Payoff / key idea</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Equity (stock)</strong></td><td>Ownership share of a company</td><td>Linear: you gain/lose 1:1 with the price</td></tr>
+      <tr><td><strong>Futures</strong></td><td>Standardized contract to buy/sell an asset at a future date &amp; agreed price</td><td>Linear, leveraged; used for hedging &amp; directional bets</td></tr>
+      <tr><td><strong>Options</strong></td><td>The <em>right</em> (not obligation) to buy (call) or sell (put) at a strike by expiry</td><td><strong>Non-linear</strong>: payoff is max(S−K,0) etc. — the whole reason stochastic calculus exists</td></tr>
+      <tr><td><strong>ETF</strong></td><td>A fund (basket of assets) that trades like a single stock</td><td>Cheap, liquid exposure to an index/sector</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Equities and futures have <strong>linear</strong> payoffs — simple to reason about. Options are
+    <strong>non-linear</strong>: their value depends on volatility and time in ways that require the
+    Year 1 Q2 machinery (Itô, Black-Scholes). That non-linearity is where much of quant pricing lives.
+  </p>
+
+  <h2>Long, short, and the two prices</h2>
+  <p>
+    To go <strong>long</strong> is to buy, profiting if the price rises. To go <strong>short</strong> is
+    to sell something you borrow, profiting if it falls (you buy it back cheaper). At any moment the
+    market shows two prices:
+  </p>
+  <div class="formula">bid = highest price a buyer will pay &nbsp;&nbsp;|&nbsp;&nbsp; ask (offer) = lowest price a seller will accept</div>
+  <p>
+    The gap is the <strong>bid-ask spread</strong>; the midpoint is the <strong>mid price</strong>. If
+    you cross the spread to trade immediately, you pay it — this is a real, recurring cost that
+    Lesson 003 and the whole microstructure quarter dissect.
+  </p>
+
+  <h2>Anatomy of a trade</h2>
+  <pre>intention  →  order  →  exchange matching engine  →  fill(s)  →  position  →  P&amp;L
+                 │
+          market order  (take liquidity now, pay the spread)
+          limit order   (post a price, wait, maybe get filled)</pre>
+  <p>
+    A <strong>market order</strong> demands immediacy and pays the spread; a <strong>limit order</strong>
+    offers liquidity at your price and may never fill. This single distinction — <em>taking vs making
+    liquidity</em> — drives execution cost, market-making, and much of Year 3 Q2.
+  </p>
+
+  <h2>Notation you'll reuse</h2>
+  <ul>
+    <li><code>S_t</code> — price of the underlying asset at time <code>t</code></li>
+    <li><code>K</code> — strike price of an option; <code>T</code> — expiry</li>
+    <li><strong>Call payoff</strong> at expiry: <code>max(S_T − K, 0)</code>; <strong>put</strong>: <code>max(K − S_T, 0)</code></li>
+    <li><strong>Notional</strong> — the total face value of a position (not the cash you put up)</li>
+  </ul>
+
+  <div class="trap">
+    <strong>Trap.</strong> Treating the "price" as a single number. There is no single price — there is
+    a bid, an ask, and a stream of trades. Backtests that assume you buy and sell at the mid (or worse,
+    the close) with no spread or impact are the most common way beginners overstate returns. We fix
+    this properly in the execution quarter, but start distrusting "the price" now.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    Hull, <em>Options, Futures, and Other Derivatives</em>, Chapters 1–2 — mechanics of markets,
+    long/short, and contract basics. Read for orientation; you'll return to Hull for Greeks in Q2.
+  </p>
+
+  <div class="ask-teacher">
+    Confused by short-selling or option payoffs? Ask your teacher for a worked numeric example.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0001-quant-landscape.html">← Lesson 001</a></li>
+      <li><a href="0003-limit-order-book.html">Lesson 003 — The Limit Order Book →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script>
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "Which instrument has a non-linear payoff?",
+    options: [
+      { label: "An equity call option contract", value: "a" },
+      { label: "A share of common company stock", value: "b" },
+      { label: "A standard index futures position", value: "c" },
+      { label: "A broad-market equity index ETF", value: "d" }
+    ],
+    correct: "a",
+    explain: "Options pay max(S−K,0)-style payoffs — non-linear in the underlying, which is why they need stochastic-calculus pricing."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "A market order (vs a limit order) primarily:",
+    options: [
+      { label: "Takes liquidity and pays the spread", value: "a" },
+      { label: "Posts a price and provides liquidity", value: "b" },
+      { label: "Guarantees a better-than-mid price", value: "c" },
+      { label: "Always fills at yesterday's close", value: "d" }
+    ],
+    correct: "a",
+    explain: "Market orders demand immediacy: they cross the spread and remove resting liquidity. Limit orders provide it."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "The bid-ask spread matters to a QR because it is:",
+    options: [
+      { label: "A recurring, real trading cost", value: "a" },
+      { label: "The company's quarterly dividend", value: "b" },
+      { label: "The option's time-value component", value: "c" },
+      { label: "The risk-free rate of interest", value: "d" }
+    ],
+    correct: "a",
+    explain: "Crossing the spread costs money every trade; ignoring it is a classic way backtests overstate returns."
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 003 — The Limit Order Book &amp; Price-Time Priority</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    .lob { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 1.25rem 0; font-family: var(--font-mono); font-size: 0.82rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .lob .side-head { font-family: var(--font-sans); font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; padding: 0.4rem 0.6rem; }
+    .bids .side-head { background: #eafaf1; color: var(--correct); }
+    .asks .side-head { background: #fdedec; color: var(--wrong); }
+    .lvl { display: flex; justify-content: space-between; padding: 0.3rem 0.6rem; border-top: 1px solid var(--border); }
+    .bids .lvl { background: #f4fbf7; }
+    .asks .lvl { background: #fdf5f4; }
+    .px { font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>The Limit Order Book &amp; Price-Time Priority</h1>
+  <p class="subtitle">Lesson 003 · Foundations · ~40 min</p>
+
+  <p>
+    Modern electronic markets are run by a <strong>limit order book (LOB)</strong>: a live, sorted list
+    of all resting buy and sell orders. Nearly every microstructure signal you'll build later —
+    order-flow imbalance, queue position, Hawkes-modeled arrivals — is a function of the LOB and how it
+    changes. Understand the object now; the alpha comes in Year 2 Q3.
+  </p>
+  <p>
+    This lesson's single skill: <strong>read a limit order book and predict what a matching engine does
+    to an incoming order under price-time (FIFO) priority</strong>.
+  </p>
+
+  <h2>The book, visualized</h2>
+  <p>Bids (buyers) below, asks (sellers) above; each level shows price × resting size:</p>
+  <div class="lob">
+    <div class="asks">
+      <div class="side-head">Asks (sellers)</div>
+      <div class="lvl"><span class="px">100.03</span><span>800</span></div>
+      <div class="lvl"><span class="px">100.02</span><span>500</span></div>
+      <div class="lvl"><span class="px">100.01</span><span>300</span></div>
+    </div>
+    <div class="bids">
+      <div class="side-head">Bids (buyers)</div>
+      <div class="lvl"><span class="px">100.00</span><span>400</span></div>
+      <div class="lvl"><span class="px">99.99</span><span>600</span></div>
+      <div class="lvl"><span class="px">99.98</span><span>900</span></div>
+    </div>
+  </div>
+  <p>
+    Here the <strong>best bid</strong> is 100.00 (400 shares want to buy) and the <strong>best ask</strong>
+    is 100.01 (300 shares offered). The <strong>spread</strong> is 0.01 and the <strong>mid</strong> is
+    100.005. The best bid and ask together are the <strong>top of book</strong> (Level 1); deeper levels
+    are Level 2 data.
+  </p>
+
+  <h2>Price-time priority (FIFO)</h2>
+  <p>The matching engine ranks resting orders by two keys, in order:</p>
+  <ol>
+    <li><strong>Price</strong> — better prices match first (higher bids, lower asks).</li>
+    <li><strong>Time</strong> — at the same price, whoever posted <em>earlier</em> is filled first (first-in, first-out).</li>
+  </ol>
+  <p>
+    This is why <strong>queue position</strong> is a tradable edge: two orders at the same price are not
+    equal — the one that arrived earlier gets filled first and faces different adverse-selection risk.
+  </p>
+
+  <h2>Walk an order through</h2>
+  <p>Using the book above, a <strong>market buy for 500</strong> shares consumes liquidity from the ask side, cheapest first:</p>
+  <table>
+    <thead><tr><th>Step</th><th>Fills against</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>300 @ 100.01</td><td>ask level 100.01 emptied</td></tr>
+      <tr><td>2</td><td>200 @ 100.02</td><td>100.02 now has 300 left</td></tr>
+      <tr><td>—</td><td>average fill ≈ 100.014</td><td>the order "walked the book"</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The buyer paid <em>more than</em> the best ask on average — that gap is <strong>slippage</strong> /
+    market impact, and it grows with order size relative to available liquidity. This mechanical fact is
+    the seed of the entire impact/execution literature (Almgren-Chriss, the square-root law).
+  </p>
+
+  <div class="trap">
+    <strong>Trap.</strong> Assuming you can trade unlimited size at the best quote (or at the mid). Real
+    fills walk the book and move the price against you. A backtest that fills large orders at a single
+    quoted price is silently manufacturing returns that don't exist. Every serious execution model
+    exists because liquidity is finite.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    Bouchaud, Bonart, Donier &amp; Gould, <em>Trades, Quotes and Prices</em>, Chapter 3 — the mechanics
+    of the order book and order types. Focus on the book structure and matching rules; the impact math
+    returns in Year 2 Q3.
+  </p>
+
+  <div class="ask-teacher">
+    Want to trace a trickier order (a large limit that partially fills, then rests)? Ask your teacher to walk it step by step.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0002-instruments-mechanics.html">← Lesson 002</a></li>
+      <li><a href="0004-returns-stylized-facts.html">Lesson 004 — Returns &amp; Stylized Facts →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script>
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "Under price-time priority, orders are ranked by:",
+    options: [
+      { label: "Best price first, then earliest time", value: "a" },
+      { label: "Largest size first, then any price", value: "b" },
+      { label: "Earliest time first, then any price", value: "c" },
+      { label: "Random selection among all orders", value: "d" }
+    ],
+    correct: "a",
+    explain: "Price is the primary key (better prices match first); time breaks ties at the same price — FIFO."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "A large market order 'walks the book,' meaning it:",
+    options: [
+      { label: "Fills across worse successive price levels", value: "a" },
+      { label: "Always executes at the mid price", value: "b" },
+      { label: "Cancels once the best level empties", value: "c" },
+      { label: "Waits in queue behind resting orders", value: "d" }
+    ],
+    correct: "a",
+    explain: "It consumes level 1, then level 2, etc., so the average fill is worse than the best quote — that's slippage."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Queue position is an edge because at one price:",
+    options: [
+      { label: "Earlier orders fill first (FIFO)", value: "a" },
+      { label: "Larger orders always fill first", value: "b" },
+      { label: "Prices are chosen at random each tick", value: "c" },
+      { label: "The spread is paid by the seller only", value: "d" }
+    ],
+    correct: "a",
+    explain: "Time priority means an earlier order at the same price gets filled sooner and faces different adverse selection."
+  });
+</script>
+</body>
+</html>

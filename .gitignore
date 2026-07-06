@@ -1,0 +1,16 @@
+# Teacher answer keys — student notebooks stay blank
+solutions/*.ipynb
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Data (secure real LOB/market data locally; don't commit)
+labs/data/
+*.parquet
+*.csv.gz
+
+# OS / editor
+.DS_Store

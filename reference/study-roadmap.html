@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Roadmap — Quant Research (3-year)</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .yr { color: var(--accent); font-weight: 600; }
+  </style>
+</head>
+<body>
+<article>
+  <h1>Study Roadmap</h1>
+  <p class="subtitle">Reference · the 3-year plan at a glance · print-friendly</p>
+
+  <p>
+    Center of gravity: <strong>Quantitative Researcher / systematic alpha</strong>. The one skill
+    that outranks all others: <strong>not fooling yourself</strong> — leakage-free pipelines,
+    purged/embargoed CV, CPCV, PBO, deflated Sharpe. Full detail:
+    <a href="curriculum.html">the expert curriculum</a>.
+  </p>
+
+  <h2>The arc</h2>
+  <table>
+    <thead><tr><th>Year</th><th>Theme</th><th>You can, by the end…</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="yr">Year 1</td>
+        <td>Foundations: markets, the math bridge, honest ML</td>
+        <td>Price/hedge an option 3 ways; build the AFML data→label pipeline with no leakage; forecast vol with a validated HAR-RV; explain why a naïve backtest lies.</td>
+      </tr>
+      <tr>
+        <td class="yr">Year 2</td>
+        <td>The researcher's craft: ML that survives markets</td>
+        <td>Build a leakage-free, sample-weighted signal model and <strong>validate it with CPCV/PBO/deflated Sharpe</strong>; reproduce a microstructure result; know when a deep model beats a GBDT.</td>
+      </tr>
+      <tr>
+        <td class="yr">Year 3</td>
+        <td>Alpha, execution, systems &amp; the interview</td>
+        <td>Construct a denoised, cost-aware portfolio; compare Almgren-Chriss vs an RL execution agent; pass the interview gauntlet; defend an end-to-end capstone to a PM.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Quarters</h2>
+  <table>
+    <thead><tr><th>Q</th><th>Year 1</th><th>Year 2</th><th>Year 3</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td>Markets &amp; statistical foundations</td><td>Financial ML II — features &amp; ensembles</td><td>Portfolio construction &amp; risk</td></tr>
+      <tr><td>Q2</td><td>Stochastic calculus &amp; pricing</td><td><strong>Backtesting &amp; the war on overfitting</strong></td><td>Execution, market making &amp; RL</td></tr>
+      <tr><td>Q3</td><td>Time series &amp; volatility</td><td>Market microstructure &amp; LOB</td><td>Research infra &amp; latency awareness</td></tr>
+      <tr><td>Q4</td><td>Financial ML I — data &amp; labeling</td><td>Deep learning &amp; NLP for markets</td><td>Interview mastery &amp; capstone</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Runs the whole way</h2>
+  <ul>
+    <li><strong>Interview drilling</strong> — weekly from Year 1: mental math, brainteasers, and LeetCode. Concentrated, not started, in Year 3 Q4.</li>
+    <li><strong>Failure-mode discipline</strong> — every method is learned with the way it breaks.</li>
+    <li><strong>Quarterly currency check</strong> — refresh the frontier (TFMs, deep LOB, RL) each quarter; leave the canon stable.</li>
+  </ul>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="curriculum.html">Full curriculum (all 120 units)</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>
