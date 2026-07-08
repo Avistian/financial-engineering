@@ -15,95 +15,340 @@
 <article>
   <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
   <h1>The Quant Landscape</h1>
-  <p class="subtitle">Lesson 001 · Foundations · ~35 min</p>
+  <p class="subtitle">Lesson 001 · Foundations · ~55 min</p>
 
   <p>
-    You're aiming for a <strong>Quantitative Researcher</strong> seat at a top systematic firm.
-    Before any math, you need the map: who does what, on which side of the market, at what speed —
-    and where <em>your</em> job sits. Getting this wrong is how people spend a year studying the
-    wrong things (e.g. grinding kernel-bypass networking for a role that never touches it).
+    You're aiming for a <strong>Quantitative Researcher</strong> seat at a top systematic firm —
+    Two Sigma, DE Shaw, Cubist, Citadel/GQS, Jane Street QR, HRT, and peers. Before any math, you need
+    the map: who does what, on which side of the market, at what speed — and where <em>your</em> job
+    sits. This is not throat-clearing. Getting the map wrong is how capable people spend a year studying
+    the wrong things: grinding kernel-bypass networking for a role that never touches it, or memorizing
+    option Greeks for a mid-frequency equity seat that lives and dies on data hygiene.
   </p>
 
   <p>
-    This lesson's single skill: <strong>place any quant role, firm, and strategy on three axes</strong>
-    — buy-side vs sell-side, the QR/QT/QD split, and trading frequency — and state what "alpha" means.
+    The whole field is unusually adversarial. Unlike most of engineering — where a correct program stays
+    correct — a trading edge decays the moment enough people find it, and the data you learn from is mostly
+    noise. So the map you build today has a second purpose: it tells you <em>which skills compound</em>
+    (validation, statistics, clean pipelines) versus which are locally useful but narrow (a specific venue's
+    order-entry protocol). We optimize relentlessly for the first kind.
+  </p>
+
+  <p>
+    This lesson's single skill: <strong>place any quant role, firm, and strategy on three axes</strong> —
+    buy-side vs sell-side, the QR/QT/QD split, and trading frequency — and state precisely what "alpha" means.
+    By the end you should be able to hear a firm described in a news article and locate it on all three axes
+    in one sentence, and sketch the research lifecycle this entire course is organized around.
   </p>
 
   <h2>Axis 1 — Buy-side vs sell-side</h2>
+  <p>
+    The first cut divides the industry by <em>whose money is at risk and why</em>.
+  </p>
   <table>
     <thead><tr><th>Side</th><th>What they do</th><th>Examples</th></tr></thead>
     <tbody>
-      <tr><td><strong>Sell-side</strong></td><td>Banks/dealers: make markets, price &amp; hedge derivatives, provide liquidity to clients</td><td>Goldman, Morgan Stanley, JPM</td></tr>
-      <tr><td><strong>Buy-side</strong></td><td>Take positions with their own/investors' capital to make money from returns</td><td>Two Sigma, DE Shaw, Citadel, HRT, Jane Street</td></tr>
+      <tr><td><strong>Sell-side</strong></td><td>Banks/dealers: make markets, price &amp; hedge derivatives, provide liquidity and financing to clients. They earn the spread and fees, not the direction.</td><td>Goldman, Morgan Stanley, JPM</td></tr>
+      <tr><td><strong>Buy-side</strong></td><td>Funds: take positions with their own and investors' capital to profit from returns. They earn (or lose) the direction and the edge.</td><td>Two Sigma, DE Shaw, Citadel, HRT, Jane Street</td></tr>
     </tbody>
   </table>
   <p>
-    Your target is the <strong>buy-side, systematic</strong> world: firms that deploy capital based on
-    models and code, not a portfolio manager's gut. This is where the QR craft — signals, validation,
-    backtesting — lives.
+    The names are historical: the sell-side <em>sells</em> products and services (underwriting, market-making,
+    structured derivatives) to the buy-side, which <em>buys</em> and holds risk to generate returns. A dealer
+    ideally wants to be flat at the end of the day — paid the spread for facilitating flow, not exposed to
+    where the market goes. A fund wants to be positioned — it is <em>trying</em> to be exposed, but only to
+    risks it believes it is being over-compensated for.
+  </p>
+  <p>
+    Your target is the <strong>buy-side, systematic</strong> world: firms that deploy capital based on models
+    and code, not a portfolio manager's gut. This is where the QR craft — signals, validation, backtesting —
+    lives, and where a strong programmer with disciplined statistics has the clearest edge. One nuance worth
+    holding: the two sides <em>need</em> each other. A systematic fund's orders are often filled by a
+    sell-side or electronic market maker; the fund is that market maker's "flow." Understanding both sides of
+    a single trade — who provides liquidity and who demands it — is a recurring theme once we reach
+    microstructure.
   </p>
 
   <h2>Axis 2 — QR / QT / QD</h2>
+  <p>
+    Within a systematic firm, three quant roles divide the work. The boundaries blur, but the center of
+    gravity of each is distinct.
+  </p>
   <table>
     <thead><tr><th>Role</th><th>Owns</th><th>Daily work</th></tr></thead>
     <tbody>
       <tr><td><strong>QR</strong> — Quant Researcher <em>(you)</em></td><td>The <em>signal</em>: what to trade and why</td><td>Data, features, models, and above all <strong>validating that an edge is real</strong></td></tr>
-      <tr><td><strong>QT</strong> — Quant Trader</td><td>Pricing, risk, execution decisions</td><td>Fast reasoning, market-making, managing live risk</td></tr>
-      <tr><td><strong>QD</strong> — Quant Developer</td><td>The <em>systems</em>: data pipelines, backtesters, low-latency infra</td><td>C++/Rust, performance, reliability</td></tr>
+      <tr><td><strong>QT</strong> — Quant Trader</td><td>Pricing, risk, and execution decisions</td><td>Fast reasoning, market-making, managing live risk in real time</td></tr>
+      <tr><td><strong>QD</strong> — Quant Developer</td><td>The <em>systems</em>: data pipelines, backtesters, low-latency infra</td><td>C++/Rust, performance, correctness, reliability under load</td></tr>
     </tbody>
   </table>
   <p>
-    The boundaries blur (at Jane Street or HRT a "researcher" writes a lot of production code), but
-    the center of gravity differs. Our curriculum is QR-centric: you'll learn enough QT (pricing,
-    microstructure) and QD (systems, latency) to <em>collaborate and interview</em>, not to switch tracks.
+    A QR's week looks like: pull a dataset, form a hypothesis ("order-flow imbalance predicts short-horizon
+    returns in liquid names"), engineer features that respect the arrow of time, fit a model, and then spend
+    most of the effort trying to <em>break</em> the result — checking for leakage, overfitting, and whether
+    the "edge" survives realistic costs. The output is a signal specification and a defensible backtest, handed
+    to QTs and QDs to trade and productionize.
+  </p>
+  <p>
+    The lines genuinely blur by firm. At Jane Street or HRT a "researcher" writes a great deal of production
+    code; at a large multi-manager platform the roles are more siloed. There is also a fourth title you'll see —
+    <strong>Quant Strategist / "quant"</strong> on the sell-side — which is a different job again (pricing and
+    risk libraries for a bank's desks). Our curriculum is <strong>QR-centric</strong>: you will learn enough
+    QT (pricing, microstructure) and QD (systems, latency) to <em>collaborate and interview credibly</em> — not
+    to switch tracks.
   </p>
 
   <h2>Axis 3 — Frequency</h2>
   <p>
-    Speed dictates almost everything — data, models, infra, and the source of edge.
+    Speed dictates almost everything downstream: what data you need, what models are feasible, how much infra
+    matters, and — crucially — <em>where the edge comes from</em>. Commit a prediction before you read the table:
   </p>
-  <pre>HFT (µs–ms)        market making, latency arbitrage      QD-heavy, tiny per-trade edge
-Mid-freq (min–days) statistical arbitrage, ML signals     QR sweet spot
-Low-freq (weeks+)   factor investing, risk premia          research-heavy, capacity-large</pre>
+
+  <div id="predict1"></div>
+
+  <pre>HFT (µs–ms)         market making, latency arbitrage      QD-heavy, tiny per-trade edge × huge volume
+Mid-freq (min–days) statistical arbitrage, ML signals      QR sweet spot: structure in data
+Low-freq (weeks+)   factor investing, risk premia          research-heavy, large capacity</pre>
   <p>
-    As a QR targeting systematic firms, you'll mostly live in <strong>mid-frequency</strong>: horizons
-    where machine learning on market and alternative data can find structure, and where careful
-    validation — not raw speed — decides who wins.
+    At high frequency, the per-trade edge is <em>minuscule</em> — a fraction of a tick — but it is harvested
+    millions of times, so the game is won on latency and queue position (a QD/infra game). At the mid-frequency
+    horizon, ML on market and alternative data can find genuine structure, and the winner is decided by
+    <strong>model and validation quality</strong>, not nanoseconds — this is the QR sweet spot and where this
+    course lives. At low frequency, you are largely being paid for bearing well-understood risk premia; capacity
+    is huge but raw edge per dollar is thin.
+  </p>
+  <p>
+    Frequency also decides how much data you effectively have. A strategy that trades once a month over 10 years
+    has ~120 independent bets — a tiny sample to prove skill on. A strategy trading thousands of times a day
+    accumulates statistical evidence far faster. This "how many independent bets do I actually have?" question
+    silently governs how confident you're allowed to be, and it will resurface every time we discuss
+    significance and overfitting.
+  </p>
+
+  <h2>Archetypes of a systematic firm</h2>
+  <p>
+    "Systematic buy-side" is not one business model. Three archetypes recur, and knowing which one a firm is
+    tells you what a QR's day and incentives look like there.
+  </p>
+  <table>
+    <thead><tr><th>Archetype</th><th>How it's organized</th><th>Flavor examples</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Multi-manager "pod" platform</strong></td><td>Many small teams (pods) each run their own book with tight risk limits; the platform allocates capital and cuts underperformers fast</td><td>Citadel, Millennium, Point72/Cubist</td></tr>
+      <tr><td><strong>Single-strategy / centralized</strong></td><td>One firm-wide research effort feeds a shared alpha pool; researchers contribute signals to a common combine</td><td>Renaissance (Medallion), Two Sigma, DE Shaw</td></tr>
+      <tr><td><strong>Market-maker → fund</strong></td><td>Grew from electronic market-making; deep infra/latency DNA, increasingly running systematic alpha too</td><td>HRT, Jane Street, Jump, Tower</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The organizational shape matters to you. On a pod platform, a signal must pass <em>your pod's</em> risk and
+    a short leash on drawdown; individual accountability is high and so is turnover. In a centralized shop, your
+    signal is one input into a giant portfolio and the bar is "does it add orthogonal, uncorrelated alpha to
+    what we already have?" — which makes <em>correlation to existing signals</em> as important as raw
+    performance. At a market-maker-turned-fund, you'll rub shoulders with world-class infra and be expected to
+    respect latency and execution realities from day one. None of this changes the core QR craft; it changes
+    what "a good result" has to clear.
   </p>
 
   <h2>What is "alpha"?</h2>
   <div class="callout">
-    <strong>Alpha</strong> is return <em>not explained by exposure to known risk factors</em> — the
-    part of performance attributable to genuine skill/edge rather than simply being paid for bearing
-    market risk. Formally, in <code>r = α + β·r_market + ε</code>, alpha is the intercept α: what you
-    earn independent of the market's move. A QR's job is to find, validate, and defend sources of α.
+    <strong>Alpha</strong> is return <em>not explained by exposure to known risk factors</em> — the part of
+    performance attributable to genuine skill/edge rather than simply being paid for bearing market risk.
+    Formally, in <code>r = α + β·r_market + ε</code>, alpha is the intercept α: what you earn independent of
+    the market's move.
   </div>
+  <p>
+    Make it concrete. Suppose your strategy returned <strong>12%</strong> over a year, the market returned
+    <strong>10%</strong>, and your strategy's market exposure (beta) was <strong>0.5</strong>. The part of
+    your return "explained" by simply riding the market is <code>β·r_market = 0.5 × 10% = 5%</code>. The
+    remaining <code>12% − 5% = 7%</code> is your alpha — the piece you'd have to <em>defend</em> as real skill.
+    Anyone can manufacture return by cranking up beta (leverage); alpha is the scarce thing, and it is what a
+    QR is hired to find, validate, and defend.
+  </p>
+  <p>
+    The idea generalizes beyond the market factor. Decades of research identified other systematic
+    <strong>risk factors</strong> that pay a premium — size, value, momentum, quality, and so on. Modern alpha
+    is measured <em>net of all the factors your employer already harvests cheaply</em>: if your "signal" is
+    just momentum in disguise, it is not alpha to a firm that already runs momentum. So "is this alpha?" really
+    means "is this return left over after regressing out every exposure we can already get for free?" That is a
+    high bar, and much of Year 2 is about clearing it honestly.
+  </p>
+  <p>
+    A related word you'll meet constantly is the <strong>Sharpe ratio</strong> — roughly, annualized excess
+    return divided by its volatility — a first-pass measure of how much edge you got per unit of risk. A single
+    great year can be luck; a Sharpe of 2 sustained across regimes is a business. Year 2 is largely about not
+    fooling yourself with an inflated Sharpe.
+  </p>
+
+  <h2>Alpha decays: crowding and capacity</h2>
+  <p>
+    Here is the property that makes this field unlike almost any other engineering discipline: <strong>a
+    published or crowded edge stops working.</strong> When many participants trade the same signal, their
+    orders move the price toward fair value before you can profit — the very act of harvesting alpha destroys
+    it. Two consequences shape a QR's whole career:
+  </p>
+  <ul>
+    <li>
+      <strong>Alpha decay.</strong> A signal's edge tends to erode over time as it's discovered and arbitraged
+      away. Research is not a one-time conquest; it's a treadmill of finding new structure as old structure fades.
+    </li>
+    <li>
+      <strong>Capacity.</strong> Every strategy has a maximum size it can deploy before its own market impact
+      eats the edge. A signal that makes a fortune on \$10M might lose money trying to run \$5B, because pushing
+      that much size moves prices against you. "What's the capacity?" is one of the first questions a PM asks,
+      and it's why a beautiful backtest on tiny size can still be worthless.
+    </li>
+  </ul>
+  <p>
+    This is why the mission targets <em>net, capacity-aware</em> Sharpe — not a headline number. Keep the
+    treadmill in mind: it reframes "I found an edge" into "I found an edge that is currently uncrowded and has
+    room to scale," which is a much harder and more valuable claim.
+  </p>
+
+  <h2>The research lifecycle (the whole course in one arc)</h2>
+  <p>
+    Everything in this curriculum slots into a single pipeline that turns a raw idea into deployed, defended
+    capital. It's worth seeing the whole thing now so each future lesson has a home:
+  </p>
+  <pre>idea/hypothesis → data → features (signal) → model → VALIDATION → portfolio → execution → live P&amp;L
+     ↑                                                                                    │
+     └──────────────────────  monitor, attribute, iterate (alpha decays)  ────────────────┘</pre>
+  <ol>
+    <li><strong>Idea / hypothesis.</strong> A testable claim about why an edge exists (an economic or behavioral reason beats a data-mined coincidence).</li>
+    <li><strong>Data.</strong> Prices, order books, fundamentals, alternative data — cleaned and, crucially, <em>point-in-time</em> (no future leaking in).</li>
+    <li><strong>Features / signal.</strong> Transformations of data that carry predictive content, engineered to respect the arrow of time.</li>
+    <li><strong>Model.</strong> Maps features to a forecast — often simpler than newcomers expect, because complex models overfit noisy data.</li>
+    <li><strong>Validation.</strong> The heart of the job: purged/embargoed cross-validation, deflated Sharpe, backtest-overfitting tests. This is where most "edges" die — as they should.</li>
+    <li><strong>Portfolio.</strong> Combine many signals into positions under risk and correlation constraints (denoised covariance, sizing).</li>
+    <li><strong>Execution.</strong> Trade the target positions while minimizing spread and market impact.</li>
+    <li><strong>Live &amp; monitor.</strong> Track realized vs expected, attribute P&amp;L, and iterate as edges decay.</li>
+  </ol>
+  <p>
+    Notice the mass of the course sits on <em>validation</em>. That's deliberate: steps 1–4 are shared with
+    ordinary ML, but step 5 is where quant research is uniquely unforgiving, and it's the skill that transfers
+    across every firm and strategy.
+  </p>
+
+  <h2>Why this is harder than ordinary machine learning</h2>
+  <p>
+    You're a strong programmer, so it's worth being explicit about why your ML instincts will occasionally
+    <em>betray</em> you here. Four properties make financial data a hostile environment:
+  </p>
+  <dl class="objections">
+    <dt>Extremely low signal-to-noise ratio</dt>
+    <dd>
+      In image classification the signal is overwhelming; in returns, an <span>R²</span> of a few percent can be
+      excellent. Most of what you see is noise, so flexible models happily fit the noise and call it signal.
+    </dd>
+    <dt>Non-stationarity</dt>
+    <dd>
+      The data-generating process changes — regimes shift, volatility rises and falls, relationships break.
+      "Train on the past, test on the future" is not a nicety here; the future is genuinely a different
+      distribution, which is why naïve i.i.d. cross-validation lies.
+    </dd>
+    <dt>Adversarial feedback</dt>
+    <dd>
+      Other smart, well-capitalized participants are actively competing to remove the very patterns you find.
+      Your actions move prices; the environment reacts to you. There is no analogue to this in classifying cats.
+    </dd>
+    <dt>Small effective sample</dt>
+    <dd>
+      Years of daily data sound like a lot, but returns are autocorrelated in volatility and overlapping in
+      information, so your number of truly <em>independent</em> observations is far smaller than the row count.
+      Confidence intervals are wider than they look.
+    </dd>
+  </dl>
+  <p>
+    Every one of these pushes in the same direction: toward humility, simpler models, and ruthless validation.
+    That's the temperament the mission is training.
+  </p>
 
   <h2>Where the real difficulty is</h2>
   <div class="trap">
     <strong>The core trap of this whole field.</strong> Markets are <em>adversarial and low
     signal-to-noise</em>. If you torture historical data enough, you will always find a beautiful
-    "strategy" — that is pure overfitting, and it will lose money live. The single most valuable QR
-    skill is not a fancier model; it is the discipline to <strong>prove you did not fool yourself</strong>
-    (leakage-free pipelines, purged cross-validation, backtest-overfitting tests). Keep this in mind
-    from day one — the entirety of Year 2 Q2 exists to make you rigorous here.
+    "strategy" — that is pure overfitting, and it will lose money live. The single most valuable QR skill is
+    not a fancier model; it is the discipline to <strong>prove you did not fool yourself</strong>
+    (leakage-free pipelines, purged cross-validation, backtest-overfitting tests). Keep this in mind from day
+    one — the entirety of Year 2 Q2 exists to make you rigorous here.
   </div>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Isn't this just applied machine learning?”</dt>
+    <dd>
+      ML is a tool in the kit, but the hard part is not fitting a model — it's the <em>evaluation</em>. In
+      most ML, a held-out test set is trustworthy; in markets, naive test sets leak the future, regimes shift,
+      and a great backtest routinely means nothing. The scarce skill is honest validation on non-stationary,
+      adversarial data. That's why this track front-loads statistics and leakage, not architectures.
+    </dd>
+    <dt>“Do I need a finance background to start?”</dt>
+    <dd>
+      No. You're starting from near-zero finance and that's expected — Year 1 Q1 builds markets vocabulary from
+      scratch (this lesson is step one). Strong math and programming are the durable base; the finance is
+      learnable and we build it deliberately.
+    </dd>
+    <dt>“Isn't HFT where the real money and prestige are?”</dt>
+    <dd>
+      HFT is a superb business, but it's a QD/infra-dominated game won on latency, and it is out of scope here
+      except at awareness depth. Mid-frequency systematic research rewards exactly your profile — statistics,
+      code, and validation discipline — and is where a QR's edge compounds.
+    </dd>
+    <dt>“If edges decay, isn't the whole thing hopeless?”</dt>
+    <dd>
+      No — it's a treadmill, not a dead end. New data sources, new inefficiencies, and structural changes
+      continually create fresh edges. What decays is any <em>specific, crowded</em> signal. The durable asset
+      is your <em>process</em> for finding and validating the next one, which is exactly what we're building.
+    </dd>
+  </dl>
 
   <h2>Check your understanding</h2>
   <div id="quiz1"></div>
   <div id="quiz2"></div>
   <div id="quiz3"></div>
+  <div id="quiz4"></div>
 
   <h2>Primary reading (today)</h2>
   <p>
-    Bouchaud, Bonart, Donier &amp; Gould, <em>Trades, Quotes and Prices</em>, Chapter 1 — the
-    ecosystem and what markets are for. Skim; you're building a map, not memorizing. Optionally read
-    one engineering/research blog post from a target firm (Jane Street, Two Sigma, HRT) to feel the bar.
+    Bouchaud, Bonart, Donier &amp; Gould, <em>Trades, Quotes and Prices</em>, Chapter 1 — the ecosystem and
+    what markets are for. Skim; you're building a map, not memorizing. Optionally read one engineering/research
+    blog post from a target firm (Jane Street, Two Sigma, HRT) to calibrate the bar.
+  </p>
+  <p>
+    As you read, jot three things: (1) one sentence on what liquidity is and who provides it, (2) one example
+    of a sell-side activity and one of a buy-side activity, (3) where on the frequency axis the chapter's
+    examples sit. You'll reuse this framing every quarter.
   </p>
 
-  <div class="ask-teacher">
-    Unsure where a specific firm or role fits? Ask your teacher in Cursor chat — name the firm and we'll place it on the three axes.
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory, draw the three axes and place two firms you've
+    heard of on each. Then draw the research lifecycle arc and label which step this course spends the most
+    effort on and why. Finally, pick any strategy you can name and state, in one sentence each, its side,
+    dominant role, and frequency. If any of these feels shaky, re-read the relevant section — tomorrow's
+    warm-up will ask for it.
   </div>
+
+  <div class="ask-teacher">
+    Unsure where a specific firm or role fits? Ask your teacher in Cursor chat — name the firm and we'll place it on the three axes and tell you which archetype it is.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Buy-side / sell-side</strong> — who holds directional risk vs who facilitates and earns the spread.</li>
+    <li><strong>QR / QT / QD</strong> — signal owner / risk &amp; execution / systems.</li>
+    <li><strong>Alpha</strong> — return beyond known factor exposures; <strong>beta</strong> — exposure to a factor (e.g. the market).</li>
+    <li><strong>Sharpe ratio</strong> — excess return per unit of volatility.</li>
+    <li><strong>Alpha decay / capacity / crowding</strong> — why edges fade and can't scale indefinitely.</li>
+    <li><strong>Research lifecycle</strong> — idea → data → signal → model → validation → portfolio → execution → live.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    You now have the map and the pipeline. Lesson 002 zooms into the <em>instruments</em> that trade on it —
+    equities, futures, options, ETFs — and the anatomy of a single trade. Everything you model later prices,
+    forecasts, or trades one of those instruments, so the vocabulary comes next.
+  </p>
 
   <nav class="nav-links">
     <ul>
@@ -115,7 +360,30 @@ Low-freq (weeks+)   factor investing, risk premia          research-heavy, capac
 </article>
 
 <script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
 <script>
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "Before reading: at the highest frequencies (HFT), the edge earned per individual trade is…",
+    options: [
+      { label: "Tiny — a fraction of one tick", value: "tiny" },
+      { label: "Large — most of the day's move", value: "large" }
+    ],
+    correct: "tiny",
+    reveal: "The per-trade edge is minuscule but harvested millions of times; HFT wins on latency and volume, not on being right by a lot."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: why is a QR's validation discipline more valuable than a fancier model?",
+    points: [
+      "Markets are low signal-to-noise and adversarial",
+      "Enough data-mining always finds a beautiful backtest",
+      "That backtest is overfit and loses money live",
+      "Only leakage-free, honest validation proves an edge is real"
+    ],
+    model: "Because markets are adversarial and mostly noise, any sufficiently flexible search over history will surface a great-looking strategy by chance. A more complex model just searches harder and overfits more. What actually separates a real edge from a mirage is the discipline to test it honestly — time-respecting splits, purged cross-validation, and overfitting tests — so you can prove you didn't fool yourself. That discipline is scarce and it is what a QR is paid for."
+  });
+
   Quiz.mount(document.getElementById("quiz1"), {
     question: "A Quant Researcher's single most important skill is:",
     options: [
@@ -150,6 +418,18 @@ Low-freq (weeks+)   factor investing, risk premia          research-heavy, capac
     ],
     correct: "a",
     explain: "HFT competes on latency; mid-frequency QR competes on finding and validating structure in data."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "A strategy's 'capacity' refers to the:",
+    options: [
+      { label: "Max size before impact eats the edge", value: "a" },
+      { label: "Number of features fed to the model", value: "b" },
+      { label: "Count of trades placed each session", value: "c" },
+      { label: "Storage the backtest data requires", value: "d" }
+    ],
+    correct: "a",
+    explain: "Beyond some size a strategy's own market impact erodes its edge; that ceiling is its capacity, and PMs ask about it early."
   });
 </script>
 </body>

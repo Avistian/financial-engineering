@@ -23,21 +23,30 @@
 <article>
   <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
   <h1>The Limit Order Book &amp; Price-Time Priority</h1>
-  <p class="subtitle">Lesson 003 · Foundations · ~40 min</p>
+  <p class="subtitle">Lesson 003 · Foundations · ~55 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
 
   <p>
-    Modern electronic markets are run by a <strong>limit order book (LOB)</strong>: a live, sorted list
-    of all resting buy and sell orders. Nearly every microstructure signal you'll build later —
-    order-flow imbalance, queue position, Hawkes-modeled arrivals — is a function of the LOB and how it
-    changes. Understand the object now; the alpha comes in Year 2 Q3.
+    Modern electronic markets are run by a <strong>limit order book (LOB)</strong>: a live, sorted list of all
+    resting buy and sell orders, maintained by the exchange's <em>matching engine</em>. It is the closest
+    thing the market has to a ground-truth data structure, and it updates thousands of times a second in liquid
+    names. Nearly every microstructure signal you'll build later — order-flow imbalance, queue position,
+    Hawkes-modeled arrivals, DeepLOB-style predictors — is a function of the LOB and how it changes over time.
   </p>
   <p>
-    This lesson's single skill: <strong>read a limit order book and predict what a matching engine does
-    to an incoming order under price-time (FIFO) priority</strong>.
+    Understanding this object now pays off twice: it's where the <em>spread</em> and <em>market impact</em> from
+    Lesson 002 come from mechanically, and it's the raw material of the Year 2 Q3 microstructure alpha. Today is
+    about the mechanics; the alpha comes later.
+  </p>
+  <p>
+    This lesson's single skill: <strong>read a limit order book and predict what the matching engine does to an
+    incoming order under price-time (FIFO) priority</strong>.
   </p>
 
   <h2>The book, visualized</h2>
-  <p>Bids (buyers) below, asks (sellers) above; each level shows price × resting size:</p>
+  <p>Bids (buyers) below, asks (sellers) above; each level shows price × total resting size:</p>
   <div class="lob">
     <div class="asks">
       <div class="side-head">Asks (sellers)</div>
@@ -53,10 +62,23 @@
     </div>
   </div>
   <p>
-    Here the <strong>best bid</strong> is 100.00 (400 shares want to buy) and the <strong>best ask</strong>
-    is 100.01 (300 shares offered). The <strong>spread</strong> is 0.01 and the <strong>mid</strong> is
-    100.005. The best bid and ask together are the <strong>top of book</strong> (Level 1); deeper levels
-    are Level 2 data.
+    Here the <strong>best bid</strong> is 100.00 (400 shares want to buy) and the <strong>best ask</strong> is
+    100.01 (300 shares offered). The <strong>spread</strong> is 0.01 and the <strong>mid</strong> is 100.005.
+    The best bid and ask together are the <strong>top of book</strong> (Level 1); the full ladder of deeper
+    prices and sizes is <strong>Level 2</strong> data. The total quantity resting at a price is that level's
+    <strong>depth</strong> — a rough gauge of how much you can trade there before pushing the price.
+  </p>
+
+  <h2>Tick size — why the spread is often exactly one tick</h2>
+  <p>
+    Prices don't move continuously; they move in discrete steps called the <strong>tick size</strong> (here,
+    0.01). The tick sets the <em>minimum</em> possible spread: you cannot quote a bid and ask closer than one
+    tick apart. In a heavily traded, liquid name, competition to be at the front of the queue drives the spread
+    down to exactly one tick — the market is "tick-constrained," and the interesting competition moves from
+    <em>price</em> (everyone is at the best price) to <em>queue position</em> and <em>size</em>. In a thin or
+    high-priced name the spread can be many ticks wide. This single parameter quietly shapes strategy: a tick
+    that is large relative to price makes queueing valuable; a tiny relative tick makes price-stepping cheap.
+    Regulators tune tick sizes precisely because they change market behavior.
   </p>
 
   <h2>Price-time priority (FIFO)</h2>
@@ -66,11 +88,38 @@
     <li><strong>Time</strong> — at the same price, whoever posted <em>earlier</em> is filled first (first-in, first-out).</li>
   </ol>
   <p>
-    This is why <strong>queue position</strong> is a tradable edge: two orders at the same price are not
-    equal — the one that arrived earlier gets filled first and faces different adverse-selection risk.
+    Why this rule? It is simple, transparent, and it <em>rewards providing liquidity early</em>: if you post a
+    resting order and wait, you keep your place in line. That makes <strong>queue position</strong> a genuine,
+    tradable edge — two orders at the same price are not equal. The one that arrived earlier gets filled first,
+    but it also faces different <em>adverse selection</em>: front-of-queue orders tend to get filled precisely
+    when the market is about to move against them (an informed trader hits them first). Modeling that trade-off
+    is a whole sub-field. Not every venue uses pure FIFO — some options and futures markets use
+    <strong>pro-rata</strong> (fills split proportionally to size) or size-priority rules — but price-time is
+    the canonical default, so master it first.
   </p>
 
-  <h2>Walk an order through</h2>
+  <h2>The book is a stream of messages</h2>
+  <p>
+    A static snapshot hides what the book really is: a <em>process</em>. The exchange broadcasts a stream of
+    events that mutate the book — three kinds dominate:
+  </p>
+  <ul>
+    <li><strong>Add</strong> — a new limit order rests at a price (joins the back of that level's queue).</li>
+    <li><strong>Cancel</strong> — a resting order is withdrawn (its queue slot disappears).</li>
+    <li><strong>Trade / execute</strong> — an incoming marketable order matches against resting orders.</li>
+  </ul>
+  <p>
+    A fact that surprises newcomers: the <em>vast majority</em> of messages in a modern equity book are adds and
+    cancels, not trades. Liquidity flickers in and out constantly as market makers reprice. This is why "how the
+    book changes" carries more information than any single snapshot, and why reconstructing the book from a
+    message feed (which the Year 2 Q3 labs do) is a core microstructure skill. It's also why naïve signals that
+    read a frozen snapshot get fooled: the size you see may vanish the instant you try to trade against it.
+  </p>
+
+  <p>Before you trace the order, commit a prediction:</p>
+  <div id="predict1"></div>
+
+  <h2>Walk an order through (a market buy)</h2>
   <p>Using the book above, a <strong>market buy for 500</strong> shares consumes liquidity from the ask side, cheapest first:</p>
   <table>
     <thead><tr><th>Step</th><th>Fills against</th><th>Result</th></tr></thead>
@@ -81,33 +130,149 @@
     </tbody>
   </table>
   <p>
-    The buyer paid <em>more than</em> the best ask on average — that gap is <strong>slippage</strong> /
-    market impact, and it grows with order size relative to available liquidity. This mechanical fact is
-    the seed of the entire impact/execution literature (Almgren-Chriss, the square-root law).
+    Compute it: <code>(300 × 100.01 + 200 × 100.02) / 500 = 100.014</code>. The buyer paid <em>more than</em> the
+    best ask (100.01) on average — that gap is <strong>slippage</strong> (a.k.a. market impact), and it grows
+    with order size relative to available depth.
+  </p>
+
+  <h2>A second walk (a market sell) — and a resting limit</h2>
+  <p>
+    Now flip it: a <strong>market sell for 700</strong> hits the <em>bid</em> side, highest price first:
+    400 @ 100.00, then 300 @ 99.99.
+  </p>
+  <div class="formula">avg fill = (400 × 100.00 + 300 × 99.99) / 700 = 99.9957</div>
+  <p>
+    You sold below the best bid (100.00) on average — slippage of about 0.0043, in the direction that hurts a
+    seller. Symmetric to the buy: takers always get the worse side of their own impact.
+  </p>
+  <p>
+    Contrast a <strong>resting limit</strong>. Suppose instead you post a limit buy for 500 @ 100.00. You do
+    <em>not</em> cross the spread; you join the 400 already queued at 100.00, sitting behind them (time
+    priority). You might fill 0, some, or all of your 500 depending on how much sells into the bid before you're
+    reached — and if the price runs away upward, you fill nothing and miss the move. That is the maker's
+    bargain: no spread paid, but <em>execution risk</em> and queue uncertainty instead. Deciding when to take
+    (pay the spread, guarantee the fill) versus make (save the spread, risk no fill) is the whole of execution
+    tactics.
+  </p>
+
+  <h2>Mid price vs micro-price (the book leans)</h2>
+  <p>
+    The mid (100.005) treats both sides equally, but the <em>sizes</em> tell you which way pressure leans. The
+    <strong>micro-price</strong> weights each side's price by the <em>opposite</em> side's size:
+  </p>
+  <div class="formula">micro = (Q_bid·P_ask + Q_ask·P_bid) / (Q_bid + Q_ask) = (400·100.01 + 300·100.00)/700 ≈ 100.0057</div>
+  <p>
+    Because there's more size resting on the bid (400) than the ask (300), the micro-price sits <em>above</em>
+    the mid — the book is leaning to buy, and the next tick is a touch more likely to be up. This is a first,
+    tiny taste of extracting a directional signal from the book's shape rather than its level. It won't make you
+    money alone, but it's the conceptual seed of the next section.
+  </p>
+
+  <h2>Order-flow imbalance — a preview of the signal</h2>
+  <p>
+    The single most durable microstructure signal is <strong>order-flow imbalance (OFI)</strong>: over a short
+    window, is buy pressure (adds to the bid, trades lifting the ask) outrunning sell pressure, or vice versa?
+    Empirically, short-horizon price changes line up with OFI far better than with raw past returns — the book's
+    <em>flow</em> leads its <em>price</em>. You'll build and validate an OFI→return relationship properly in
+    Year 2 Q3 (with correct temporal splits, because it's dangerously easy to leak the future here). For now,
+    just hold the intuition: the book is not a static ledger, it's a pressure gauge, and the change in that
+    pressure is where the edge lives.
+  </p>
+
+  <h2>Market impact and the square-root law</h2>
+  <p>
+    Slippage isn't just an accounting nuisance — it obeys a remarkably robust empirical regularity. The price
+    impact of executing a large order scales roughly with the <em>square root</em> of its size relative to
+    daily volume (the "square-root law"). Doubling your size does <em>not</em> double your impact; it multiplies
+    it by about √2. This is why splitting a big parent order into many small child orders over time is standard
+    practice, and it's the empirical backbone of the Almgren-Chriss optimal-execution framework (Year 2 Q3). The
+    mechanical fact underneath — that liquidity is finite and consuming it moves the price — is the seed of the
+    entire execution literature.
   </p>
 
   <div class="trap">
-    <strong>Trap.</strong> Assuming you can trade unlimited size at the best quote (or at the mid). Real
-    fills walk the book and move the price against you. A backtest that fills large orders at a single
-    quoted price is silently manufacturing returns that don't exist. Every serious execution model
-    exists because liquidity is finite.
+    <strong>Trap.</strong> Assuming you can trade unlimited size at the best quote (or at the mid). Real fills
+    walk the book and move the price against you, and the size you see on screen can be canceled the instant you
+    reach for it. A backtest that fills large orders at a single quoted price is silently manufacturing returns
+    that don't exist — and the error grows with your assumed position size. Every serious execution model exists
+    because liquidity is finite.
   </div>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Why not always post limit orders and never pay the spread?”</dt>
+    <dd>
+      Because a limit order is not guaranteed to fill — the market can walk away from your price, and you get
+      nothing. You trade the spread cost for <em>execution risk</em>. Whether to make or take is a real
+      optimization (urgency vs cost), not a free lunch.
+    </dd>
+    <dt>“Do I really need Level 2 depth, or is top-of-book enough?”</dt>
+    <dd>
+      For low-frequency, small-size strategies, top-of-book is often plenty. But any signal about impact, queue
+      dynamics, or order-flow imbalance <em>lives</em> in the deeper levels and the message stream — you can't
+      measure how a large order will walk the book, or compute OFI, from a single Level-1 number.
+    </dd>
+    <dt>“My strategy is tiny — can't I ignore impact?”</dt>
+    <dd>
+      Maybe, and that's a legitimate simplifying assumption to <em>state and check</em>, not to assume silently.
+      As soon as size grows relative to depth, impact becomes the dominant cost, and a strategy that ignored it
+      can flip from profitable to losing.
+    </dd>
+    <dt>“If the book leans to buy, can't I just trade the micro-price?”</dt>
+    <dd>
+      Not naïvely. The lean is real but tiny and fleeting, other people see it too, and the resting size can be
+      spoofed or canceled. It's a genuine seed of signal, but turning it into net-of-cost profit requires the
+      careful, leakage-free treatment of Year 2 Q3 — which is exactly the point of doing this properly.
+    </dd>
+  </dl>
 
   <h2>Check your understanding</h2>
   <div id="quiz1"></div>
   <div id="quiz2"></div>
   <div id="quiz3"></div>
+  <div id="quiz4"></div>
 
   <h2>Primary reading (today)</h2>
   <p>
-    Bouchaud, Bonart, Donier &amp; Gould, <em>Trades, Quotes and Prices</em>, Chapter 3 — the mechanics
-    of the order book and order types. Focus on the book structure and matching rules; the impact math
-    returns in Year 2 Q3.
+    Bouchaud, Bonart, Donier &amp; Gould, <em>Trades, Quotes and Prices</em>, Chapter 3 — the mechanics of the
+    order book and order types. Focus on the book structure and matching rules; the impact math returns in Year 2 Q3.
+  </p>
+  <p>
+    As you read, redraw the book above and trace a <em>market sell for 700</em> by hand (you did it above —
+    reproduce it without looking). Then compute the micro-price and say which way it leans. Those two
+    calculations are the whole point of the chapter.
   </p>
 
-  <div class="ask-teacher">
-    Want to trace a trickier order (a large limit that partially fills, then rests)? Ask your teacher to walk it step by step.
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: state the two priority keys in order; explain
+    why an earlier order at the same price is <em>not</em> strictly better off despite filling first (adverse
+    selection); recompute the average fill for the market buy of 500; and say whether the micro-price is above
+    or below the mid when the bid has more size than the ask, and why.
   </div>
+
+  <div class="ask-teacher">
+    Want to trace a trickier order — a large limit that partially fills, then rests in the book, then gets adverse-selected? Ask your teacher to walk it step by step.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Best bid / best ask / top of book / Level 2 / depth</strong> — the book's anatomy.</li>
+    <li><strong>Tick size</strong> — the minimum price increment and minimum possible spread.</li>
+    <li><strong>Price-time priority (FIFO)</strong>; <strong>pro-rata</strong> as an alternative.</li>
+    <li><strong>Add / cancel / trade</strong> — the message stream that mutates the book.</li>
+    <li><strong>Slippage / market impact</strong>; the <strong>square-root law</strong>.</li>
+    <li><strong>Micro-price</strong> and <strong>order-flow imbalance (OFI)</strong> — the book as a pressure gauge.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    You can now read a book, predict a fill, and see where microstructure signal hides. Lesson 004 steps back
+    from the microsecond world to the quantity you'll model most often — <strong>returns</strong> — and the
+    stubborn empirical regularities (fat tails, volatility clustering) that every model must respect.
+  </p>
 
   <nav class="nav-links">
     <ul>
@@ -119,7 +284,35 @@
 </article>
 
 <script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
 <script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 3, count: 3 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "A market buy for 500 shares against the book above will fill, on average, at a price that is…",
+    options: [
+      { label: "Equal to the best ask, 100.01", value: "best" },
+      { label: "Above the best ask, near 100.014", value: "above" },
+      { label: "Below the best ask, near the mid", value: "below" }
+    ],
+    correct: "above",
+    reveal: "It takes all 300 at 100.01, then 200 at 100.02, averaging 100.014 — worse than the top quote. That gap is slippage."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: why is queue position a tradable edge under price-time priority?",
+    points: [
+      "At one price, earlier orders fill first (FIFO)",
+      "So position in the queue changes your fill probability",
+      "Front-of-queue also carries adverse-selection risk",
+      "Modeling that trade-off is a real source of edge"
+    ],
+    model: "Under price-time priority, at a given price the earliest-posted order is filled first. So two identical-price orders are not equivalent: your place in the queue determines how likely and how soon you fill. That's an edge you can model and compete for. But it cuts both ways — orders at the front of the queue tend to get filled exactly when informed flow arrives and the price is about to move against them (adverse selection), so the optimal queue behaviour balances fill probability against getting picked off."
+  });
+
   Quiz.mount(document.getElementById("quiz1"), {
     question: "Under price-time priority, orders are ranked by:",
     options: [
@@ -154,6 +347,18 @@
     ],
     correct: "a",
     explain: "Time priority means an earlier order at the same price gets filled sooner and faces different adverse selection."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "With more resting size on the bid than the ask, the micro-price sits:",
+    options: [
+      { label: "Above the mid (leaning to an up-tick)", value: "a" },
+      { label: "Exactly at the mid price always", value: "b" },
+      { label: "Below the mid (leaning to a down-tick)", value: "c" },
+      { label: "At the best ask by construction", value: "d" }
+    ],
+    correct: "a",
+    explain: "The size-weighted micro-price is pulled toward the heavier side; more bid size lifts it above the mid, hinting at buy pressure."
   });
 </script>
 </body>

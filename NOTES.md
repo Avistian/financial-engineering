@@ -15,6 +15,22 @@
 - Quiz answers must be equal length (words/chars) so formatting leaks no hint.
 - Be strict at checkpoints: no advancing past a failed exit criterion.
 
+## Lesson authoring patterns (adopted from the `relational` workspace, 2026-07-08)
+- Lessons should be **long and substantial (~22–30 KB, target ~55–60 min)** — the learner prefers
+  more text to learn efficiently in one sitting, not terse skeletons. Every conceptual beat gets full
+  prose, not a one-line table row: multiple worked numeric examples, several deep-dive subsections per
+  major idea, a "Common questions (and honest answers)" `<dl class="objections">`, a no-peek `.reflect`
+  block, active reading instructions, and a "Where you are in the arc" closer.
+- Depth checklist per lesson: (1) motivate the idea, (2) develop it with prose + a worked example,
+  (3) show at least one *second-order* consequence or subtlety, (4) name the failure mode (`.trap`),
+  (5) connect it forward to where it's used later in the curriculum. Aim for 8–12 `<h2>` sections.
+- Every lesson from 002 on opens with a spaced-retrieval **warm-up** (`retrieval-bank.js` +
+  `retrieval-pool.js`, `upTo` = lesson number) drawing only from earlier lessons.
+- One **predict-before-reveal** (`predict.js`) on a non-obvious result, placed above the reveal.
+- One **teach-back** (`teachback.js`) on the load-bearing idea.
+- The two authoring skills encode this: `.agents/skills/lesson-pedagogy` and `lesson-visuals`.
+- Feed `assets/retrieval-pool.js` (stable ids, never renumber) whenever a lesson ships a durable idea.
+
 ## Standing weekly habits (don't let these lapse)
 - 10 mental-math drills + 5 probability brainteasers/week (Green Book / Heard on the Street).
 - 3–5 LeetCode problems/week from Year 1 (rotating arrays → DP → graphs → trees).

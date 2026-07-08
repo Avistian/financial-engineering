@@ -15,13 +15,23 @@
 <article>
   <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
   <h1>Returns &amp; the Stylized Facts</h1>
-  <p class="subtitle">Lesson 004 · Foundations · ~40 min · has lab</p>
+  <p class="subtitle">Lesson 004 · Foundations · ~55 min · has lab</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
 
   <p>
-    Prices are non-stationary and awkward to model; <strong>returns</strong> are the currency of quant
-    research. But returns are not the tame Gaussian variables intro stats assumes — they obey a set of
-    stubborn empirical regularities called the <strong>stylized facts</strong> (Cont 2001). Every model
-    you build must respect them, and half of all beginner mistakes come from ignoring them.
+    Prices are non-stationary and awkward to model directly — their level drifts, their scale changes, and
+    "$5" means something different for a $10 stock than a $1,000 one. <strong>Returns</strong> are the
+    currency of quant research precisely because they normalize all of that away. But returns are <em>not</em>
+    the tame Gaussian variables intro statistics assumes. Across essentially every liquid asset and era, they
+    obey a set of stubborn empirical regularities called the <strong>stylized facts</strong> (Cont, 2001).
+  </p>
+  <p>
+    These facts are not academic trivia. Roughly half of all beginner mistakes — inflated Sharpe ratios,
+    "significant" strategies that die live, risk models that miss crashes — trace directly to pretending
+    returns are IID normal when they are not. Every model you build must respect the stylized facts, and
+    learning to <em>see</em> them in real data is today's skill.
   </p>
   <p>
     This lesson's single skill: <strong>compute log returns and identify the stylized facts in real
@@ -31,67 +41,215 @@
   <h2>Simple vs log returns</h2>
   <div class="formula">R_t = (P_t − P_{t−1}) / P_{t−1} &nbsp;&nbsp;·&nbsp;&nbsp; r_t = ln(P_t / P_{t−1}) = ln(1 + R_t)</div>
   <p>
-    <strong>Log returns</strong> add across time (a k-period return is the sum of the one-period log
-    returns), are symmetric around zero, and play nicely with the Brownian-motion models of Q2. Simple
-    returns add across <em>assets</em> (portfolio return = weighted sum). Quants default to log returns
-    for time-series modeling. For small moves, <code>r_t ≈ R_t</code>.
+    The <strong>simple return</strong> <code>R_t</code> is the percentage change. The <strong>log return</strong>
+    <code>r_t</code> is the natural log of the price ratio. They are nearly identical for small moves
+    (<code>r_t ≈ R_t</code> when <code>R_t</code> is small), but they compose differently, and the difference
+    decides which one a quant reaches for.
   </p>
+  <p>
+    <strong>Log returns add across time.</strong> A <code>k</code>-period log return is simply the sum of the
+    one-period log returns, because logs turn products into sums. Concretely, if a price goes
+    <code>100 → 110 → 99</code>: <code>r₁ = ln(110/100) = +0.0953</code>, <code>r₂ = ln(99/110) = −0.1054</code>,
+    and their sum <code>−0.0101 = ln(99/100)</code> — exactly the two-period log return. Try that with simple
+    returns and you'd have to multiply <code>(1+R₁)(1+R₂)</code>, not add. This additivity is why log returns
+    play nicely with the Brownian-motion and random-walk models of Q2.
+  </p>
+  <p>
+    <strong>Simple returns add across assets.</strong> A portfolio's simple return is the weighted sum of its
+    holdings' simple returns — which is why performance and portfolio math often uses simple returns. The rule
+    of thumb: <em>log returns for time-series modeling, simple returns for cross-sectional/portfolio
+    aggregation.</em>
+  </p>
+  <p>
+    Two subtleties worth banking now. First, the approximation <code>r ≈ R</code> only holds for small moves:
+    a +50% day is <code>R = 0.50</code> but <code>r = ln(1.5) = 0.405</code> — noticeably different, so never
+    use the approximation on crash-sized moves. Second, the domains differ: a simple return can't be worse than
+    <code>−100%</code> (a price floors at zero), while a log return is unbounded below. That asymmetry is
+    exactly what makes the lognormal price model of Lesson 005 natural — logs are the symmetric, additive
+    coordinate for a quantity that compounds multiplicatively.
+  </p>
+
+  <p>Commit a prediction before the next section:</p>
+  <div id="predict1"></div>
 
   <h2>The stylized facts you must respect</h2>
   <table>
     <thead><tr><th>Fact</th><th>Observation</th><th>Consequence</th></tr></thead>
     <tbody>
-      <tr><td><strong>Fat tails</strong></td><td>excess kurtosis ≫ 0; crashes far more likely than Gaussian says</td><td>normal-based risk models undercount tail loss</td></tr>
-      <tr><td><strong>No linear autocorr.</strong></td><td>corr(r_t, r_{t+k}) ≈ 0</td><td>naïve momentum on raw returns fails</td></tr>
-      <tr><td><strong>Volatility clustering</strong></td><td>corr(\|r_t\|, \|r_{t+k}\|) &gt; 0, decays slowly</td><td>vol is forecastable → GARCH, HAR-RV</td></tr>
+      <tr><td><strong>Fat tails</strong></td><td>excess kurtosis ≫ 0 (daily equity kurtosis often 5–10+, vs 3 for a normal); crashes far more likely than Gaussian says</td><td>normal-based risk models undercount tail loss</td></tr>
+      <tr><td><strong>No linear autocorr.</strong></td><td>corr(r_t, r_{t+k}) ≈ 0 for k ≥ 1</td><td>naïve momentum on raw returns fails</td></tr>
+      <tr><td><strong>Volatility clustering</strong></td><td>corr(|r_t|, |r_{t+k}|) &gt; 0, decays slowly</td><td>vol is forecastable → GARCH, HAR-RV</td></tr>
       <tr><td><strong>Leverage effect</strong></td><td>down moves raise future vol more than up moves</td><td>asymmetric vol models (Q3)</td></tr>
+      <tr><td><strong>Aggregational gaussianity</strong></td><td>returns look more normal at longer horizons (daily → monthly)</td><td>fat tails are mostly a high-frequency phenomenon</td></tr>
+      <tr><td><strong>Volume–volatility link</strong></td><td>trading volume and volatility move together</td><td>volume is an information/activity proxy</td></tr>
     </tbody>
   </table>
   <p>
-    The tension here is the entire game: <strong>direction</strong> is nearly unpredictable from past
-    returns alone (no linear autocorrelation), yet <strong>volatility</strong> is quite predictable
-    (clustering). Much of quant research is finding the nonlinear/cross-sectional structure that raw
-    autocorrelation misses, while modeling volatility separately.
+    The tension between the "no linear autocorr" and "volatility clustering" rows <em>is</em> the entire game.
+    <strong>Direction</strong> is nearly unpredictable from past returns alone — the near-zero autocorrelation
+    means yesterday's return tells you almost nothing about the sign of tomorrow's. Yet
+    <strong>volatility</strong> is quite predictable: big moves cluster, so a turbulent day makes a turbulent
+    tomorrow more likely. Much of quant research is finding the nonlinear or cross-sectional structure that raw
+    autocorrelation misses (that's where signal-based alpha lives), while modeling volatility on a separate
+    track (that's where risk and option pricing live).
+  </p>
+
+  <h2>Long memory in volatility</h2>
+  <p>
+    Volatility clustering is not a one-day effect. The autocorrelation of <code>|r_t|</code> stays positive for
+    a <em>very</em> long time — hundreds of lags — decaying slowly, like a power law rather than the fast
+    exponential decay a simple model would predict. This "long memory" is why volatility models blend
+    information across many horizons (the HAR-RV model literally sums daily, weekly, and monthly realized
+    volatility). Contrast the sign of returns, whose autocorrelation dies almost immediately: magnitude has a
+    long memory, direction has essentially none. Holding those two facts side by side is the single most useful
+    mental model of return dynamics you can carry into Year 2.
+  </p>
+
+  <h2>The leverage effect</h2>
+  <p>
+    Volatility responds <em>asymmetrically</em> to the sign of returns: a large drop tends to raise future
+    volatility more than an equally large rise does. The classic (partial) explanation is corporate leverage —
+    as a firm's equity falls, its debt-to-equity ratio rises, making the equity riskier — hence "leverage
+    effect," though behavioral and risk-premium stories also contribute. The practical upshot: symmetric
+    volatility models (plain GARCH) miss this, so Q3 introduces asymmetric variants (GJR-GARCH, EGARCH). It also
+    explains why equity index returns have <em>negative skew</em>: down moves are both larger and beget more
+    turbulence.
+  </p>
+
+  <h2>Scaling volatility across horizons (and why it's only approximate)</h2>
+  <p>
+    If returns were IID, variance would add across time, so volatility would scale with the <em>square root</em>
+    of the horizon:
+  </p>
+  <div class="formula">σ(T days) ≈ σ(1 day) · √T &nbsp;&nbsp;⇒&nbsp;&nbsp; σ(annual) ≈ σ(daily) · √252</div>
+  <p>
+    So a stock with 1% daily volatility has roughly <code>1% × √252 ≈ 16%</code> annualized volatility. This
+    "√t rule" is everywhere — annualizing Sharpe ratios, sizing risk, quoting vol — so it's worth knowing cold.
+    But notice the assumption: it needs returns to be IID with finite, constant variance. Volatility clustering
+    (variance is not constant) and fat tails (higher moments misbehave) mean the rule is an
+    <em>approximation</em>, and worse, using it with Gaussian quantiles to compute Value-at-Risk understates
+    tail risk — the same fat-tail leak, wearing a different hat. Use √t for back-of-envelope scaling; distrust
+    it for the tails.
+  </p>
+
+  <h2>Aggregational gaussianity — fat tails are a horizon effect</h2>
+  <p>
+    Here's a fact that reconciles "returns are fat-tailed" with "the CLT says sums go normal": as you aggregate
+    returns over longer windows (daily → weekly → monthly), their distribution looks <em>more</em> normal and
+    the excess kurtosis shrinks. Fat tails are largely a <strong>high-frequency</strong> phenomenon; monthly
+    returns are far closer to Gaussian than one-minute returns. This matters when you choose a model: a
+    daily-bar strategy must take fat tails seriously, while a monthly rebalanced factor portfolio can often lean
+    on near-normal approximations. The stylized facts are not universal constants — they are strongest at short
+    horizons and fade as you zoom out.
   </p>
 
   <h2>How to see them (the lab does this)</h2>
   <pre>import numpy as np
 r = np.log(px).diff().dropna()
-r.kurtosis()            # &gt;&gt; 0   → fat tails
-r.autocorr(lag=1)       # ~ 0    → no linear predictability
-r.abs().autocorr(lag=1) # &gt; 0    → volatility clustering</pre>
+r.kurtosis()            # &gt;&gt; 0   → fat tails (pandas reports EXCESS kurtosis)
+r.autocorr(lag=1)       # ~ 0    → no linear predictability of direction
+r.abs().autocorr(lag=1) # &gt; 0    → volatility clustering
+r.skew()                # &lt; 0    → negative skew (equity indices)</pre>
+  <p>
+    Four one-liners, four stylized facts. The lab has you run these on a real series and on a simulated
+    Gaussian series of the same mean and variance, so you can <em>see</em> what the normal distribution is
+    missing — its tails are too thin, its <code>|r|</code> autocorrelation is flat, and its skew is zero. It
+    also has you re-aggregate to weekly and monthly and watch the kurtosis fall, confirming aggregational
+    gaussianity with your own eyes.
+  </p>
 
   <div class="trap">
-    <strong>Trap.</strong> Reporting Sharpe ratios and t-statistics as if returns were IID normal. Fat
-    tails and volatility clustering violate both assumptions, inflating apparent significance and making
-    overfit strategies look "statistically real." This is the first leak through which false edges
-    enter — and the reason the deflated Sharpe ratio (Year 2 Q2) exists. Distrust any single-number
-    performance claim that ignores the stylized facts.
+    <strong>Trap.</strong> Reporting Sharpe ratios and t-statistics as if returns were IID normal. Fat tails and
+    volatility clustering violate both assumptions, inflating apparent significance and making overfit strategies
+    look "statistically real." This is the first leak through which false edges enter — and the reason the
+    deflated Sharpe ratio (Year 2 Q2) exists. Distrust any single-number performance claim that ignores the
+    stylized facts.
   </div>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“If direction is unpredictable, how does anyone make money?”</dt>
+    <dd>
+      "No <em>linear</em> autocorrelation of a single series" is not "no predictability." Edge comes from
+      nonlinear structure, cross-sectional relationships (this stock vs its peers), alternative data, and
+      shorter horizons — plus, separately, from trading volatility itself, which <em>is</em> forecastable. The
+      stylized facts tell you where the easy, naïve edge <em>isn't</em>.
+    </dd>
+    <dt>“Aren't fat tails just outliers I should clean out?”</dt>
+    <dd>
+      No — the tails are the signal, not noise. Extreme moves are a genuine, repeated property of markets;
+      deleting them is how a risk model comes to fatally understate crash probability. You model the tails
+      (Student-t, EVT), you don't erase them.
+    </dd>
+    <dt>“Why not just always use simple returns — they're more intuitive?”</dt>
+    <dd>
+      For reporting a single asset's P&amp;L, fine. But for time-series modeling you want additivity across
+      time and compatibility with Brownian models, which log returns give and simple returns don't. Use each
+      where its algebra is clean.
+    </dd>
+    <dt>“If returns go Gaussian at long horizons, can't I always just annualize with √t?”</dt>
+    <dd>
+      √t scaling is a fine back-of-envelope, but it assumes IID returns. Clustering and fat tails break the
+      assumption, so it misstates risk — especially in the tails, where it understates the chance of a large
+      loss. Use it to get a ballpark, not to set risk limits.
+    </dd>
+  </dl>
 
   <h2>Check your understanding</h2>
   <div id="quiz1"></div>
   <div id="quiz2"></div>
   <div id="quiz3"></div>
+  <div id="quiz4"></div>
 
   <h2>Primary reading (today)</h2>
   <p>
     Cont (2001), <em>Empirical properties of asset returns: stylized facts and statistical issues</em>,
-    <em>Quantitative Finance</em> 1(2). The founding catalog of the stylized facts — short and
-    foundational. Pair it with the <a href="../reference/stylized-facts.html">stylized-facts cheat sheet</a>.
+    <em>Quantitative Finance</em> 1(2). The founding catalog of the stylized facts — short and foundational.
+    Pair it with the <a href="../reference/stylized-facts.html">stylized-facts cheat sheet</a>.
+  </p>
+  <p>
+    As you read, note for each stylized fact one <em>modeling consequence</em> — what it forbids and what it
+    demands — and mark which facts strengthen at high frequency versus fade with aggregation. You'll be able to
+    answer "why not just use a Gaussian?" in an interview from those notes.
   </p>
 
   <h2>Lab — measure the stylized facts on real data</h2>
   <p>
-    Notebook: <code>0004-returns-stylized-facts.ipynb</code>. You'll load a real daily price series,
-    compute log returns, and <em>verify</em> fat tails, absent linear autocorrelation, and volatility
-    clustering — then compare against a simulated Gaussian series to see what's missing.
-    <a href="../labs/README.md">How labs work</a>.
+    Notebook: <code>0004-returns-stylized-facts.ipynb</code>. You'll load a real daily price series, compute log
+    returns, and <em>verify</em> fat tails, absent linear autocorrelation, and volatility clustering — then
+    compare against a simulated Gaussian series to see exactly what's missing, and re-aggregate to confirm
+    aggregational gaussianity. <a href="../labs/README.md">How labs work</a>.
   </p>
 
-  <div class="ask-teacher">
-    Kurtosis, autocorrelation, or the log-vs-simple choice unclear? Ask your teacher for a worked toy example on 5 numbers.
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory, list the three stylized facts the lab measures
+    and the one-line pandas call that reveals each. Then answer in one sentence each: which is more forecastable
+    from a return's own past — its <em>sign</em> or its <em>magnitude</em>, and why? And why does the √t rule
+    understate tail risk?
   </div>
+
+  <div class="ask-teacher">
+    Kurtosis, autocorrelation, long memory, or the √t rule unclear? Ask your teacher for a worked toy example on a handful of numbers.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Simple vs log return</strong>; additivity across time (log) vs assets (simple).</li>
+    <li><strong>Fat tails / excess kurtosis</strong>; <strong>negative skew</strong>.</li>
+    <li><strong>Volatility clustering</strong> and its <strong>long memory</strong>; the <strong>leverage effect</strong>.</li>
+    <li><strong>√t volatility scaling</strong> (and why it's only approximate).</li>
+    <li><strong>Aggregational gaussianity</strong> — fat tails fade with horizon.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    You now know what returns look like and how they misbehave. Lesson 005 sharpens the probability toolkit —
+    moments, distributions, covariance, and conditioning — you need to describe those returns precisely and to
+    bridge into the measure-theoretic view that Q2 formalizes.
+  </p>
 
   <nav class="nav-links">
     <ul>
@@ -104,7 +262,35 @@ r.abs().autocorr(lag=1) # &gt; 0    → volatility clustering</pre>
 </article>
 
 <script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
 <script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 4, count: 3 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "The kurtosis of daily equity returns is, compared with a normal distribution's value of 3, typically…",
+    options: [
+      { label: "Much higher (often 5–10+)", value: "higher" },
+      { label: "About the same, near 3", value: "same" },
+      { label: "Much lower (near 1)", value: "lower" }
+    ],
+    correct: "higher",
+    reveal: "Returns are fat-tailed: kurtosis well above 3, so extreme moves happen far more often than a Gaussian predicts — Gaussian VaR undercounts tail risk."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: why is a return's direction nearly unpredictable while its volatility is forecastable?",
+    points: [
+      "Raw returns show ~0 linear autocorrelation",
+      "So naive momentum on returns tends to fail",
+      "But |returns| (or squared) are autocorrelated (long memory)",
+      "Big moves cluster, so vol is forecastable (GARCH/HAR)"
+    ],
+    model: "The autocorrelation of raw returns is essentially zero, so knowing yesterday's return tells you almost nothing about the sign of tomorrow's — that's why naïve momentum on a single series fails. But the autocorrelation of |returns| (or squared returns) is positive and decays slowly over many lags (long memory): a large move today makes a large move tomorrow more likely regardless of direction. So the magnitude of returns carries persistent structure that the sign does not, which is why volatility can be modeled and forecast (GARCH, HAR-RV) even when direction can't."
+  });
+
   Quiz.mount(document.getElementById("quiz1"), {
     question: "Quants prefer log returns for time series because they:",
     options: [
@@ -139,6 +325,18 @@ r.abs().autocorr(lag=1) # &gt; 0    → volatility clustering</pre>
     ],
     correct: "a",
     explain: "Real returns have far more extreme moves than a normal distribution predicts, so Gaussian VaR undercounts tail risk."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "Under the IID assumption, T-day volatility scales with the daily value as:",
+    options: [
+      { label: "σ · √T (square-root of horizon)", value: "a" },
+      { label: "σ · T (linear in the horizon)", value: "b" },
+      { label: "σ / √T (shrinks with horizon)", value: "c" },
+      { label: "σ, unchanged by the horizon", value: "d" }
+    ],
+    correct: "a",
+    explain: "Variance adds across IID periods, so volatility scales as σ·√T — e.g. annualized ≈ daily·√252. It's only approximate under clustering and fat tails."
   });
 </script>
 </body>

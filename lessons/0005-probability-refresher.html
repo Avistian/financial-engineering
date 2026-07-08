@@ -15,16 +15,22 @@
 <article>
   <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
   <h1>Probability Refresher for Quants</h1>
-  <p class="subtitle">Lesson 005 · Foundations · ~40 min</p>
+  <p class="subtitle">Lesson 005 · Foundations · ~55 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
 
   <p>
-    You have solid undergrad probability; this lesson sharpens it into the <strong>quant working set</strong>
-    and the four distributions you'll reach for constantly. It's also the on-ramp to the
-    measure-theoretic view (Lesson 011) — think of moments and conditioning now, filtrations later.
+    You already have solid undergraduate probability; this lesson doesn't reteach it. Instead it sharpens that
+    knowledge into the <strong>quant working set</strong> — the handful of moments, distributions, dependence
+    tools, and one core idea (conditioning) you will reach for constantly, framed the way quants use them. It's
+    also the on-ramp to the measure-theoretic view formalized in Lesson 011: think of moments and conditioning
+    concretely now, filtrations and rigor later.
   </p>
   <p>
-    This lesson's single skill: <strong>pick the right distribution for a modeling job and reason with
-    the first four moments</strong>.
+    This lesson's single skill: <strong>pick the right distribution for a modeling job and reason with the
+    first four moments and with dependence (covariance)</strong> — and see why "a forecast" is really a
+    conditional expectation.
   </p>
 
   <h2>The four moments you actually use</h2>
@@ -32,61 +38,221 @@
     <thead><tr><th>Moment</th><th>Meaning</th><th>In markets</th></tr></thead>
     <tbody>
       <tr><td>Mean (μ)</td><td>center / expected value</td><td>drift, expected return</td></tr>
-      <tr><td>Variance (σ²)</td><td>spread</td><td>risk / volatility (σ)</td></tr>
-      <tr><td>Skewness</td><td>asymmetry</td><td>crash risk (equities: negative skew)</td></tr>
-      <tr><td>Kurtosis</td><td>tail heaviness</td><td>fat tails (Lesson 004)</td></tr>
+      <tr><td>Variance (σ²)</td><td>spread around the mean</td><td>risk / volatility (σ = std. dev.)</td></tr>
+      <tr><td>Skewness</td><td>asymmetry of the distribution</td><td>crash risk (equities have negative skew)</td></tr>
+      <tr><td>Kurtosis</td><td>tail heaviness / peakedness</td><td>fat tails (Lesson 004)</td></tr>
     </tbody>
   </table>
   <p>
-    A normal distribution has skew 0 and kurtosis 3 ("excess kurtosis" 0). Real returns have negative
-    skew and excess kurtosis &gt; 0 — which is exactly why the next distribution matters.
+    A normal distribution has skewness 0 and kurtosis 3 (so "excess kurtosis" — kurtosis minus 3 — is 0). Real
+    equity returns have <em>negative</em> skew (big down moves are larger and more frequent than big up moves)
+    and <em>positive</em> excess kurtosis (fat tails). Those two departures from normality — which you measured
+    in Lesson 004 — are exactly why the choice of distribution below is not a formality. A useful discipline:
+    whenever you summarize returns, report at least the first two moments, and be suspicious of any claim that
+    ignores the third and fourth.
   </p>
 
-  <h2>The four distributions to know cold</h2>
+  <p>Commit a prediction before the distributions table:</p>
+  <div id="predict1"></div>
+
+  <h2>The distributions to know cold</h2>
   <table>
     <thead><tr><th>Distribution</th><th>Use it for</th><th>Key property</th></tr></thead>
     <tbody>
-      <tr><td><strong>Normal</strong></td><td>errors, CLT limits, Brownian increments</td><td>thin tails; sums of it stay normal</td></tr>
-      <tr><td><strong>Lognormal</strong></td><td>prices (if log returns are normal, price is lognormal)</td><td>positive, right-skewed</td></tr>
-      <tr><td><strong>Student-t</strong></td><td>fat-tailed returns; robust models</td><td>heavier tails; ν → ∞ gives normal</td></tr>
+      <tr><td><strong>Normal</strong></td><td>errors, CLT limits, Brownian increments</td><td>thin tails; sums of normals stay normal</td></tr>
+      <tr><td><strong>Lognormal</strong></td><td>prices (if log returns are normal, the price is lognormal)</td><td>strictly positive, right-skewed</td></tr>
+      <tr><td><strong>Student-t</strong></td><td>fat-tailed returns; robust models</td><td>heavier tails; ν → ∞ recovers the normal</td></tr>
+      <tr><td><strong>Bernoulli / Binomial</strong></td><td>up/down moves; counts of successes</td><td>building block of the binomial option tree</td></tr>
       <tr><td><strong>Poisson</strong></td><td>counts of events (trades, jumps) per interval</td><td>underlies Poisson/Hawkes processes (Q2, Y2)</td></tr>
+      <tr><td><strong>Exponential</strong></td><td>waiting times between events (inter-arrival)</td><td>the gaps of a Poisson process; memoryless</td></tr>
     </tbody>
   </table>
+  <p>
+    Two relationships are worth internalizing because they recur in microstructure. First, the
+    <strong>Bernoulli → Binomial → Normal</strong> chain: a single up/down move is Bernoulli, a sum of them is
+    Binomial, and by the CLT many of them approach a Normal — this is literally how the binomial option-pricing
+    tree converges to Black-Scholes. Second, the <strong>Poisson ↔ Exponential</strong> duality: if events
+    (say, trades) arrive as a Poisson process at rate λ, the <em>counts</em> per interval are Poisson and the
+    <em>gaps</em> between events are Exponential. When trade arrivals cluster (they do — think volatility
+    clustering's cousin), the constant-rate Poisson fails and you reach for a <strong>Hawkes</strong> process
+    (self-exciting arrivals), which Year 2 builds on exactly this foundation.
+  </p>
+  <p>
+    The lognormal deserves its own moment. If a price evolves by multiplying random factors — as returns
+    compound — then by the same log-turns-products-into-sums logic from Lesson 004, the <em>log</em> price is a
+    sum of increments. If those increments are normal, the log price is normal, so the price itself is the
+    exponential of a normal: <strong>lognormal</strong>. That's why prices (which can't go negative) are modeled
+    lognormally while their log returns are modeled normally — and it's the distributional backbone of
+    Black-Scholes.
+  </p>
+
+  <h2>Covariance, correlation, and the covariance matrix</h2>
+  <p>
+    A single asset's risk is its variance; a <em>portfolio's</em> risk depends on how assets move
+    <em>together</em>. That co-movement is <strong>covariance</strong>, and its normalized, unit-free version is
+    <strong>correlation</strong> (between −1 and +1). The key formula — the one that makes diversification work —
+    is the variance of a weighted sum:
+  </p>
+  <div class="formula">Var(aX + bY) = a²Var(X) + b²Var(Y) + 2ab·Cov(X, Y)</div>
+  <p>
+    That cross term is the whole game. Combine two assets each with variance <code>σ²</code>. If they are
+    <em>uncorrelated</em>, an equal-weight mix has variance <code>(σ²/4 + σ²/4) = σ²/2</code> — half the risk of
+    holding one, for the same expected return. Extend to <code>n</code> equally-weighted uncorrelated assets and
+    the portfolio variance falls to <code>σ²/n</code>: risk shrinks with the number of independent bets. This is
+    the mathematical statement of "diversification is the only free lunch," and it's why a QR cares less about
+    any single signal's strength than about finding signals whose errors are <em>uncorrelated</em> with the ones
+    already in the book. The full bookkeeping for many assets is the <strong>covariance matrix</strong> Σ — a
+    symmetric matrix of every pairwise covariance — and estimating it well from noisy data (Ledoit-Wolf
+    shrinkage, random-matrix denoising) is a whole Year-2 topic.
+  </p>
+
+  <h2>Independent vs uncorrelated (a costly confusion)</h2>
+  <p>
+    Zero correlation does <strong>not</strong> mean independence. Correlation measures only <em>linear</em>
+    association. A classic counterexample: let <code>X</code> be symmetric around 0 and let <code>Y = X²</code>.
+    Then <code>Cov(X, Y) = 0</code> — zero correlation — yet <code>Y</code> is completely determined by
+    <code>X</code>. They are perfectly dependent and linearly uncorrelated at once. This is not a math-class
+    curiosity: markets are full of <em>nonlinear</em> and <em>tail</em> dependence. Assets that look
+    uncorrelated in calm times crash together in a crisis (correlations "go to 1" in tail events), so a risk
+    model built only on linear correlation systematically understates joint disaster risk. Independence is a
+    strong claim; uncorrelatedness is a weak one — never silently upgrade the second to the first.
+  </p>
+
+  <h2>Bayes' rule — updating a belief with evidence</h2>
+  <div class="formula">P(A | B) = P(B | A) · P(A) / P(B)</div>
+  <p>
+    Bayes' rule tells you how to revise a prior belief <code>P(A)</code> into a posterior <code>P(A|B)</code>
+    after observing evidence <code>B</code>. It's the engine behind a huge amount of quant thinking: updating a
+    regime probability as new data arrives, combining a prior view with noisy signals (Black-Litterman
+    portfolio construction is Bayesian at heart), and reasoning about base rates. The base-rate lesson is the
+    practical one: a test that's "95% accurate" for a rare event still produces mostly false positives if the
+    event is rare enough, because <code>P(A)</code> is tiny. Quants who ignore base rates chase signals that are
+    almost all noise — the same overfitting trap in probabilistic clothing.
+  </p>
+
+  <h2>Law of large numbers vs the central limit theorem</h2>
+  <p>
+    Two theorems anchor how much you can trust an average, and conflating them is common. The <strong>law of
+    large numbers (LLN)</strong> says the sample mean converges to the true mean as the sample grows — it
+    promises the average <em>lands in the right place</em> eventually. The <strong>central limit theorem
+    (CLT)</strong> says the sample mean's <em>distribution</em> becomes approximately normal with standard
+    deviation <code>σ/√n</code> — it tells you <em>how uncertain</em> that average still is. The <code>√n</code>
+    is the punchline for a QR: to halve your error bar you need <em>four times</em> the data, which is why
+    proving a small edge is real takes so much history. And both theorems carry fine print that markets
+    violate — the CLT needs <em>finite variance</em> (fat tails strain it) and effectively <em>independent</em>
+    observations (autocorrelation shrinks your true <code>n</code> below the row count). Your error bars are
+    almost always wider than a naïve <code>σ/√n</code> suggests.
+  </p>
 
   <h2>Conditioning: the idea everything is built on</h2>
   <p>
     A <strong>conditional expectation</strong> <code>E[X | information]</code> is your best forecast of
-    <code>X</code> given what you know. Almost every model — a regression, a signal, an option price —
-    is a conditional expectation of a payoff given current information. In Lesson 011 you'll see the
-    formal version: conditioning on a <em>filtration</em> (the information available up to time t) and
-    the fact that <code>E[·|ℱ]</code> is a projection. Get comfortable now with the plain idea:
-    <em>expectation given what you currently observe</em>.
+    <code>X</code> given what you currently know. This is not one technique among many — it is the shape of
+    almost every model you will ever build. A regression predicts <code>E[y | features]</code>. A trading
+    signal is <code>E[future return | today's data]</code>. An option price is (a discounted) expected payoff
+    <em>conditional</em> on current market information. Internalize the plain idea now:
+    <em>expectation given what you currently observe.</em>
   </p>
   <div class="formula">Tower rule: E[ E[X | ℱ] ] = E[X]</div>
+  <p>
+    The <strong>tower rule</strong> (law of iterated expectations) says: if you average your conditional
+    forecasts over all the things you might have observed, you recover the unconditional average. A worked
+    example makes it click. Flip a fair coin; on heads, <code>X</code> is drawn with mean 10, on tails with mean
+    2. Then <code>E[X | heads] = 10</code> and <code>E[X | tails] = 2</code>, and averaging over the coin:
+    <code>E[X] = 0.5·10 + 0.5·2 = 6</code>. Forecasting and then averaging over the information can't change the
+    overall mean — it just reorganizes it. In Lesson 011 you'll meet the formal version: conditioning on a
+    <em>filtration</em> ℱ (the information available up to time <code>t</code>), and the fact that
+    <code>E[·|ℱ]</code> is a <em>projection</em> onto what's knowable — the machinery behind martingales and
+    no-arbitrage pricing.
+  </p>
 
   <div class="trap">
-    <strong>Trap.</strong> Reaching for the normal distribution by default. It underlies the CLT and
-    Brownian motion, but it badly models returns (too-thin tails) and prices (which can't go negative).
-    Using a normal where a Student-t or lognormal belongs is how risk gets systematically
-    underestimated. Match the distribution to the quantity: normal for <em>increments/errors</em>,
-    lognormal for <em>prices</em>, Student-t for <em>fat-tailed returns</em>, Poisson for <em>counts</em>.
+    <strong>Trap.</strong> Reaching for the normal distribution by default. It underlies the CLT and Brownian
+    motion, but it badly models returns (tails too thin) and prices (which can't go negative), and its
+    correlation captures only linear dependence. Using a normal where a Student-t or lognormal belongs, or
+    trusting zero correlation as independence, is how risk gets systematically underestimated. Match the tool to
+    the quantity: normal for <em>increments/errors</em>, lognormal for <em>prices</em>, Student-t for
+    <em>fat-tailed returns</em>, Poisson/Exponential for <em>event timing</em> — and remember correlation ≠
+    dependence.
   </div>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Doesn't the Central Limit Theorem justify using the normal everywhere?”</dt>
+    <dd>
+      The CLT justifies the normal for <em>sums of many independent, finite-variance</em> pieces — a strong set
+      of conditions. Returns violate them: they're heavy-tailed and not independent (volatility clusters), and
+      real data is finite. The CLT is a limit, not a license to assume normality of the thing you actually observe.
+    </dd>
+    <dt>“Do I need measure theory to do any of this?”</dt>
+    <dd>
+      Not yet. The concrete versions — moments, distributions, covariance, conditional expectation as "best
+      forecast given info" — carry you through Q1. Measure theory (Lesson 011) makes conditioning and
+      filtrations rigorous so that stochastic calculus is well-defined; you'll want it before Q2, not before
+      this lesson.
+    </dd>
+    <dt>“If two signals are uncorrelated, can I treat them as independent bets?”</dt>
+    <dd>
+      Only cautiously. Zero correlation rules out <em>linear</em> co-movement, not nonlinear or tail dependence.
+      Two "uncorrelated" strategies can still blow up together in a crisis. Diversification math assumes more
+      than correlation reports, so stress-test the joint tail, don't just check ρ.
+    </dd>
+    <dt>“Why model prices as lognormal instead of just normal?”</dt>
+    <dd>
+      A normal price could go negative, which is nonsensical for a stock, and it doesn't match how prices
+      compound multiplicatively. The lognormal is positive and arises naturally when log returns are normal —
+      it's the honest distribution for a quantity built by compounding.
+    </dd>
+  </dl>
 
   <h2>Check your understanding</h2>
   <div id="quiz1"></div>
   <div id="quiz2"></div>
   <div id="quiz3"></div>
+  <div id="quiz4"></div>
 
   <h2>Primary reading (today)</h2>
   <p>
-    Wasserman, <em>All of Statistics</em>, Chapters 1–5 — probability, random variables, expectation,
-    and the key distributions. This book is your Q1 statistics anchor; you'll use Ch. 6–9 in
-    Lessons 006–007.
+    Wasserman, <em>All of Statistics</em>, Chapters 1–5 — probability, random variables, expectation, and the key
+    distributions. This book is your Q1 statistics anchor; you'll use Ch. 6–9 in Lessons 006–007.
+  </p>
+  <p>
+    As you read, write the one-line definition of each of the four moments and one market quantity it maps to,
+    plus the variance-of-a-sum formula from memory. Keep it — you'll extend this into the "moments,
+    distributions &amp; dependence" entry of your personal glossary.
   </p>
 
-  <div class="ask-teacher">
-    Want a refresher on skewness/kurtosis formulas or the tower rule with a worked example? Ask your teacher.
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: name six distributions and the one thing each
+    is the right tool for. Write <code>Var(aX+bY)</code> and use it to explain why 100 uncorrelated equal-weight
+    bets have 1/100th the variance of one. State why a trading signal is a conditional expectation. Then give one
+    reason zero correlation is <em>not</em> independence. Re-read any section that felt shaky.
   </div>
+
+  <div class="ask-teacher">
+    Want a refresher on the covariance matrix, Bayes with base rates, or the tower rule with different numbers? Ask your teacher for a worked example.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Mean / variance / skew / kurtosis</strong> — the first four moments.</li>
+    <li><strong>Normal / lognormal / Student-t / Bernoulli-Binomial / Poisson / Exponential</strong> — the working distributions.</li>
+    <li><strong>Covariance / correlation / covariance matrix Σ</strong>; variance of a sum and diversification.</li>
+    <li><strong>Independent vs uncorrelated</strong> — correlation is only linear dependence.</li>
+    <li><strong>Bayes' rule</strong>, base rates; <strong>LLN vs CLT</strong> and the <code>σ/√n</code> error bar.</li>
+    <li><strong>Conditional expectation</strong> and the <strong>tower rule</strong>.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    This closes the Q1 foundations you can learn without new machinery. From here the curriculum moves into
+    <strong>estimation and inference</strong> (Unit 006) — how to estimate these moments, distributions, and
+    covariances from finite, noisy data and quantify your uncertainty — the first place the "don't fool
+    yourself" discipline gets quantitative teeth.
+  </p>
 
   <nav class="nav-links">
     <ul>
@@ -98,7 +264,35 @@
 </article>
 
 <script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
 <script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 5, count: 3 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "If a stock's log returns are normally distributed, the price level itself is distributed as…",
+    options: [
+      { label: "Lognormal (positive, right-skewed)", value: "lognormal" },
+      { label: "Normal (symmetric around its mean)", value: "normal" },
+      { label: "Uniform over a bounded interval", value: "uniform" }
+    ],
+    correct: "lognormal",
+    reveal: "Price = P₀·exp(Σ log returns). The exponential of a normal is lognormal — strictly positive and right-skewed, which is why prices are modeled this way."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: why is essentially every model — a regression, a signal, an option price — a conditional expectation?",
+    points: [
+      "A forecast is your best guess of X given what you know",
+      "E[X | information] is that best (MSE-optimal) guess",
+      "Regression predicts E[y | features]; a signal, E[return | data]",
+      "An option price is a (discounted) expected payoff given info"
+    ],
+    model: "Any forecast answers 'given what I currently know, what do I expect?' — and the object that captures 'best guess given information' is the conditional expectation E[X | information], which minimizes mean-squared error. A regression is literally an estimate of E[y | features]; a trading signal is E[future return | today's data]; an option's value is a discounted expected payoff conditional on current market information. They differ in what X and the information set are, but they are all the same mathematical object: an expectation taken conditional on what's known."
+  });
+
   Quiz.mount(document.getElementById("quiz1"), {
     question: "If log returns are normal, the price level is:",
     options: [
@@ -133,6 +327,18 @@
     ],
     correct: "a",
     explain: "E[X | information] is the optimal (MSE) forecast given what you know — the backbone of regression, signals, and pricing."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "Zero correlation between two variables implies:",
+    options: [
+      { label: "No linear relation, but maybe dependence", value: "a" },
+      { label: "They are fully statistically independent", value: "b" },
+      { label: "Their covariance matrix is singular", value: "c" },
+      { label: "Both must be normally distributed", value: "d" }
+    ],
+    correct: "a",
+    explain: "Correlation captures only linear association; variables can be uncorrelated yet strongly (nonlinearly) dependent — e.g. Y = X² with symmetric X."
   });
 </script>
 </body>

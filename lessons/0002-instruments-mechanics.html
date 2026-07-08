@@ -15,45 +15,165 @@
 <article>
   <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
   <h1>Instruments &amp; Market Mechanics</h1>
-  <p class="subtitle">Lesson 002 · Foundations · ~40 min</p>
+  <p class="subtitle">Lesson 002 · Foundations · ~55 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
 
   <p>
-    You start with near-zero finance, so this lesson buys you the <strong>vocabulary of what actually
-    trades</strong>. Every model later prices, forecasts, or trades one of these instruments; if the
-    instrument is fuzzy, the model is fuzzy.
+    You start from near-zero finance, so this lesson buys you the <strong>vocabulary of what actually
+    trades</strong> and how an intention becomes a filled position. Every model you build later prices,
+    forecasts, or trades one of these instruments; if the instrument is fuzzy in your head, the model built
+    on it will be fuzzy too. This is deliberately concrete — the abstractions (Itô, Black-Scholes) only earn
+    their keep once you can picture the thing being priced.
   </p>
   <p>
     This lesson's single skill: <strong>describe the four core instrument classes and the anatomy of a
-    trade</strong> — long/short, bid/ask, and how an intention becomes a fill.
+    trade</strong> — long vs short, bid vs ask, and how an order turns into a fill and a P&amp;L.
   </p>
 
   <h2>The four core instruments</h2>
   <table>
     <thead><tr><th>Instrument</th><th>What it is</th><th>Payoff / key idea</th></tr></thead>
     <tbody>
-      <tr><td><strong>Equity (stock)</strong></td><td>Ownership share of a company</td><td>Linear: you gain/lose 1:1 with the price</td></tr>
-      <tr><td><strong>Futures</strong></td><td>Standardized contract to buy/sell an asset at a future date &amp; agreed price</td><td>Linear, leveraged; used for hedging &amp; directional bets</td></tr>
-      <tr><td><strong>Options</strong></td><td>The <em>right</em> (not obligation) to buy (call) or sell (put) at a strike by expiry</td><td><strong>Non-linear</strong>: payoff is max(S−K,0) etc. — the whole reason stochastic calculus exists</td></tr>
-      <tr><td><strong>ETF</strong></td><td>A fund (basket of assets) that trades like a single stock</td><td>Cheap, liquid exposure to an index/sector</td></tr>
+      <tr><td><strong>Equity (stock)</strong></td><td>An ownership share of a company (a claim on its assets and future cash flows)</td><td>Linear: you gain/lose ~1:1 with the price; may pay dividends</td></tr>
+      <tr><td><strong>Futures</strong></td><td>A standardized, exchange-traded contract to buy/sell an asset at a future date and agreed price</td><td>Linear, leveraged; marked-to-market daily; used for hedging &amp; directional bets</td></tr>
+      <tr><td><strong>Options</strong></td><td>The <em>right</em> (not the obligation) to buy (call) or sell (put) at a strike by expiry, for a premium paid up front</td><td><strong>Non-linear</strong>: payoff is max(S−K,0) etc. — the whole reason stochastic calculus exists</td></tr>
+      <tr><td><strong>ETF</strong></td><td>A fund holding a basket of assets that itself trades like a single stock</td><td>Cheap, liquid exposure to an index/sector via create/redeem arbitrage</td></tr>
     </tbody>
   </table>
   <p>
-    Equities and futures have <strong>linear</strong> payoffs — simple to reason about. Options are
-    <strong>non-linear</strong>: their value depends on volatility and time in ways that require the
-    Year 1 Q2 machinery (Itô, Black-Scholes). That non-linearity is where much of quant pricing lives.
+    That table is the map; the next four subsections are the territory. Each instrument has a mechanical detail
+    that trips up newcomers and shows up later in pricing or backtests, so we take them one at a time.
+  </p>
+
+  <h3>Equity — and the details that break naïve backtests</h3>
+  <p>
+    A share is a claim on a company. Two mechanical facts matter for a QR. First, <strong>dividends</strong>:
+    when a company pays a dividend, the share price drops by roughly the dividend on the ex-dividend date — not
+    because anything went wrong, but because that cash left the firm. A backtest on raw prices will read that
+    drop as a loss unless you use <em>total-return</em> (dividend-adjusted) prices. Second,
+    <strong>corporate actions</strong> like stock splits: a 2-for-1 split halves the price and doubles the
+    share count with no economic change. Unadjusted data shows a spurious 50% "crash." Professional data is
+    <em>adjusted</em> for both; knowing they exist is how you catch a data bug before it becomes a fake signal.
+  </p>
+
+  <h3>Futures — leverage, mark-to-market, and the roll</h3>
+  <p>
+    A future is a standardized promise to exchange an asset at a set price on a set date. Three properties
+    define it. It is <strong>leveraged</strong>: you post a small <em>margin</em> (say 5–10% of notional)
+    rather than the full value, so a 1% move in the underlying is a large percentage move on your posted cash.
+    It is <strong>marked-to-market daily</strong>: gains and losses are settled into your account every day, so
+    you can't quietly accumulate a huge unrealized loss — a margin call forces you to top up or close. And it
+    <strong>expires</strong>: to keep a position beyond expiry you must <em>roll</em> — close the expiring
+    contract and open the next month's. If further-dated contracts are more expensive (<strong>contango</strong>),
+    rolling steadily costs you; if cheaper (<strong>backwardation</strong>), rolling earns. This roll yield is a
+    real, sometimes dominant, component of returns for commodity and volatility products — and a classic hidden
+    cost in a backtest that pretends a single "futures price" persists forever.
+  </p>
+
+  <h3>Options — moneyness, intrinsic value, and time value</h3>
+  <p>
+    An option is the pivot of the course. The buyer pays a <strong>premium</strong> up front for the
+    <em>right</em> (not obligation) to transact at the strike <code>K</code> by expiry <code>T</code>. Its
+    price decomposes into two pieces:
+  </p>
+  <div class="formula">premium = intrinsic value + time value</div>
+  <p>
+    <strong>Intrinsic value</strong> is what you'd get exercising now: <code>max(S−K,0)</code> for a call.
+    <strong>Time value</strong> is everything else — the extra you'll pay because the price might move
+    favorably before expiry. Time value is largest when the option is near the money and shrinks to zero at
+    expiry (the option "decays"). The jargon for where the price sits relative to the strike is
+    <strong>moneyness</strong>: a call is <em>in-the-money</em> (ITM) if <code>S &gt; K</code>,
+    <em>at-the-money</em> (ATM) if <code>S ≈ K</code>, and <em>out-of-the-money</em> (OTM) if <code>S &lt; K</code>
+    (reversed for puts). Because the payoff depends on <em>how much</em> the price might move, an option's value
+    depends on <strong>volatility</strong> — the single deepest reason options need the stochastic-calculus
+    machinery of Q2, where the Black-Scholes model makes "time value" precise.
+  </p>
+
+  <h3>ETF — a basket that trades like a stock</h3>
+  <p>
+    An ETF holds a basket (say, the 500 stocks of an index) but trades as one ticker. Why does its price track
+    the value of its holdings (its <strong>NAV</strong>) so closely? Because of an arbitrage mechanism:
+    authorized participants can <strong>create</strong> new ETF shares by delivering the basket, or
+    <strong>redeem</strong> shares for the basket. If the ETF trades above NAV, they create and sell (pushing
+    price down); if below, they buy and redeem (pushing price up). That create/redeem loop keeps price ≈ NAV
+    and is a clean, real-world example of arbitrage enforcing a price relationship — a pattern you'll see again
+    in put-call parity and no-arbitrage pricing.
+  </p>
+
+  <p>
+    Equities and futures have <strong>linear</strong> payoffs — a $1 move in the underlying is a $1 move in
+    your position (times contract size). Options are <strong>non-linear</strong>, and that single distinction
+    reorganizes how you must think about risk.
+  </p>
+
+  <h2>Worked payoffs: a call and a put</h2>
+  <p>
+    Take a <strong>call</strong> with strike <code>K = 100</code>, bought for a premium of <code>3</code>.
+    At expiry the intrinsic value is <code>max(S_T − K, 0)</code>, and your profit is that minus the premium:
+  </p>
+  <ul>
+    <li>If <code>S_T = 110</code>: intrinsic <code>= max(10, 0) = 10</code>, so profit <code>= 10 − 3 = +7</code>.</li>
+    <li>If <code>S_T = 95</code>: intrinsic <code>= max(−5, 0) = 0</code>, so you lose only the premium: <code>−3</code>.</li>
+  </ul>
+  <p>
+    Now a <strong>put</strong> with strike <code>K = 100</code>, premium <code>4</code>, payoff
+    <code>max(K − S_T, 0)</code> — it profits when the price <em>falls</em>:
+  </p>
+  <ul>
+    <li>If <code>S_T = 90</code>: intrinsic <code>= max(10, 0) = 10</code>, so profit <code>= 10 − 4 = +6</code>.</li>
+    <li>If <code>S_T = 105</code>: intrinsic <code>= max(−5, 0) = 0</code>, so you lose the premium: <code>−4</code>.</li>
+  </ul>
+  <p>
+    Notice the asymmetry in both: your loss is capped at the premium, your upside is open (or, for the put,
+    large). If you sketch profit against <code>S_T</code>, each is a flat line at <code>−premium</code> that
+    kinks upward at the strike — the "hockey stick." That kink <em>is</em> non-linearity, and it's why you can't
+    price an option by just guessing the average future price: two futures with the same mean but different
+    volatility give the same expected stock payoff but very different option payoffs.
   </p>
 
   <h2>Long, short, and the two prices</h2>
   <p>
-    To go <strong>long</strong> is to buy, profiting if the price rises. To go <strong>short</strong> is
-    to sell something you borrow, profiting if it falls (you buy it back cheaper). At any moment the
-    market shows two prices:
+    To go <strong>long</strong> is to buy, profiting if the price rises. To go <strong>short</strong> is to
+    sell something you have <em>borrowed</em>, profiting if it falls — you sell high now and buy it back
+    cheaper later to return it (paying a borrow fee in between). Shorting is how quants express negative views
+    and build market-neutral books, but it carries a nasty asymmetry we'll flag below.
+  </p>
+  <p>
+    At any instant the market shows not one price but two:
   </p>
   <div class="formula">bid = highest price a buyer will pay &nbsp;&nbsp;|&nbsp;&nbsp; ask (offer) = lowest price a seller will accept</div>
   <p>
-    The gap is the <strong>bid-ask spread</strong>; the midpoint is the <strong>mid price</strong>. If
-    you cross the spread to trade immediately, you pay it — this is a real, recurring cost that
-    Lesson 003 and the whole microstructure quarter dissect.
+    The gap between them is the <strong>bid-ask spread</strong>; the midpoint is the <strong>mid price</strong>.
+    If you want to trade <em>immediately</em>, you cross the spread — buying at the ask or selling at the bid —
+    and you pay roughly half the spread relative to the mid, every single time. This is a real, recurring cost,
+    not an accounting footnote, and Lesson 003 plus the whole microstructure quarter dissect it.
+  </p>
+
+  <p>Before reading on, commit a prediction:</p>
+  <div id="predict1"></div>
+
+  <p>
+    The answer matters for risk: a long position can lose at most what you paid (the price can't go below zero),
+    but a <strong>short</strong> position's loss is <em>unbounded</em> — the price you must buy back at can rise
+    without limit. Borrow 100 shares and sell at $50 (proceeds $5,000); if the stock falls to $40 you buy back
+    for $4,000 and keep ~$1,000 (less borrow cost). But if it rallies to $80, you must buy back for $8,000 —
+    a $3,000 loss, and rising. There's a second hazard: to short you must first <em>borrow</em> the shares (a
+    "locate"), and the lender can recall them or the borrow fee can spike. A <strong>short squeeze</strong> — a
+    rising price forcing shorts to buy back, pushing the price higher still — is the extreme case. Short risk is
+    asymmetric and operationally fiddly, and forgetting that has ended careers.
+  </p>
+
+  <h2>Leverage and margin</h2>
+  <p>
+    <strong>Leverage</strong> is controlling more notional than the cash you post. Futures embed it (small
+    margin, large contract), and you can also borrow to buy equities (buying "on margin"). Leverage scales both
+    gains <em>and</em> losses: at 5× leverage, a 2% adverse move wipes 10% of your capital. Because futures mark
+    to market daily, a run of losses triggers a <strong>margin call</strong> — post more cash or be liquidated,
+    often at the worst possible moment. This is why a QR never reports raw return without reporting the risk
+    (volatility, leverage) taken to get it: doubling leverage doubles return and doubles risk, so it is not
+    skill. The Sharpe ratio exists precisely to make leverage-neutral comparisons.
   </p>
 
   <h2>Anatomy of a trade</h2>
@@ -62,9 +182,25 @@
           market order  (take liquidity now, pay the spread)
           limit order   (post a price, wait, maybe get filled)</pre>
   <p>
-    A <strong>market order</strong> demands immediacy and pays the spread; a <strong>limit order</strong>
-    offers liquidity at your price and may never fill. This single distinction — <em>taking vs making
-    liquidity</em> — drives execution cost, market-making, and much of Year 3 Q2.
+    A <strong>market order</strong> demands immediacy: it crosses the spread and removes resting liquidity from
+    the book — you are a <em>taker</em>. A <strong>limit order</strong> posts a price and waits, offering
+    liquidity to others — you are a <em>maker</em>, and you may never get filled. This taking-vs-making
+    distinction drives execution cost, underpins market-making as a business, and returns in force in Year 3 Q2.
+    Many venues even price it directly: takers pay a fee, makers get a rebate.
+  </p>
+  <p>
+    Beyond these two, a few order types recur and are worth recognizing now:
+  </p>
+  <ul>
+    <li><strong>Stop order</strong> — becomes a market order once a trigger price is hit (used for stop-losses); note it does <em>not</em> guarantee your trigger price, since it then walks the book.</li>
+    <li><strong>Marketable limit</strong> — a limit priced aggressively enough to fill immediately, capping how far you'll cross.</li>
+    <li><strong>IOC (immediate-or-cancel)</strong> — fill what you can right now, cancel the rest.</li>
+    <li><strong>FOK (fill-or-kill)</strong> — fill the whole order at once or cancel it entirely.</li>
+  </ul>
+  <p>
+    You don't need to memorize the full zoo, but internalize the axis they all vary along: <em>how much
+    immediacy do I demand, and how much price am I willing to give up for it?</em> That trade-off is the seed
+    of optimal execution.
   </p>
 
   <h2>Notation you'll reuse</h2>
@@ -73,29 +209,93 @@
     <li><code>K</code> — strike price of an option; <code>T</code> — expiry</li>
     <li><strong>Call payoff</strong> at expiry: <code>max(S_T − K, 0)</code>; <strong>put</strong>: <code>max(K − S_T, 0)</code></li>
     <li><strong>Notional</strong> — the total face value of a position (not the cash you put up)</li>
+    <li><strong>Moneyness</strong> — ITM / ATM / OTM, the price's position relative to the strike</li>
   </ul>
 
   <div class="trap">
-    <strong>Trap.</strong> Treating the "price" as a single number. There is no single price — there is
-    a bid, an ask, and a stream of trades. Backtests that assume you buy and sell at the mid (or worse,
-    the close) with no spread or impact are the most common way beginners overstate returns. We fix
-    this properly in the execution quarter, but start distrusting "the price" now.
+    <strong>Trap.</strong> Treating "the price" as a single number. There is no single price — there is a bid,
+    an ask, and a stream of trades. Backtests that assume you buy and sell at the mid (or worse, the daily
+    close) with no spread or impact are the most common way beginners overstate returns. A close second: using
+    <em>unadjusted</em> price data, so dividends and splits masquerade as returns. We fix costs properly in the
+    execution quarter, but start distrusting "the price" and "the raw price series" now.
   </div>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Aren't options just gambling?”</dt>
+    <dd>
+      Used blindly, sure. But an option is a precise bet on <em>volatility and time</em>, and its non-linear
+      payoff lets you shape risk in ways stock alone cannot (capping downside, hedging a book). Pricing them
+      correctly is a rigorous science — the core of Q2 — not a coin flip.
+    </dd>
+    <dt>“Why would a quant ever short — isn't it needlessly risky?”</dt>
+    <dd>
+      Shorting is how you express a negative view and, more importantly, how you build a
+      <em>market-neutral</em> book (long the cheap, short the expensive) that profits from relative value while
+      hedging out the market's overall move. The unbounded-loss asymmetry is real and must be risk-managed, not
+      avoided outright.
+    </dd>
+    <dt>“Can't I just backtest on daily closing prices?”</dt>
+    <dd>
+      You can, and it's a common first step — but the close is one number that ignores the spread and market
+      impact, so any strategy that trades often will look far better on paper than in reality. Treat close-only
+      backtests as an upper bound to be discounted, never as the truth.
+    </dd>
+    <dt>“If futures track the underlying, why does the roll matter?”</dt>
+    <dd>
+      Because you never hold "the future" forever — contracts expire, and you roll to the next one at whatever
+      price it trades. In contango you sell low (expiring) and buy high (next month) repeatedly, bleeding roll
+      yield. For products like volatility ETFs, that bleed can dominate the headline exposure entirely.
+    </dd>
+  </dl>
 
   <h2>Check your understanding</h2>
   <div id="quiz1"></div>
   <div id="quiz2"></div>
   <div id="quiz3"></div>
+  <div id="quiz4"></div>
 
   <h2>Primary reading (today)</h2>
   <p>
-    Hull, <em>Options, Futures, and Other Derivatives</em>, Chapters 1–2 — mechanics of markets,
-    long/short, and contract basics. Read for orientation; you'll return to Hull for Greeks in Q2.
+    Hull, <em>Options, Futures, and Other Derivatives</em>, Chapters 1–2 — mechanics of markets, long/short,
+    and contract basics. Read for orientation; you'll return to Hull for the Greeks in Q2.
+  </p>
+  <p>
+    As you read, sketch the payoff diagram of a long call and a long put by hand (price on the x-axis, profit on
+    the y-axis, including the premium). Then annotate where each is ITM, ATM, and OTM. Being able to draw those
+    two kinked lines and label moneyness from memory is worth more than re-reading the chapter.
   </p>
 
-  <div class="ask-teacher">
-    Confused by short-selling or option payoffs? Ask your teacher for a worked numeric example.
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: define bid, ask, spread, and mid. State the
+    maximum loss on (a) a long stock position and (b) a short stock position, and why they differ. Then write
+    <code>premium = intrinsic + time value</code> and explain, in one sentence, why time value goes to zero at
+    expiry. If any of these trips you up, re-read the relevant subsection.
   </div>
+
+  <div class="ask-teacher">
+    Confused by short-selling, the roll, or option payoffs? Ask your teacher for a worked numeric example with the numbers changed.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Long / short</strong> — profit if price rises / falls (short = sell borrowed, unbounded loss).</li>
+    <li><strong>Bid / ask / spread / mid</strong> — the two live prices, their gap, and its midpoint.</li>
+    <li><strong>Maker / taker</strong> — provide liquidity (limit) vs demand it (market).</li>
+    <li><strong>Premium = intrinsic + time value</strong>; <strong>moneyness</strong> (ITM/ATM/OTM).</li>
+    <li><strong>Margin / leverage / margin call</strong>; <strong>roll</strong>, <strong>contango</strong>, <strong>backwardation</strong>.</li>
+    <li><strong>Notional</strong> — face value of a position, distinct from cash posted.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    You can now name what trades and how a trade happens. Lesson 003 opens up the machine that actually matches
+    orders — the <strong>limit order book</strong> — and shows exactly how the spread and market impact you just
+    met arise mechanically from resting orders and price-time priority.
+  </p>
 
   <nav class="nav-links">
     <ul>
@@ -107,7 +307,34 @@
 </article>
 
 <script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
 <script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 2, count: 2 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "The maximum amount you can lose on a SHORT stock position is…",
+    options: [
+      { label: "Capped at your initial proceeds", value: "capped" },
+      { label: "Unbounded as the price rises", value: "unbounded" }
+    ],
+    correct: "unbounded",
+    reveal: "A long can only fall to zero, but a short must be bought back at whatever the price becomes — and prices can rise without limit."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: why does crossing the spread make a frequently-trading backtest overstate returns?",
+    points: [
+      "There is no single price — a bid and an ask exist",
+      "Taking liquidity pays about half the spread each trade",
+      "A backtest at the mid/close ignores that cost",
+      "Costs recur every trade, so paper P&L exceeds real P&L"
+    ],
+    model: "Every immediate trade crosses the spread — you buy at the ask and sell at the bid — which costs roughly half the spread versus the mid, each time. A backtest that fills at the mid or the close pretends that cost doesn't exist. Because the cost recurs on every round trip, a strategy that trades often accumulates a large gap between its paper returns and what it would actually earn, so the backtest systematically overstates the edge."
+  });
+
   Quiz.mount(document.getElementById("quiz1"), {
     question: "Which instrument has a non-linear payoff?",
     options: [
@@ -142,6 +369,18 @@
     ],
     correct: "a",
     explain: "Crossing the spread costs money every trade; ignoring it is a classic way backtests overstate returns."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "An option's premium equals its intrinsic value plus:",
+    options: [
+      { label: "Time value, which decays to expiry", value: "a" },
+      { label: "The bid-ask spread of the stock", value: "b" },
+      { label: "The dividend paid before expiry", value: "c" },
+      { label: "The broker's per-contract commission", value: "d" }
+    ],
+    correct: "a",
+    explain: "Premium = intrinsic + time value; time value reflects possible future moves and shrinks to zero at expiry."
   });
 </script>
 </body>
