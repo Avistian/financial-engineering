@@ -51,6 +51,9 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
 
 - `0004-returns-stylized-facts.ipynb` — compute log returns; verify fat tails, absent linear
   autocorrelation, and volatility clustering; contrast with an IID-Gaussian series (Lesson 004).
+- `0006-bootstrap-sharpe-ci.ipynb` — bootstrap a 95% confidence interval for a strategy's Sharpe
+  ratio; compare to the i.i.d.-normal (Lo) formula; widen it honestly with a block bootstrap that
+  respects autocorrelation (Lesson 006).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 

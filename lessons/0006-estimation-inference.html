@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 006 — Estimation &amp; Inference: From Data to Honest Uncertainty</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>Estimation &amp; Inference: From Data to Honest Uncertainty</h1>
+  <p class="subtitle">Lesson 006 · Foundations · ~60 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <p>
+    Lesson 005 gave you the objects — moments, distributions, covariance, conditional expectation. But in
+    real work you never <em>know</em> those quantities; you have a finite, noisy sample and must
+    <strong>estimate</strong> them. This lesson is about the single discipline that separates a quant
+    researcher from someone who just fits models: <strong>every number you report from data is itself a
+    random quantity, so it must come with an honest error bar.</strong> A mean return, a volatility, a
+    correlation, a Sharpe ratio — each is a guess, and the guess has uncertainty you are obligated to
+    quantify before you stake capital or your reputation on it.
+  </p>
+  <p>
+    This lesson's single skill: <strong>turn a finite sample into (1) a point estimate and (2) a defensible
+    statement of how uncertain that estimate is</strong> — using the bias/variance vocabulary, maximum
+    likelihood, confidence intervals, and the bootstrap. The mission-critical payoff is the
+    <strong>Sharpe-ratio confidence interval</strong> in this unit's lab: the difference between "my
+    strategy has a Sharpe of 1.3" and "my strategy has a Sharpe of 1.3, 95% CI [0.2, 2.4]" is the difference
+    between a data-mined mirage and a claim you can defend.
+  </p>
+
+  <h2>The setup: estimand, estimator, estimate</h2>
+  <p>
+    Three words that are easy to blur and worth keeping crisp:
+  </p>
+  <ul>
+    <li>The <strong>estimand</strong> (or <em>parameter</em>) is the unknown, fixed truth you care about —
+      the population mean return <code>μ</code>, the true volatility <code>σ</code>, the strategy's true
+      Sharpe. Call it <code>θ</code> (theta) in general. It is a fixed number, not random; you just don't
+      know it.</li>
+    <li>An <strong>estimator</strong> <code>θ̂</code> ("theta-hat") is a <em>rule</em> — a function of the
+      data — for guessing <code>θ</code>. "Take the sample average" is an estimator. Because it is computed
+      from a random sample, <strong>the estimator is itself a random variable</strong>: draw a different
+      sample and you get a different value.</li>
+    <li>An <strong>estimate</strong> is the single number the estimator spits out on the particular data you
+      happen to have. "0.42" is an estimate.</li>
+  </ul>
+  <p>
+    The whole subject lives in one realization: since <code>θ̂</code> is random, it has a distribution — the
+    <strong>sampling distribution</strong> — and everything below (bias, variance, standard error,
+    confidence intervals) is just a way of describing that distribution. The hat notation
+    (<code>θ̂</code>, <code>μ̂</code>, <code>σ̂</code>) is universal shorthand for "an estimate of the thing
+    under the hat"; we use it throughout.
+  </p>
+
+  <h2>Bias, variance, and the standard error</h2>
+  <p>
+    Two properties summarize how good an estimator is. <strong>Bias</strong> is how far off it is
+    <em>on average</em>: <code>Bias(θ̂) = E[θ̂] − θ</code>. An estimator is <strong>unbiased</strong> if its
+    average over many samples lands exactly on the truth (bias 0). <strong>Variance</strong> is how much the
+    estimate jumps around from sample to sample: <code>Var(θ̂) = E[(θ̂ − E[θ̂])²]</code>. Low bias means
+    "aimed at the target"; low variance means "tight grouping."
+  </p>
+  <p>
+    The <strong>standard error (SE)</strong> is simply the standard deviation of the estimator's sampling
+    distribution — the square root of its variance. It is the number you put after a "±". The canonical
+    case is the sample mean of <code>n</code> independent observations, each with standard deviation
+    <code>σ</code>:
+  </p>
+  <div class="formula">θ̂ = x̄ = (x₁ + … + xₙ) / n &nbsp;&nbsp;⟹&nbsp;&nbsp; SE(x̄) = σ / √n</div>
+  <p>
+    <strong>Worked example.</strong> Daily returns with a true volatility of <code>σ = 1%</code>, one year of
+    data (<code>n = 252</code>). The standard error of the estimated <em>mean</em> daily return is
+    <code>0.01 / √252 = 0.01 / 15.87 ≈ 0.00063</code>, i.e. about <code>0.063%</code> per day. Now notice the
+    trap that is coming: a typical true mean daily return might be a few basis points — <em>smaller than its
+    own error bar</em>. That is why estimating the <em>drift</em> (mean return) of an asset is notoriously
+    hard, while estimating its <em>volatility</em> is comparatively easy. It is a fact about standard errors,
+    not about your cleverness.
+  </p>
+  <div class="callout">
+    <strong>Why sample variance divides by n − 1.</strong> When you estimate the variance with
+    <code>σ̂² = Σ(xᵢ − x̄)² / (n − 1)</code>, the <code>n − 1</code> (not <code>n</code>) is
+    <strong>Bessel's correction</strong>. Dividing by <code>n</code> is biased <em>downward</em> because you
+    measured deviations from the <em>sample</em> mean <code>x̄</code> — which is itself fitted to the data and
+    so sits closer to the points than the true mean does. You "used up" one degree of freedom estimating
+    <code>x̄</code>, so only <code>n − 1</code> independent pieces of spread information remain. Dividing by
+    <code>n − 1</code> corrects the bias exactly.
+  </div>
+
+  <h2>The bias–variance decomposition of error</h2>
+  <p>
+    Bias and variance are not competing virtues you pick between arbitrarily — they add up, in a precise way,
+    to total expected error. The standard scorecard is <strong>mean squared error (MSE)</strong>, the average
+    squared distance between the estimate and the truth, and it splits cleanly:
+  </p>
+  <div class="formula">MSE(θ̂) = E[(θ̂ − θ)²] = Bias(θ̂)² + Var(θ̂)</div>
+  <p>
+    Read it as a target-shooting picture. The bullseye is the true <code>θ</code>. Each shot is one estimate
+    from one sample. Bias is how far the <em>center</em> of your shot cluster sits from the bullseye;
+    variance is how <em>spread out</em> the cluster is. Total error blends both.
+  </p>
+
+  <div id="bv"></div>
+  <p class="viz-cap">
+    Four estimators on the same target. The bullseye is the true value; gold dots are estimates (one per
+    sample); the red ring is their average (its gap from the bullseye is bias). Re-sample to see that the
+    <em>character</em> of each panel is stable even as individual shots move. The bottom-left panel — precise
+    but systematically off — is the dangerous one: it looks reliable and is confidently wrong.
+  </p>
+
+  <p>
+    <strong>Worked example (why a biased estimator can win).</strong> Suppose estimator A is unbiased but
+    noisy: bias 0, variance 0.25, so MSE = 0 + 0.25 = 0.25. Estimator B is slightly biased but much steadier:
+    bias 0.2 (so bias² = 0.04), variance 0.09, so MSE = 0.04 + 0.09 = 0.13. <strong>B is better</strong>
+    despite being biased — its MSE is roughly half. This is not a curiosity; it is the entire logic behind
+    <strong>shrinkage</strong> estimators (Ledoit–Wolf covariance shrinkage, ridge regression, hierarchical
+    risk parity) that you will meet in Year 2–3. On noisy financial data, deliberately accepting a little
+    bias to kill a lot of variance is often the winning trade. "Unbiased" is not a synonym for "best."
+  </p>
+
+  <p>Commit a prediction before the next section reveals the rate:</p>
+  <div id="predict1"></div>
+
+  <h2>Consistency and the √n rate</h2>
+  <p>
+    An estimator is <strong>consistent</strong> if it converges to the truth as the sample grows — pour in
+    more data and <code>θ̂ → θ</code>. This is the estimator-level version of the <strong>Law of Large
+    Numbers</strong> from Lesson 005. Consistency is a low bar (it only says "eventually right with infinite
+    data"), but it is the minimum you should demand: an <em>inconsistent</em> estimator can be biased no
+    matter how much data you feed it.
+  </p>
+  <p>
+    The more useful question is the <em>rate</em>: how fast does the error shrink? From <code>SE = σ/√n</code>
+    the answer is the <strong>√n rate</strong>, and it is humbling. To <strong>halve</strong> your error bar
+    you need <strong>four times</strong> the data; to shrink it by 10× you need <strong>100×</strong> the
+    data. This is exactly the Central Limit Theorem's <code>σ/√n</code> from Lesson 005, now read as a budget:
+    edges in markets are small, and the √n wall is <em>the</em> reason proving a small edge is real demands so
+    much history — often more history than any single regime actually gives you.
+  </p>
+  <div class="callout">
+    <strong>Effective sample size &lt; row count.</strong> The <code>√n</code> formula assumes
+    <em>independent</em> observations. Financial data is autocorrelated (volatility clusters; overlapping
+    windows share data), so your <strong>effective</strong> number of independent observations is smaller
+    than your row count — sometimes far smaller. If returns have positive autocorrelation <code>ρ</code>, the
+    variance of the mean inflates roughly by a factor of <code>(1 + ρ)/(1 − ρ)</code>. Naïvely using
+    <code>σ/√n</code> with the raw row count therefore reports an error bar that is <em>too small</em> — the
+    single most common way quants fool themselves about significance. Hold that thought; it is this lesson's
+    trap.
+  </div>
+
+  <h2>Maximum likelihood: the workhorse estimator</h2>
+  <p>
+    So far "take the average" appeared by intuition. <strong>Maximum likelihood estimation (MLE)</strong> is
+    the general recipe that produces good estimators for almost any parametric model. The idea is a flip of
+    perspective. The <strong>likelihood</strong> is the probability of the data you actually observed, viewed
+    as a function of the unknown parameter: <code>L(θ) = P(data | θ)</code>. The MLE is the parameter value
+    that makes your observed data <em>most probable</em> — the peak of that function:
+  </p>
+  <div class="formula">θ̂<sub>MLE</sub> = argmax<sub>θ</sub> L(θ) = argmax<sub>θ</sub> log L(θ)</div>
+  <p>
+    We almost always maximize the <strong>log-likelihood</strong> <code>ℓ(θ) = log L(θ)</code> instead of
+    <code>L</code> itself, for two reasons: probabilities of many independent observations
+    <em>multiply</em>, and logs turn products into sums (easier to differentiate and numerically stabler —
+    multiplying thousands of small probabilities underflows to zero). Because <code>log</code> is increasing,
+    the location of the peak is unchanged.
+  </p>
+  <p>
+    <strong>Worked example (the up-day probability).</strong> Model each day as up or down, up with unknown
+    probability <code>p</code> (a Bernoulli trial). You observe <code>n</code> days, <code>k</code> of them
+    up. The probability of that exact data is <code>L(p) = p<sup>k</sup>(1 − p)<sup>n−k</sup></code>, so the
+    log-likelihood is <code>ℓ(p) = k·ln p + (n − k)·ln(1 − p)</code>. Set the derivative to zero:
+    <code>ℓ′(p) = k/p − (n − k)/(1 − p) = 0</code>, which solves to
+  </p>
+  <div class="formula">p̂<sub>MLE</sub> = k / n &nbsp; (the sample fraction of up-days)</div>
+  <p>
+    MLE recovers the obvious estimator here — the point is that the <em>same</em> machinery derives estimators
+    when the answer is <em>not</em> obvious (GARCH volatility parameters, a Student-t's degrees of freedom, a
+    logistic regression's coefficients). MLE comes with a package of large-sample guarantees that make it the
+    default:
+  </p>
+  <ul>
+    <li><strong>Consistency</strong> — as <code>n → ∞</code>, <code>θ̂<sub>MLE</sub> → θ</code>.</li>
+    <li><strong>Asymptotic normality</strong> — for large <code>n</code> the estimator is approximately
+      normal around the truth, which is what lets us write a "± z·SE" interval at all.</li>
+    <li><strong>Equivariance (invariance)</strong> — the MLE of a function of <code>θ</code> is that function
+      of the MLE: if <code>p̂</code> is the MLE of <code>p</code>, then <code>g(p̂)</code> is the MLE of
+      <code>g(p)</code>. Handy when the thing you report (say, annualized Sharpe) is a transform of the
+      parameters you fit.</li>
+  </ul>
+  <p>
+    Where does the standard error of an MLE come from? From the <strong>curvature</strong> of the
+    log-likelihood at its peak, formalized as the <strong>Fisher information</strong>. A sharply peaked
+    likelihood means the data strongly rule out nearby parameter values — lots of information, small standard
+    error. A flat likelihood means many values explain the data almost equally well — little information,
+    large standard error. Concretely, the SE is roughly <code>1/√(Fisher information)</code>. For the
+    Bernoulli case the Fisher information is <code>n / (p(1 − p))</code>, giving
+    <code>SE(p̂) ≈ √(p̂(1 − p̂)/n)</code> — the familiar poll margin-of-error, and it shrinks at the
+    <code>√n</code> rate we just met. Slide <code>n</code> below and watch the peak sharpen (information
+    grows), the peak settle onto the truth (consistency), and the interval narrow (asymptotic normality):
+  </p>
+
+  <div id="mle"></div>
+  <p class="viz-cap">
+    Likelihood of the up-day probability <code>p</code> from <code>n</code> Bernoulli days (true p = 0.55,
+    dashed gold; MLE p̂ = k/n, teal; shaded 95% interval). Small <code>n</code>: a broad hill and a wide
+    interval — the data barely pin down <code>p</code>. Large <code>n</code>: a sharp spike and a tight
+    interval. Curvature at the peak <em>is</em> the Fisher information.
+  </p>
+
+  <h2>Confidence intervals: what "95%" actually means</h2>
+  <p>
+    A point estimate without an interval is half an answer. A <strong>confidence interval (CI)</strong> is a
+    range, computed from the data, designed to contain the true parameter with a stated frequency. The
+    textbook construction, when the estimator is approximately normal, is:
+  </p>
+  <div class="formula">θ̂ ± z · SE &nbsp;&nbsp;(z = 1.96 for 95%, z = 2.58 for 99%)</div>
+  <p>
+    Here <code>z = 1.96</code> is the value that cuts off the central 95% of a standard normal distribution.
+    So a 95% CI for a mean is <code>x̄ ± 1.96·σ/√n</code>. Simple — but the <em>interpretation</em> is the
+    part almost everyone gets wrong, and getting it right is a load-bearing idea for the rest of the mission.
+  </p>
+  <p>
+    <strong>What 95% confidence means:</strong> if you repeated the whole experiment many times, drawing a
+    fresh sample and building a fresh interval each time, about 95% of <em>those intervals</em> would contain
+    the true parameter. The randomness is in the interval, not in the parameter. The parameter is a fixed
+    (unknown) constant; it does not have a 95% "chance" of being anywhere.
+  </p>
+
+  <div id="ci"></div>
+  <p class="viz-cap">
+    Twenty 95% intervals, each from a fresh sample; the true value is the dashed vertical line. About 19 of
+    20 cross it (teal); roughly one misses (red) — not because the truth moved, but by unlucky draw. Draw new
+    batches and the long-run coverage hovers near 95%. That long-run coverage <em>is</em> the definition.
+  </p>
+
+  <p>
+    The seductive misreading is "there's a 95% probability the true Sharpe is in [0.2, 2.4]." Once you have
+    <em>this</em> particular interval, the true Sharpe is either in it or not — there is no probability left;
+    the 95% describes the <em>procedure's</em> long-run hit rate, not this one interval. (The statement you
+    <em>want</em> to make — a probability about the parameter itself — is a <em>Bayesian credible interval</em>,
+    which requires a prior; we meet Bayesian machinery later. Keep the two straight.)
+  </p>
+
+  <h2>The bootstrap: an error bar without a formula</h2>
+  <p>
+    The <code>±z·SE</code> recipe needs a formula for the standard error <em>and</em> an approximate-normal
+    sampling distribution. For a mean, fine. For a <strong>Sharpe ratio</strong> — a ratio of two estimated,
+    correlated quantities (mean over standard deviation) — the closed-form SE is messy and leans on
+    assumptions (i.i.d., often normal returns) that markets violate. The <strong>bootstrap</strong> sidesteps
+    the algebra entirely, and it is one of the most important practical tools in this whole track.
+  </p>
+  <p>
+    The engine is the <strong>plug-in principle</strong>. The reason we cannot compute the true sampling
+    distribution is that we do not have the true population to draw fresh samples from. The bootstrap's move:
+    <em>use the sample itself as a stand-in for the population.</em> The observed data, weighted equally, is
+    the <strong>empirical distribution</strong> — the best nonparametric guess of the population you have. So
+    to imitate "draw a fresh sample of size <code>n</code>," you <strong>resample with replacement</strong>
+    from your data: draw <code>n</code> observations, allowing repeats, so each bootstrap sample reshuffles
+    which points appear and how often. The recipe:
+  </p>
+  <ol>
+    <li>From your <code>n</code> observations, draw <code>n</code> with replacement — one bootstrap sample.</li>
+    <li>Compute your statistic (here, the Sharpe ratio) on that bootstrap sample.</li>
+    <li>Repeat <code>B</code> times (say <code>B = 1000–10000</code>), collecting <code>B</code> values.</li>
+    <li>The spread of those values estimates the statistic's sampling distribution. Its standard deviation is
+      the <strong>bootstrap standard error</strong>; its 2.5th and 97.5th percentiles are a
+      <strong>95% percentile confidence interval</strong>.</li>
+  </ol>
+
+  <div id="boot"></div>
+  <p class="viz-cap">
+    One fixed sample of 30 returns (top). "Resample once" draws 30 with replacement — repeats stack taller,
+    some points are skipped — and drops that resample's Sharpe onto the histogram. "Add 1000 resamples"
+    fills the bootstrap distribution and marks the 2.5–97.5 percentile CI (dashed red) around the point
+    estimate (teal). No normality assumed anywhere.
+  </p>
+
+  <p>
+    <strong>Worked example (the Sharpe CI you will build in the lab).</strong> Say 36 monthly returns give a
+    sample Sharpe of 0.25 per month, ≈ 0.87 annualized. Is that "good"? Without an interval you cannot say.
+    Bootstrap 10000 resamples, annualize each, and you might find a 95% CI of roughly <code>[0.1, 1.6]</code>
+    — a range so wide it <em>includes values near zero</em>. The honest conclusion is not "Sharpe 0.87" but
+    "I cannot rule out that this strategy has essentially no edge, given only three years of data." That is
+    precisely the kind of self-skepticism the mission is built to instill, and the √n wall is why: three
+    years is simply not many independent monthly observations.
+  </p>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <div class="trap">
+    <strong>Trap — the error bar that lies (and the bootstrap that lies with it).</strong> Both the classical
+    <code>σ/√n</code> interval <em>and</em> the plain bootstrap above assume observations are
+    <strong>independent</strong>. Financial data breaks that: returns cluster in volatility, overlapping
+    labels share information, and strategy P&amp;L is autocorrelated. When observations are positively
+    dependent, your <em>effective</em> sample size is smaller than the row count, so every i.i.d. error bar —
+    formula or bootstrap — is <strong>too narrow</strong>, and t-stats and Sharpe "significance" are
+    overstated. Two fixes you will meet: the <strong>block bootstrap</strong> (resample contiguous blocks of
+    time, not individual points, to preserve dependence) and, for the Sharpe specifically,
+    <strong>Lo's autocorrelation-adjusted standard error</strong>. And even a perfect single-strategy
+    interval is not enough: if you tried 100 strategies and reported the best, its CI must be corrected for
+    <strong>multiple testing</strong> — the subject of Lesson 007. A confidence interval is only honest if the
+    assumptions behind it hold; naming and checking those assumptions is the job.
+  </div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Isn't an unbiased estimator always the one to use?”</dt>
+    <dd>
+      No. What you usually care about is total error (MSE = bias² + variance), and a slightly biased
+      estimator with much lower variance can have smaller MSE — the whole rationale for shrinkage (Ledoit–Wolf,
+      ridge). On noisy financial data, trading a little bias for a lot of variance reduction is frequently the
+      right call. "Unbiased" is a property, not a goal.
+    </dd>
+    <dt>“Does a 95% CI mean the true value has a 95% chance of being inside it?”</dt>
+    <dd>
+      Not in the frequentist sense used here. The parameter is fixed; the interval is random. "95%" is the
+      long-run fraction of such intervals that would cover the truth over many repetitions. The
+      probability-about-the-parameter statement you may want is a Bayesian credible interval, which needs a
+      prior and is a different object.
+    </dd>
+    <dt>“If the bootstrap makes no assumptions, why not use it for everything?”</dt>
+    <dd>
+      It makes fewer <em>distributional</em> assumptions, but it still assumes your resampling scheme matches
+      how the data were generated. The plain (i.i.d.) bootstrap assumes independence, which financial time
+      series violate — so it understates uncertainty just like the formula does. Use a block bootstrap (or
+      model-based resampling) to respect dependence, and remember the bootstrap can be poor for extreme
+      quantiles and very small samples.
+    </dd>
+    <dt>“Why is estimating the mean return so much harder than the volatility?”</dt>
+    <dd>
+      Because the mean's signal is tiny relative to its noise. A daily drift of a few basis points sits under
+      a standard error of order σ/√n that is often larger than the drift itself, while volatility is estimated
+      from squared moves that accumulate information much faster. This asymmetry — direction hard, magnitude
+      easier — echoes the stylized facts of Lesson 004 and shapes what strategies are even estimable.
+    </dd>
+    <dt>“Where does maximum likelihood get its standard error from?”</dt>
+    <dd>
+      From the curvature of the log-likelihood at its peak — the Fisher information. Sharp peak ⇒ lots of
+      information ⇒ small SE; flat peak ⇒ little information ⇒ large SE. Formally SE ≈ 1/√(Fisher information),
+      and it shrinks at the √n rate.
+    </dd>
+  </dl>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    Wasserman, <em>All of Statistics</em>, Chapters 6–9 — point estimation and the bias/variance/MSE
+    framework (Ch. 6), the CDF and plug-in statistical functionals (Ch. 7), the bootstrap (Ch. 8), and
+    parametric inference / maximum likelihood with Fisher information (Ch. 9). This continues the Ch. 1–5
+    probability you read for Lesson 005 and sets up the hypothesis-testing and multiple-testing traps of
+    Lesson 007.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong> <a href="../labs/0006-bootstrap-sharpe-ci.ipynb"><code>labs/0006-bootstrap-sharpe-ci.ipynb</code></a>
+    — bootstrap a 95% confidence interval for a strategy's Sharpe ratio, compare it to the i.i.d. normal
+    formula, and see the interval widen once you respect autocorrelation with a block bootstrap. As you read,
+    write from memory the definitions of bias, variance, standard error, and MSE, plus the four-step bootstrap
+    recipe.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) write <code>MSE = bias² + variance</code>
+    and explain in one sentence why a biased estimator can beat an unbiased one. (2) State, correctly, what a
+    95% confidence interval means — and the misreading to avoid. (3) List the four steps of the bootstrap.
+    (4) Give the one reason both the <code>σ/√n</code> formula and the plain bootstrap understate uncertainty
+    on financial data. Re-read any section that felt shaky.
+  </div>
+
+  <div class="ask-teacher">
+    Want the Fisher-information SE derived for a different model, a block-bootstrap walk-through, or the
+    n − 1 correction shown algebraically? Ask your teacher for a worked example.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Estimand / estimator / estimate</strong>; the <strong>sampling distribution</strong> of θ̂.</li>
+    <li><strong>Bias, variance, standard error (SE)</strong>; <strong>MSE = bias² + variance</strong>.</li>
+    <li><strong>Bessel's correction</strong> (the n − 1 in the sample variance).</li>
+    <li><strong>Consistency</strong> and the <strong>√n rate</strong>; <strong>effective sample size</strong>.</li>
+    <li><strong>Maximum likelihood (MLE)</strong>, log-likelihood, <strong>Fisher information</strong>,
+      equivariance.</li>
+    <li><strong>Confidence interval</strong> and its correct (frequentist) interpretation.</li>
+    <li><strong>Bootstrap</strong>: plug-in principle, empirical distribution, resampling with replacement,
+      percentile CI, <strong>block bootstrap</strong>.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    You can now attach an honest error bar to any estimate — the first quantitative teeth of the "don't fool
+    yourself" discipline. Next, Lesson 007 (Estimation &amp; inference II) turns error bars into
+    <strong>hypothesis tests</strong> and confronts the trap that dominates quant research: when you test
+    hundreds of signals, some will look "significant" by pure chance. Multiple-testing corrections, the
+    false-discovery problem, and why finance breaks classical p-values are next — and the confidence interval
+    you learned to build here is exactly what those corrections adjust.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0005-probability-refresher.html">← Lesson 005</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 007 — Hypothesis testing &amp; multiple-testing traps (curriculum) →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/biasvariance-viz.js"></script>
+<script src="../assets/likelihood-viz.js"></script>
+<script src="../assets/ci-coverage-viz.js"></script>
+<script src="../assets/bootstrap-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 6, count: 3 });
+
+  BiasVariance.mount(document.getElementById("bv"), { seed: 7 });
+  Likelihood.mount(document.getElementById("mle"), { seed: 5 });
+  CICoverage.mount(document.getElementById("ci"), { seed: 3, samples: 20, n: 40 });
+  Bootstrap.mount(document.getElementById("boot"), { seed: 11 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "You collect 4× as much independent data. Your estimate's standard error (error bar) shrinks to about…",
+    options: [
+      { label: "Half its size", value: "half" },
+      { label: "One-quarter its size", value: "quarter" },
+      { label: "Three-quarters its size", value: "threeq" }
+    ],
+    correct: "half",
+    reveal: "SE ∝ 1/√n, and √4 = 2, so 4× the data halves the error bar. To shrink it 10× you need 100× the data — the √n wall behind why proving a small edge takes so much history."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: what does a 95% confidence interval actually claim, and why can the bootstrap produce one for a Sharpe ratio even though the closed-form standard error is messy?",
+    points: [
+      "The parameter is fixed; the interval is what's random",
+      "95% = long-run fraction of such intervals that cover the truth",
+      "Bootstrap resamples the data with replacement to mimic new samples",
+      "Its 2.5–97.5 percentiles form a CI with no normality/formula needed"
+    ],
+    model: "A 95% CI is a statement about the procedure, not this one interval: if you repeated the sampling many times and built an interval each time, ~95% of those intervals would contain the true (fixed) parameter. It is wrong to say 'there's a 95% chance the true Sharpe is in this particular interval' — once computed, the truth is in it or not. The bootstrap gives a CI without a formula by treating the observed sample as a stand-in for the population (the plug-in principle): resample n points with replacement many times, recompute the Sharpe each time, and read off the 2.5th and 97.5th percentiles of those bootstrap Sharpes. It needs no closed-form SE and no normality — but it still assumes the resampling scheme matches the data, so on autocorrelated returns you use a block bootstrap or the interval comes out too narrow."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "Mean squared error decomposes exactly into:",
+    options: [
+      { label: "Bias squared plus variance", value: "a" },
+      { label: "Bias plus variance squared", value: "b" },
+      { label: "Variance minus the bias term", value: "c" },
+      { label: "Standard error times the bias", value: "d" }
+    ],
+    correct: "a",
+    explain: "MSE(θ̂) = Bias(θ̂)² + Var(θ̂) — which is why a biased-but-low-variance estimator can beat an unbiased one."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "To halve the standard error of an estimate you need about:",
+    options: [
+      { label: "Four times as much data", value: "a" },
+      { label: "Twice as much data", value: "b" },
+      { label: "Half as much data", value: "c" },
+      { label: "Ten times as much data", value: "d" }
+    ],
+    correct: "a",
+    explain: "SE ∝ 1/√n, so cutting it in half needs √n to double, i.e. 4× the data — the √n rate."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "A correct reading of a 95% confidence interval is:",
+    options: [
+      { label: "95% of such intervals cover the truth", value: "a" },
+      { label: "The parameter is inside with 95% odds", value: "b" },
+      { label: "95% of the data fall inside the interval", value: "c" },
+      { label: "The estimate is correct 95% of the time", value: "d" }
+    ],
+    correct: "a",
+    explain: "The interval is random and the parameter is fixed; 95% is the long-run coverage frequency of the procedure, not a probability about this one interval."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "The plain bootstrap can understate a Sharpe ratio's uncertainty because it assumes:",
+    options: [
+      { label: "Observations are independent", value: "a" },
+      { label: "Returns are exactly lognormal", value: "b" },
+      { label: "The sample size is very large", value: "c" },
+      { label: "The mean return is positive", value: "d" }
+    ],
+    correct: "a",
+    explain: "Resampling individual points assumes i.i.d. data; autocorrelated returns shrink the effective sample size, so a block bootstrap is needed to avoid too-narrow intervals."
+  });
+</script>
+</body>
+</html>
