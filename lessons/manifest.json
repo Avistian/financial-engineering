@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "lessons": [
     {
       "id": 1,
@@ -49,6 +49,16 @@
       "checkpoint": false,
       "labPath": null,
       "title": "Probability Refresher for Quants",
+      "published": true
+    },
+    {
+      "id": 6,
+      "slug": "0006-estimation-inference",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": false,
+      "labPath": "labs/0006-bootstrap-sharpe-ci.ipynb",
+      "title": "Estimation & Inference: From Data to Honest Uncertainty",
       "published": true
     }
   ]

@@ -224,6 +224,68 @@
       ],
       correct: "a",
       explain: "Correlation captures only linear association; uncorrelated variables can still be strongly (nonlinearly or tail-) dependent."
+    },
+
+    // ---- L006: estimation & inference ----
+    {
+      id: "l006-mse", lesson: 6, quarter: "Q1", concept: "estimator-error",
+      question: "An estimator's mean squared error decomposes exactly into:",
+      options: [
+        { label: "Bias squared plus its variance", value: "a" },
+        { label: "Bias plus the variance squared", value: "b" },
+        { label: "Variance minus the squared bias", value: "c" },
+        { label: "Standard error times its bias", value: "d" }
+      ],
+      correct: "a",
+      explain: "MSE = bias² + variance, so a biased low-variance estimator can beat an unbiased one — the logic behind shrinkage."
+    },
+    {
+      id: "l006-sqrtn", lesson: 6, quarter: "Q1", concept: "sample-size",
+      question: "To halve the standard error of an estimate, you need roughly:",
+      options: [
+        { label: "Four times as much data", value: "a" },
+        { label: "Twice as much data used", value: "b" },
+        { label: "Half as much data used", value: "c" },
+        { label: "Ten times as much data", value: "d" }
+      ],
+      correct: "a",
+      explain: "SE ∝ 1/√n, so halving it requires √n to double — i.e. 4× the data. The √n wall is why small edges need long histories."
+    },
+    {
+      id: "l006-ci", lesson: 6, quarter: "Q1", concept: "confidence", misconception: true,
+      question: "The correct reading of a 95% confidence interval is that:",
+      options: [
+        { label: "95% of such intervals cover the truth", value: "a" },
+        { label: "The value lies inside with 95% odds", value: "b" },
+        { label: "95% of the data fall in the interval", value: "c" },
+        { label: "The estimate is right 95% of the time", value: "d" }
+      ],
+      correct: "a",
+      explain: "The parameter is fixed and the interval is random; 95% is the procedure's long-run coverage, not a probability about this one interval."
+    },
+    {
+      id: "l006-bootstrap", lesson: 6, quarter: "Q1", concept: "bootstrap",
+      question: "The bootstrap estimates a statistic's uncertainty by:",
+      options: [
+        { label: "Resampling the data with replacement", value: "a" },
+        { label: "Assuming returns are exactly normal", value: "b" },
+        { label: "Dropping the most extreme outliers", value: "c" },
+        { label: "Fitting one model to the full sample", value: "d" }
+      ],
+      correct: "a",
+      explain: "It treats the sample as a stand-in for the population (plug-in), resamples n points with replacement many times, and reads percentiles for a CI."
+    },
+    {
+      id: "l006-mle", lesson: 6, quarter: "Q1", concept: "likelihood",
+      question: "The maximum-likelihood estimate is the parameter value that:",
+      options: [
+        { label: "Makes the observed data most probable", value: "a" },
+        { label: "Minimizes the sample's total variance", value: "b" },
+        { label: "Sets the sample bias exactly to zero", value: "c" },
+        { label: "Maximizes the width of the interval", value: "d" }
+      ],
+      correct: "a",
+      explain: "MLE maximizes L(θ)=P(data|θ) (usually its log); its SE comes from the curvature at the peak — the Fisher information."
     }
   ];
 })(window);

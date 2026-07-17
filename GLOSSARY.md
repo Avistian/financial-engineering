@@ -9,3 +9,7 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Alpha | — (to be filled when you can define it cold) | — | 001 |
 | Log return | — | — | 004 |
 | Stylized fact | — | — | 004 |
+| Standard error | — | — | 006 |
+| Confidence interval | — | — | 006 |
+| Bootstrap | — | — | 006 |
+| Maximum likelihood | — | — | 006 |
