@@ -398,11 +398,90 @@ dl.objections dd {
 .tb-model { font-size: 0.92rem; background: #fff; border: 1px solid var(--border); border-radius: 5px; padding: 0.6rem 0.8rem; }
 .tb-nudge { font-family: var(--font-sans); font-size: 0.82rem; color: var(--muted); margin-top: 0.6rem; font-style: italic; }
 
+/* ---- Lesson 006 visualizations ---- */
+
+/* Shared viz buttons */
+.bv-btn, .ci-btn, .boot-btn {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--accent);
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+.bv-btn:hover, .ci-btn:hover, .boot-btn:hover { background: var(--accent-light); }
+.boot-btn-ghost { border-color: var(--border); color: var(--muted); }
+
+/* Bias–variance dartboard */
+.bv-viz { margin: 1.25rem 0; }
+.bv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  justify-items: center;
+}
+.bv-cell { margin: 0; text-align: center; }
+.bv-cell canvas { display: block; margin: 0 auto; }
+.bv-cell figcaption {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+  line-height: 1.25;
+}
+.bv-cell figcaption strong { display: block; color: var(--ink); font-size: 0.74rem; }
+.bv-legend {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-top: 0.75rem;
+}
+.bv-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.bv-dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; display: inline-block; }
+.bv-dot.bv-truth { background: var(--accent); }
+.bv-dot.bv-shot { background: rgba(154,107,31,0.75); }
+.bv-dot.bv-mean { background: transparent; border: 2px solid var(--wrong); }
+
+/* Confidence-interval coverage */
+.ci-viz { margin: 1.25rem 0; }
+.ci-canvas { display: block; }
+.ci-tally { font-family: var(--font-sans); font-size: 0.85rem; margin-bottom: 0.5rem; }
+.ci-tally.good { color: var(--correct); }
+.ci-tally.warn { color: var(--gold); }
+
+/* Bootstrap distribution */
+.boot-viz { margin: 1.25rem 0; }
+.boot-label, .boot-ci-lab, .boot-resample-lab {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+}
+.boot-label { margin-bottom: 0.4rem; }
+.boot-strip, .boot-hist { display: block; }
+.boot-resample-lab { color: var(--muted); margin: 0.35rem 0; min-height: 1.1rem; }
+.boot-ci-lab { color: var(--muted); margin-top: 0.4rem; min-height: 1.1rem; }
+.boot-ci-lab.shown { color: var(--correct); }
+.boot-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* MLE likelihood curve */
+.mle-viz { margin: 1.25rem 0; }
+.mle-canvas { display: block; }
+.mle-readout { font-family: var(--font-sans); font-size: 0.82rem; margin-bottom: 0.4rem; }
+.mle-controls { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+.mle-slider-label { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.mle-slider { flex: 1; }
+
 @media (max-width: 480px) {
   html { font-size: 17px; }
   body { padding: 1.25rem 1rem 3rem; }
   h1 { font-size: 1.55rem; }
   pre { font-size: 0.75rem; }
+  .bv-grid { gap: 0.4rem; }
 }
 
 @media print {
