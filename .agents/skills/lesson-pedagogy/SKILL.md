@@ -17,6 +17,17 @@ failure mode in a `.trap`, and connect it forward in the curriculum. Never compr
 into a single table row when it deserves a paragraph. (This overrides the generic "keep lessons short"
 default in the `teach` skill for this workspace — see `NOTES.md`.)
 
+### Explain everything you introduce (standing decision, 2026-07-17, Lesson 006 on)
+
+**Thoroughness overrides brevity.** Every term, symbol, formula, or method a lesson *introduces* must be
+fully explained where it first appears — defined in plain words, motivated (why it exists / when you reach
+for it), and grounded in at least one worked numeric example. No naked jargon, no symbol used before it is
+defined, no "we'll cover this later" hand-wave for something the current lesson actually relies on. If a
+concept is only *previewed* (developed in a later unit), say so explicitly and give the one-line intuition
+anyway. It is better to overrun the ~22–30 KB / ~55–60 min band than to leave anything introduced
+under-explained — treat that band as a floor for depth, not a cap. This is the learner's explicit standing
+preference (see `NOTES.md`) and applies to every future lesson.
+
 ## 1. Open every lesson with a spaced-retrieval warm-up (`assets/retrieval-bank.js`)
 
 Before new material, make the learner recall **older** material from memory. Spacing + interleaving +

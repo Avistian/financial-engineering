@@ -31,6 +31,16 @@
 - The two authoring skills encode this: `.agents/skills/lesson-pedagogy` and `lesson-visuals`.
 - Feed `assets/retrieval-pool.js` (stable ids, never renumber) whenever a lesson ships a durable idea.
 
+## Standing decision — explain everything introduced, in full (from 2026-07-17, Lesson 006 on)
+- **Thoroughness overrides brevity.** Every term, symbol, formula, or method a lesson *introduces* must be
+  fully explained on the spot — defined in words, motivated, and shown with a worked numeric example — even
+  if it makes the lesson longer. No naked jargon, no "see later," no symbol used before it is defined.
+- The learner explicitly prefers **longer, self-contained lessons** to terse ones: it is better to run past
+  the ~30 KB / ~60 min guideline than to leave anything introduced under-explained. Treat the size band in
+  the skills as a floor for depth, not a ceiling on it.
+- Applies to **all future lessons**, not just 006. Encoded in `.agents/skills/lesson-pedagogy/SKILL.md`
+  ("Explain everything you introduce").
+
 ## Standing weekly habits (don't let these lapse)
 - 10 mental-math drills + 5 probability brainteasers/week (Green Book / Heard on the Street).
 - 3–5 LeetCode problems/week from Year 1 (rotating arrays → DP → graphs → trees).
