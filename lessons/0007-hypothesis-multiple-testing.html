@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 007 — Hypothesis Testing &amp; the Multiple-Testing Trap</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>Hypothesis Testing &amp; the Multiple-Testing Trap</h1>
+  <p class="subtitle">Lesson 007 · Foundations · ~60 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <p>
+    Lesson 006 taught you to attach an honest error bar to a single estimate. This lesson turns that error
+    bar into a <strong>decision</strong> — "is this edge real, or is it noise?" — and then delivers the most
+    important warning in the whole mission: <strong>the machinery that answers that question for one strategy
+    quietly breaks the moment you ask it about the best of many.</strong> A quant researcher who does not
+    internalize this will, with near certainty, one day present a beautiful backtest that is pure luck, and a
+    skeptical PM will take it apart in thirty seconds. The point of today is to never be that researcher.
+  </p>
+  <p>
+    This lesson's single skill: <strong>read a t-statistic and a p-value correctly, and then correct them for
+    how many strategies you actually tried.</strong> The payoff is the unit's lab — you will run a
+    <em>false-discovery simulation</em>: generate hundreds of strategies with <em>zero</em> true edge, watch a
+    predictable fraction of them cross the classic "significant" bar by pure chance, and see two corrections
+    (Bonferroni and Benjamini-Hochberg) put the false discoveries back in their box. That simulation is the
+    seed of everything Year 2 does on backtest overfitting and the deflated Sharpe ratio.
+  </p>
+
+  <h2>The hypothesis-testing frame</h2>
+  <p>
+    A <strong>hypothesis test</strong> is a formal procedure for deciding whether data are consistent with a
+    default "nothing is happening" claim. It has four moving parts, and every symbol matters:
+  </p>
+  <ul>
+    <li>The <strong>null hypothesis</strong> <code>H₀</code> ("H-naught") — the boring default we try to
+      <em>disprove</em>. For a trading strategy it is almost always <strong>"the true mean return is zero"</strong>
+      (<code>μ = 0</code>): no edge, the strategy is a coin flip after costs.</li>
+    <li>The <strong>alternative hypothesis</strong> <code>H₁</code> — what we suspect instead
+      (<code>μ ≠ 0</code>, or one-sided <code>μ &gt; 0</code>: there is a real edge).</li>
+    <li>A <strong>test statistic</strong> — one number computed from the data that measures how far the data
+      sit from <code>H₀</code>, scaled by their own noise. Below this is the <strong>t-statistic</strong>.</li>
+    <li>A <strong>decision rule</strong> — reject <code>H₀</code> (declare a discovery) if the statistic is
+      more extreme than a chosen threshold; otherwise fail to reject.</li>
+  </ul>
+  <p>
+    The logic is deliberately asymmetric, and this trips people up, so hold onto it: we never "prove
+    <code>H₀</code> true." We either gather enough evidence to <strong>reject</strong> it, or we
+    <strong>fail to reject</strong> it — which only means "not enough evidence," not "confirmed no edge." A
+    court analogy is exact: <code>H₀</code> is "innocent," the data are the evidence, and "fail to reject" is
+    "not guilty," never "proven innocent." We are always trying to build a case <em>against</em> the null.
+  </p>
+
+  <h2>The t-statistic — and why it <em>is</em> the Sharpe ratio in disguise</h2>
+  <p>
+    The workhorse test statistic for "is the mean nonzero?" is the <strong>t-statistic</strong>: the estimate
+    divided by its own standard error (the standard error, <code>SE</code>, is the standard deviation of the
+    estimate from Lesson 006).
+  </p>
+  <div class="formula">t = θ̂ / SE(θ̂) &nbsp;&nbsp;⟹&nbsp;&nbsp; for a mean return: t = μ̂ / (σ̂ / √n) = (μ̂ / σ̂) · √n</div>
+  <p>
+    Read it as a signal-to-noise ratio: the numerator <code>μ̂</code> is the estimated average return (the
+    signal), the denominator <code>σ̂/√n</code> is how much that average would wobble from sample to sample
+    (the noise), and <code>n</code> is the number of periods. A big <code>t</code> means "the estimate is many
+    standard errors away from zero, so zero is an implausible truth."
+  </p>
+  <p>
+    Now the punchline that ties this whole quarter together. The quantity <code>μ̂/σ̂</code> — mean over
+    standard deviation — <em>is</em> the (per-period) <strong>Sharpe ratio</strong> from Lesson 006. So:
+  </p>
+  <div class="formula">t = SR<sub>period</sub> · √n = SR<sub>annual</sub> · √(years)</div>
+  <p>
+    The second form follows because annualizing multiplies the per-period Sharpe by <code>√P</code>
+    (<code>P</code> = periods per year) while <code>n = P · years</code>, and the <code>√P</code> cancels. This
+    tiny identity is one of the most clarifying facts in applied quant research: <strong>a strategy's
+    t-statistic is just its annualized Sharpe ratio scaled by the square root of how many years you ran
+    it.</strong>
+  </p>
+  <div class="callout">
+    <strong>Worked example (why three years is not enough).</strong> A strategy shows an annualized Sharpe of
+    <code>1.0</code> — genuinely good-looking. Over <strong>3 years</strong>, its t-statistic is
+    <code>1.0 · √3 ≈ 1.73</code>, which is <em>below</em> the classic 1.96 bar: you cannot even reject "no
+    edge" at 5%. You would need <code>√years ≥ 1.96</code>, i.e. about <strong>4 years</strong>, to clear the
+    single-test hurdle, and (as we will see) <em>far</em> more if you searched for that strategy among many.
+    This is the √n wall of Lesson 006 wearing a different hat, and it is why "I have a Sharpe of 1" is a
+    beginning of a conversation, not the end.
+  </div>
+
+  <h2>The p-value: what it is, and what it is not</h2>
+  <p>
+    A threshold like 1.96 is a blunt yes/no. The <strong>p-value</strong> reports <em>how</em> extreme the
+    evidence is, on a continuous 0-to-1 scale. Its definition is precise and worth memorizing verbatim:
+  </p>
+  <div class="formula">p = P( a test statistic at least as extreme as the one observed | H₀ is true )</div>
+  <p>
+    In words: <strong>if there were truly no edge, how often would luck alone hand you a result this
+    striking?</strong> A small p-value (say 0.01) means "data this extreme would be rare under pure noise, so
+    noise is a strained explanation." A large p-value (0.40) means "noise explains this comfortably." The
+    threshold you compare against is the <strong>significance level</strong> <code>α</code> (alpha), chosen
+    <em>before</em> looking; <code>α = 0.05</code> is the (arbitrary, conventional) default, and it corresponds
+    to the two-sided <code>|t| &gt; 1.96</code> fence. Drag the observed statistic below and watch the shaded
+    tail area — that area <em>is</em> the p-value:
+  </p>
+
+  <div id="pval"></div>
+  <p class="viz-cap">
+    The bell curve is the distribution of the t-statistic <em>assuming H₀ (no edge) is true</em>. The gold
+    dashed fences at ±1.96 enclose the middle 95%; the light band beyond them is the 5% rejection region. The
+    solid teal lines are the observed <code>|t|</code>; the dark shaded tails beyond them are the two-sided
+    p-value. Slide right: as <code>|t|</code> pushes past 1.96 the tails shrink under 0.05 and the result
+    becomes "significant."
+  </p>
+
+  <p>
+    Now the misreading that ends interviews. The p-value is <strong>P(data | H₀)</strong> — the probability of
+    the <em>data</em> given the null. It is <strong>not</strong> <code>P(H₀ | data)</code>, the probability the
+    null is true given your data, and it is <strong>not</strong> the probability your strategy is worthless.
+    Those are different conditional probabilities (Bayes' rule relates them, and the flip needs a prior you
+    haven't supplied). "p = 0.05" does <em>not</em> mean "95% chance the edge is real." It means: "if the edge
+    were fake, I'd see something this good 5% of the time anyway." Keep the direction of the conditioning
+    straight and half the field's mistakes disappear.
+  </p>
+
+  <h2>Two ways to be wrong: Type I, Type II, and power</h2>
+  <p>
+    Because the decision is made under uncertainty, there are exactly two ways to blow it, and quant research
+    lives and dies on which one you fear more:
+  </p>
+  <table>
+    <thead><tr><th></th><th>H₀ true (no edge)</th><th>H₀ false (real edge)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Reject H₀</strong> (trade it)</td><td><span style="color:var(--wrong)"><strong>Type I error</strong> — false discovery</span></td><td>Correct (true discovery)</td></tr>
+      <tr><td><strong>Fail to reject</strong> (pass)</td><td>Correct</td><td><span style="color:var(--muted)"><strong>Type II error</strong> — missed edge</span></td></tr>
+    </tbody>
+  </table>
+  <p>
+    A <strong>Type I error</strong> is declaring an edge that isn't there; its probability is exactly the
+    significance level <code>α</code>. A <strong>Type II error</strong> is missing a real edge; its probability
+    is written <code>β</code> (beta). The <strong>power</strong> of a test is <code>1 − β</code> — the chance
+    of catching a real edge when one exists. For an <em>allocator of capital</em>, a Type I error is usually
+    the expensive one: funding a strategy that is pure luck burns money and credibility, whereas passing on a
+    marginal real edge merely leaves some money on the table. That asymmetry is <em>why</em> the discipline
+    leans so hard on controlling false discoveries — which is exactly where classical testing falls apart.
+  </p>
+
+  <p>Commit a prediction before the next section reveals the number:</p>
+  <div id="predict1"></div>
+
+  <h2>The multiple-testing trap: why finance breaks classical testing</h2>
+  <p>
+    Everything above is correct <strong>for a single, pre-specified test.</strong> Quant research is almost
+    never a single test. You try dozens of features, hundreds of parameter settings, many universes and
+    holding periods, and you report <em>the best</em>. That search is where the wheels come off, and it has a
+    precise name: the <strong>multiple-testing problem</strong> (a.k.a. data snooping, or selection bias).
+  </p>
+  <p>
+    Start from one clean fact. <strong>Under the null, a p-value is uniformly distributed on [0, 1].</strong>
+    That is what "5% significance level" <em>means</em>: if there is no edge, there is a 5% chance the p-value
+    lands below 0.05 by luck. Harmless once. But run the same worthless test on <code>M</code> independent
+    strategies and the false positives pile up. The field below is <code>M</code> strategies that <em>all</em>
+    have zero true edge; every red cell is a strategy that crossed the 5% bar by chance alone:
+  </p>
+
+  <div id="mt"></div>
+  <p class="viz-cap">
+    Each square is one worthless strategy (no edge exists). Red = "significant" at the chosen threshold — a
+    <em>false</em> discovery, every one. At the nominal 5% level about 5% of the field lights up no matter how
+    often you re-run. Raise <code>M</code> and the count of false winners rises with it. Toggle
+    <strong>Bonferroni</strong> to tighten the bar to <code>α/M</code> and watch them nearly all vanish.
+  </p>
+
+  <p>
+    The quantity that should scare you is the <strong>family-wise error rate (FWER)</strong>: the probability
+    of making <em>at least one</em> false discovery across the whole family of tests. For <code>M</code>
+    independent true nulls each tested at level <code>α</code>:
+  </p>
+  <div class="formula">FWER = 1 − (1 − α)<sup>M</sup></div>
+  <p>
+    <strong>Worked example.</strong> With <code>α = 0.05</code> and <code>M = 100</code> strategies,
+    <code>FWER = 1 − 0.95<sup>100</sup> ≈ 1 − 0.006 = 0.994</code>. So if you backtest 100 worthless ideas and
+    report any that clear <code>p &lt; 0.05</code>, you are <strong>99.4% likely</strong> to walk away with a
+    "significant" strategy that is pure noise. It does not even take 100: at <code>M = 14</code> the FWER
+    already passes 50%. The classic single-test bar, applied to a search, is not a filter — it is a
+    false-discovery generator.
+  </p>
+
+  <h2>Correction I — Bonferroni and family-wise control</h2>
+  <p>
+    The oldest fix is the <strong>Bonferroni correction</strong>: to hold the family-wise error rate at or
+    below <code>α</code> across <code>M</code> tests, require each individual test to clear the much stricter
+    level <code>α/M</code>.
+  </p>
+  <div class="formula">reject test i only if &nbsp; p<sub>i</sub> &lt; α / M</div>
+  <p>
+    It works by a one-line probability bound (Boole's inequality): the chance of <em>any</em> of <code>M</code>
+    events is at most the sum of their individual chances, so <code>M · (α/M) = α</code> caps the total. With
+    <code>M = 100</code> and <code>α = 0.05</code>, each strategy must now clear <code>p &lt; 0.0005</code> —
+    which for a two-sided test means roughly <code>|t| &gt; 3.48</code>, not 1.96. That is the "Bonferroni on"
+    state in the widget: the false discoveries almost entirely disappear.
+  </p>
+  <div class="callout">
+    <strong>The cost of Bonferroni: it is brutally conservative.</strong> Two problems. First, it controls the
+    probability of <em>even one</em> false positive, which is often stricter than you need — in research you
+    can tolerate a few false leads if most discoveries are real. Second, it assumes the tests are (nearly)
+    independent; real strategies are <em>highly correlated</em> (a hundred momentum variants are almost the
+    same bet), so the effective number of independent tests is smaller than <code>M</code> and Bonferroni
+    over-corrects, killing power — you throw away real edges to avoid any false one. This tension motivates the
+    second, more modern correction.
+  </div>
+
+  <h2>Correction II — the false discovery rate (Benjamini-Hochberg)</h2>
+  <p>
+    Instead of "never make even one false discovery," control the <strong>false discovery rate (FDR)</strong>:
+    the <em>expected proportion</em> of your discoveries that are false. If you reject <code>R</code>
+    hypotheses and <code>V</code> of them are truly null, <code>FDR = E[V / R]</code>. Targeting, say, an FDR
+    of 10% says "I'm content if about one in ten of my 'winners' is a fluke" — a far more sensible bargain for
+    a research pipeline than Bonferroni's zero-tolerance stance, and it keeps much more power.
+  </p>
+  <p>
+    The <strong>Benjamini-Hochberg (BH) procedure</strong> delivers FDR control with a simple step-up rule:
+  </p>
+  <ol>
+    <li>Sort the <code>M</code> p-values ascending: <code>p₍₁₎ ≤ p₍₂₎ ≤ … ≤ p₍M₎</code>.</li>
+    <li>Find the <strong>largest</strong> rank <code>k</code> for which <code>p₍k₎ ≤ (k / M) · q</code>, where
+      <code>q</code> is your target FDR (e.g. 0.10).</li>
+    <li>Reject (declare real) all hypotheses with rank <code>1</code> through <code>k</code>.</li>
+  </ol>
+  <p>
+    <strong>Worked example.</strong> Say <code>M = 10</code> strategies and <code>q = 0.10</code>. Sorted
+    p-values are <code>0.001, 0.008, 0.02, 0.04, 0.13, …</code>. Compare each to <code>(k/10)·0.10</code>, i.e.
+    the thresholds <code>0.010, 0.020, 0.030, 0.040, 0.050, …</code>: rank 1 (0.001 ≤ 0.010) ✓, rank 2 (0.008 ≤
+    0.020) ✓, rank 3 (0.02 ≤ 0.030) ✓, rank 4 (0.04 ≤ 0.040) ✓, rank 5 (0.13 ≤ 0.050) ✗. The largest passing
+    rank is <code>k = 4</code>, so BH declares the first four significant — even though a pure Bonferroni bar
+    (<code>p &lt; 0.005</code>) would have kept only the first. BH recovered two real-looking discoveries
+    Bonferroni would have discarded, at the controlled cost of an expected ~10% false-discovery share.
+  </p>
+  <div class="callout">
+    <strong>Dependence: Benjamini-Yekutieli (BHY).</strong> Plain BH assumes independence or a mild positive
+    dependence. Financial tests are strongly and messily dependent, so the <strong>Benjamini-Yekutieli
+    (BHY)</strong> variant divides the threshold by <code>c(M) = Σ<sub>i=1..M</sub> 1/i ≈ ln M + 0.577</code>,
+    buying validity under arbitrary dependence at the price of some power. Harvey, Liu &amp; Zhu build their
+    finance-specific recommendations on exactly this machinery.
+  </div>
+
+  <h2>The Sharpe / t-stat haircut and Harvey-Liu-Zhu</h2>
+  <p>
+    Put the pieces together and you get the single most-cited practical rule of this literature. Because a
+    t-statistic is <code>SR<sub>annual</sub>·√years</code>, correcting the significance bar upward for
+    multiple testing is identical to <strong>haircutting a reported Sharpe ratio</strong>: the more strategies
+    you searched, the higher the <code>|t|</code> a survivor must clear, and equivalently the more you must
+    shave off its headline Sharpe before believing it. The curve below shows how far above the naive 1.96 the
+    bar climbs as the number of tested strategies grows:
+  </p>
+
+  <div id="hc"></div>
+  <p class="viz-cap">
+    The required <code>|t|</code> to stay at an overall 5% false-positive rate (Bonferroni), against the number
+    of strategies tested (log axis). At <code>M = 1</code> it is the familiar 1.96; by <code>M = 100</code> it
+    is ≈ 3.5, above Harvey-Liu-Zhu's rule-of-thumb ≈ 3.0 line. Slide it: a backtest with <code>t = 2.5</code>
+    that looks like a clear winner alone is <em>not</em> significant once you admit you tried 100 ideas.
+  </p>
+
+  <p>
+    <strong>Harvey, Liu &amp; Zhu (2016)</strong> — the primary reading — surveyed decades of published equity
+    "factors" and argued that, given how much the profession has collectively data-mined, the conventional
+    <code>|t| &gt; 1.96</code> bar is far too lenient: most published factors would not survive an honest
+    multiple-testing correction. Their headline recommendation is that a genuinely new factor should clear
+    roughly <strong><code>|t| &gt; 3.0</code></strong>, and they provide explicit "haircuts" that translate a
+    reported Sharpe into a deflated, multiple-testing-aware one. This is the academic mirror of the
+    <strong>deflated Sharpe ratio</strong> (Bailey &amp; López de Prado) you meet in Year 2 (unit 055), which
+    does the same deflation at the level of a single researcher's own backtest search.
+  </p>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <div class="trap">
+    <strong>Trap — the best of many backtests.</strong> The failure mode this entire lesson exists to prevent:
+    you (or your research group, or the whole published literature) try many strategies and report the one with
+    the best t-stat, at the nominal 5% bar. That "winner" is drawn from the <em>maximum</em> of many noisy
+    statistics, and the maximum of <code>M</code> pure-noise t-stats drifts upward like <code>√(2 ln M)</code>
+    — so it <em>looks</em> significant precisely because you selected it. Three concrete forms: (1)
+    <strong>data snooping</strong> — grid-searching parameters and reporting the peak; (2)
+    <strong>p-hacking</strong> — tweaking the universe, dates, or filters until <code>p</code> dips under 0.05;
+    (3) <strong>publication / survivorship bias</strong> — you only see the strategies that worked, never the
+    thousands that were quietly binned. The defenses are everything above (Bonferroni / BH / BHY on the true
+    number of trials) plus, at the strategy level, the deflated Sharpe ratio and the leakage-free cross-
+    validation (CPCV) of Year 2. <em>Always report how many things you tried.</em> A t-stat without a trial
+    count is not evidence.
+  </div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Doesn't p = 0.05 mean there's a 95% chance my strategy is real?”</dt>
+    <dd>
+      No — that swaps the conditioning. The p-value is P(data this extreme | no edge), not P(edge is real |
+      data). Getting from one to the other requires Bayes' rule and a prior probability that the edge is real,
+      which the p-value alone never supplies. In a field where the base rate of real edges is low and search is
+      heavy, a nominally "significant" result can still be far more likely noise than signal.
+    </dd>
+    <dt>“If Bonferroni controls the error, why bother with FDR?”</dt>
+    <dd>
+      Bonferroni controls the probability of <em>any</em> false positive (FWER), which is stricter than most
+      research needs and destroys power — especially with correlated tests, where it badly over-corrects. FDR
+      controls the <em>expected fraction</em> of your discoveries that are false, a more useful target for a
+      pipeline that can tolerate a few false leads to keep the real ones. Different guarantees for different
+      jobs.
+    </dd>
+    <dt>“How many tests should I count as M — only the ones I ran?”</dt>
+    <dd>
+      Count every idea you effectively tried, including the ones you abandoned early and the variations your
+      intuition pre-filtered — and, at the field level, the ones others published before you. This is genuinely
+      hard to pin down, which is the honest, uncomfortable core of the problem. When in doubt, assume you tried
+      more than you remember; the deflated Sharpe ratio (Year 2) formalizes estimating the effective number of
+      trials.
+    </dd>
+    <dt>“My 200 strategies are all correlated — isn't Bonferroni with M = 200 wrong?”</dt>
+    <dd>
+      It is too conservative, yes. Correlation means your <em>effective</em> number of independent tests is
+      well below 200, so dividing by 200 over-corrects and kills real edges. That's exactly why BHY (valid under
+      arbitrary dependence) and simulation-based nulls that preserve the correlation structure are preferred in
+      finance over vanilla Bonferroni.
+    </dd>
+    <dt>“Is a low p-value on a long backtest enough to trade?”</dt>
+    <dd>
+      No. Statistical significance is necessary, not sufficient. You still need economic significance (does the
+      edge survive costs and capacity?), out-of-sample and leakage-free validation, and a correction for how
+      many strategies produced this one. A t = 2 from a search of hundreds is not evidence of anything.
+    </dd>
+  </dl>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    Harvey, Liu &amp; Zhu (2016), <em>“…and the Cross-Section of Expected Returns”</em> (Review of Financial
+    Studies) — the multiple-testing reckoning for empirical finance: why the <code>t &gt; 1.96</code> bar is
+    too low given decades of data mining, and their FWER/FDR (Bonferroni, BH, BHY) framework for a defensible
+    hurdle (≈ <code>t &gt; 3.0</code>). See <a href="../RESOURCES.md">RESOURCES.md</a> → Statistics of markets
+    / overfitting. For the underlying testing mechanics, this continues Wasserman <em>All of Statistics</em>
+    Ch. 10 (hypothesis testing and p-values), which pairs with the Ch. 6–9 you read for Lesson 006.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0007-false-discoveries.ipynb"><code>labs/0007-false-discoveries.ipynb</code></a>
+    — simulate a universe of zero-edge strategies, measure the false-discovery rate at the nominal 5% bar,
+    confirm the FWER formula, then apply Bonferroni and Benjamini-Hochberg and watch the false discoveries
+    collapse. Finish by measuring the <em>selection bias</em> of reporting the single best strategy. As you
+    read, write from memory the p-value definition, the FWER formula, and the BH step-up rule.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) state the exact definition of a p-value,
+    and the one-sentence misreading to avoid. (2) Write <code>t = SR<sub>annual</sub>·√years</code> and use it
+    to find the t-stat of a Sharpe-1 strategy run for 4 years. (3) Give the FWER of 100 independent tests at
+    5%, and say why that number indicts the naive bar. (4) State what Bonferroni controls versus what BH
+    controls, and when you'd prefer each. Re-read any part that felt shaky.
+  </div>
+
+  <div class="ask-teacher">
+    Want the FWER formula derived from Boole's inequality, the BH procedure proven to control FDR, or the
+    √(2 ln M) growth of the maximum of M nulls shown numerically? Ask your teacher for a worked example.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Null / alternative hypothesis</strong> (<code>H₀</code>, <code>H₁</code>); reject vs fail to reject.</li>
+    <li><strong>t-statistic</strong> = estimate / SE, and the identity <strong>t = SR<sub>annual</sub>·√years</strong>.</li>
+    <li><strong>p-value</strong> (P(data | H₀)) and its correct interpretation; <strong>significance level α</strong>.</li>
+    <li><strong>Type I / Type II error</strong>, and <strong>power</strong> = 1 − β.</li>
+    <li><strong>Multiple testing</strong> / data snooping / selection bias; p-values are Uniform(0,1) under H₀.</li>
+    <li><strong>Family-wise error rate (FWER)</strong> = 1 − (1 − α)<sup>M</sup>; <strong>Bonferroni</strong> (α/M).</li>
+    <li><strong>False discovery rate (FDR)</strong>; <strong>Benjamini-Hochberg</strong> step-up; <strong>BHY</strong> under dependence.</li>
+    <li>The <strong>Sharpe / t-stat haircut</strong> and Harvey-Liu-Zhu's <code>t &gt; 3.0</code> hurdle.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    You can now turn an error bar into a decision <em>and</em> defend that decision against the field's number-one
+    self-deception. This closes the statistics thread of Year 1 Q1: from returns and stylized facts (004),
+    through probability (005) and honest estimation (006), to testing that survives a search (007). Everything
+    downstream leans on it — Year 1 Q2's stochastic calculus gives you models to test; Year 2's financial-ML
+    pipeline (purged/embargoed CV, the deflated Sharpe ratio, the probability of backtest overfitting) is
+    essentially this lesson's discipline scaled up to a full research process. When a PM later asks "how many
+    strategies did you try before this one?", you now know why it is the sharpest question in the room.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0006-estimation-inference.html">← Lesson 006</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 008 — curriculum →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/pvalue-viz.js"></script>
+<script src="../assets/multiple-testing-viz.js"></script>
+<script src="../assets/haircut-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 7, count: 3 });
+
+  PValue.mount(document.getElementById("pval"), { t: 1.4 });
+  MultipleTesting.mount(document.getElementById("mt"), { seed: 4, m: 100 });
+  Haircut.mount(document.getElementById("hc"), { m: 100 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "You backtest 100 strategies that ALL have zero true edge, each at the 5% level. The probability that at least one looks 'significant' is about…",
+    options: [
+      { label: "About 5% (the significance level)", value: "five" },
+      { label: "About 63% (a coin-flip-ish risk)", value: "sixty" },
+      { label: "About 99% (nearly guaranteed)", value: "ninety" }
+    ],
+    correct: "ninety",
+    reveal: "FWER = 1 − 0.95^100 ≈ 0.994. With 100 worthless tests you are ~99% sure to get a false 'winner' — the multiple-testing trap in one number."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: a colleague shows you a backtest with t = 2.3 (significant at 5%!) and wants to trade it. Why is your first question 'how many strategies did you try?', and what changes if the answer is 200?",
+    points: [
+      "A single test at 5% only controls error for ONE pre-specified test",
+      "Searching many strategies inflates false positives (FWER = 1−(1−α)^M)",
+      "The reported one is the MAX of many noisy t-stats, so it's biased upward",
+      "Correcting for M raises the bar (Bonferroni α/M or BH); t=2.3 likely fails",
+      "So t-stat without a trial count is not evidence — count M, then deflate"
+    ],
+    model: "A t = 2.3 clears the classic 1.96 bar, but that bar only controls the false-positive rate for a single, pre-specified test. If the strategy was chosen as the best of many, its t-stat is the maximum of a batch of noisy statistics — which drifts upward with the number of trials even when nothing is real (E[max] ~ √(2 ln M)). So the 'significance' is partly an artifact of selection. With M = 200, the family-wise error rate at 5% is essentially 1 (you'd almost certainly get some false winner), and the multiple-testing-corrected hurdle rises well above 1.96 — Bonferroni would demand p < 0.00025 (|t| ≳ 3.7), and even the gentler Benjamini-Hochberg / BHY correction would likely reject t = 2.3. The right move is to establish the true number of trials M, apply an FDR/FWER correction (or a deflated Sharpe ratio), and only then decide — while also checking costs, capacity, and out-of-sample, leakage-free validation."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "The correct definition of a p-value is the probability of:",
+    options: [
+      { label: "Data this extreme, assuming H₀ is true", value: "a" },
+      { label: "The null hypothesis H₀ being actually true", value: "b" },
+      { label: "The strategy having a genuine real edge", value: "c" },
+      { label: "A Type II error given the chosen level α", value: "d" }
+    ],
+    correct: "a",
+    explain: "p = P(statistic at least this extreme | H₀). It is P(data | H₀), NOT P(H₀ | data) and not the probability the edge is real."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "A strategy with an annualized Sharpe of 1.0 run for 4 years has a t-statistic of about:",
+    options: [
+      { label: "2.0 (just clears the 1.96 bar)", value: "a" },
+      { label: "1.0 (equal to the Sharpe ratio)", value: "b" },
+      { label: "4.0 (the number of years used)", value: "c" },
+      { label: "0.5 (the Sharpe over the years)", value: "d" }
+    ],
+    correct: "a",
+    explain: "t = SR_annual·√years = 1.0·√4 = 2.0 — barely significant for a SINGLE test, and not at all if the strategy was searched for."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Testing 100 zero-edge strategies at the 5% level, the expected number of false 'winners' is:",
+    options: [
+      { label: "About 5 of the 100 strategies", value: "a" },
+      { label: "About 0, since none have edge", value: "b" },
+      { label: "About 50 of the 100 strategies", value: "c" },
+      { label: "Exactly 1 by the FWER formula", value: "d" }
+    ],
+    correct: "a",
+    explain: "Under H₀ each has a 5% chance to cross the bar, so expected false positives = α·M = 0.05·100 = 5 (and FWER ≈ 99% for at least one)."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "Compared with Bonferroni, the Benjamini-Hochberg procedure:",
+    options: [
+      { label: "Controls the expected false-discovery share", value: "a" },
+      { label: "Guarantees zero false positives always", value: "b" },
+      { label: "Ignores how many tests were performed", value: "c" },
+      { label: "Requires all tests to be independent", value: "d" }
+    ],
+    correct: "a",
+    explain: "BH controls the FDR (expected fraction of discoveries that are false), which keeps more power than Bonferroni's family-wise 'not even one' guarantee."
+  });
+</script>
+</body>
+</html>

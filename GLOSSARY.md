@@ -13,3 +13,8 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Confidence interval | — | — | 006 |
 | Bootstrap | — | — | 006 |
 | Maximum likelihood | — | — | 006 |
+| p-value | — | — | 007 |
+| t-statistic | — | — | 007 |
+| Family-wise error rate | — | — | 007 |
+| False discovery rate | — | — | 007 |
+| Multiple testing | — | — | 007 |

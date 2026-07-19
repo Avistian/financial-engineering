@@ -286,6 +286,56 @@
       ],
       correct: "a",
       explain: "MLE maximizes L(θ)=P(data|θ) (usually its log); its SE comes from the curvature at the peak — the Fisher information."
+    },
+
+    // ---- L007: hypothesis testing & multiple-testing traps ----
+    {
+      id: "l007-pvalue", lesson: 7, quarter: "Q1", concept: "p-value", misconception: true,
+      question: "A p-value is best defined as the probability of:",
+      options: [
+        { label: "Data this extreme, if H\u2080 is true", value: "a" },
+        { label: "The null hypothesis being truly true", value: "b" },
+        { label: "The strategy having a genuine edge", value: "c" },
+        { label: "Making a Type II error at level \u03b1", value: "d" }
+      ],
+      correct: "a",
+      explain: "p = P(statistic at least this extreme | H\u2080). It is P(data | H\u2080), not P(H\u2080 | data), and not the chance the edge is real."
+    },
+    {
+      id: "l007-t-sharpe", lesson: 7, quarter: "Q1", concept: "t-stat",
+      question: "For a return series, a strategy's t-statistic equals roughly:",
+      options: [
+        { label: "Annualized Sharpe times \u221ayears", value: "a" },
+        { label: "Annualized Sharpe divided by n", value: "b" },
+        { label: "Mean return times the sample size", value: "c" },
+        { label: "Volatility over the mean return", value: "d" }
+      ],
+      correct: "a",
+      explain: "t = SR_period\u00b7\u221an = SR_annual\u00b7\u221ayears, so a Sharpe-1 strategy needs ~4 years just to clear the single-test 1.96 bar."
+    },
+    {
+      id: "l007-fwer", lesson: 7, quarter: "Q1", concept: "multiple-testing",
+      question: "Test 100 zero-edge strategies at 5%; the chance of at least one false 'winner' is about:",
+      options: [
+        { label: "99% (nearly guaranteed by chance)", value: "a" },
+        { label: "5% (equal to the chosen level)", value: "b" },
+        { label: "1% (rare, so safe to ignore)", value: "c" },
+        { label: "50% (a straight coin-flip risk)", value: "d" }
+      ],
+      correct: "a",
+      explain: "FWER = 1\u2212(1\u2212\u03b1)^M = 1\u22120.95^100 \u2248 0.994 \u2014 the classic bar becomes a false-discovery generator under a search."
+    },
+    {
+      id: "l007-bonf-bh", lesson: 7, quarter: "Q1", concept: "corrections",
+      question: "Unlike Bonferroni's family-wise control, Benjamini-Hochberg controls the:",
+      options: [
+        { label: "Expected false-discovery proportion", value: "a" },
+        { label: "Chance of any single false positive", value: "b" },
+        { label: "Total number of tests you may run", value: "c" },
+        { label: "Variance of every strategy's return", value: "d" }
+      ],
+      correct: "a",
+      explain: "BH controls the FDR (expected fraction of discoveries that are false), keeping more power than Bonferroni's 'not even one' rule."
     }
   ];
 })(window);

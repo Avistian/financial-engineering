@@ -54,6 +54,9 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
 - `0006-bootstrap-sharpe-ci.ipynb` — bootstrap a 95% confidence interval for a strategy's Sharpe
   ratio; compare to the i.i.d.-normal (Lo) formula; widen it honestly with a block bootstrap that
   respects autocorrelation (Lesson 006).
+- `0007-false-discoveries.ipynb` — simulate a universe of zero-edge strategies; measure the
+  false-discovery rate and confirm the FWER formula; apply Bonferroni and Benjamini-Hochberg; then
+  expose the selection bias of reporting the best-of-M t-stat (Lesson 007).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 
