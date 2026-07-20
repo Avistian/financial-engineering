@@ -49,6 +49,8 @@ const files = [
   "assets/pvalue-viz.js",
   "assets/multiple-testing-viz.js",
   "assets/haircut-viz.js",
+  "assets/covariance-ellipse-viz.js",
+  "assets/scree-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -83,6 +85,20 @@ trap("Haircut.mount + slide", () => {
   window.Haircut.mount(el, { m: 100 });
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "1000"; i.dispatch("input"); i.value = "0"; i.dispatch("input"); });
+});
+
+trap("CovEllipse.mount + slide", () => {
+  const el = makeEl("div");
+  window.CovEllipse.mount(el, { rho: 0.7 });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "-95"; i.dispatch("input"); i.value = "0"; i.dispatch("input"); i.value = "95"; i.dispatch("input"); });
+});
+
+trap("Scree.mount + slide", () => {
+  const el = makeEl("div");
+  window.Scree.mount(el, { n: 20, rho: 0.4 });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "90"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

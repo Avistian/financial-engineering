@@ -535,6 +535,32 @@ dl.objections dd {
 .hc-fail { color: var(--wrong); font-weight: 600; }
 .hc-ok { color: var(--correct); font-weight: 600; }
 
+/* ---- Lesson 008 visualizations (covariance ellipse, scree) ---- */
+
+.cov-viz, .scree-viz { margin: 1.25rem 0; }
+.cov-canvas, .scree-canvas {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fffdf8;
+}
+.cov-readout, .scree-readout {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  min-height: 2.4rem;
+}
+.cov-readout strong, .scree-readout strong { color: var(--ink); }
+.scree-pc1 { color: var(--wrong); font-weight: 700; }
+.cov-controls, .scree-controls {
+  display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;
+}
+.cov-slider-label, .scree-slider-label {
+  font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted);
+  white-space: nowrap; min-width: 10.5rem;
+}
+.cov-slider, .scree-slider { flex: 1; }
+
 @media (max-width: 480px) {
   html { font-size: 17px; }
   body { padding: 1.25rem 1rem 3rem; }

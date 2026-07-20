@@ -1,0 +1,13 @@
+# Binder build for running lab notebooks in the browser (mybinder.org).
+# Mirrors ../requirements-labs.txt. Binder opens notebooks with CWD=labs/, and
+# has network access, so the optional yfinance fetch works (labs fall back to a
+# simulation offline regardless).
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+scikit-learn>=1.4
+statsmodels>=0.14
+matplotlib>=3.8
+yfinance>=0.2
+ipykernel>=6.29
+jupyterlab>=4.2

@@ -18,3 +18,8 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Family-wise error rate | — | — | 007 |
 | False discovery rate | — | — | 007 |
 | Multiple testing | — | — | 007 |
+| Covariance matrix | — | — | 008 |
+| Eigenvector / eigenvalue | — | — | 008 |
+| Principal component (PCA) | — | — | 008 |
+| Variance explained | — | — | 008 |
+| Market factor (PC1) | — | — | 008 |

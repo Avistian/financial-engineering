@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 008 — Linear Algebra for Quants: Covariance, Eigendecomposition, PCA</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>Linear Algebra for Quants: Covariance, Eigendecomposition, PCA</h1>
+  <p class="subtitle">Lesson 008 · Foundations · ~60 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <p>
+    Lessons 004–007 lived in one dimension at a time: the returns of <em>a</em> strategy, the Sharpe of
+    <em>a</em> series, the p-value of <em>a</em> test. Real quant research is <strong>many assets at once</strong> —
+    a book of hundreds of stocks, a grid of signals, a panel of returns. The moment you have more than one
+    series, the object that governs risk, diversification, and structure is not a number but a
+    <strong>matrix</strong>: the covariance matrix. This lesson gives you the linear algebra to read that
+    matrix — not as a recipe to memorize, but as a <em>geometry</em> you can see.
+  </p>
+  <p>
+    This lesson's single skill: <strong>take a returns panel, form its covariance matrix, and decompose it
+    into principal components — eigenvectors and eigenvalues — and say in plain English what each one
+    means.</strong> That is <strong>Principal Component Analysis (PCA)</strong>, and it is the workhorse behind
+    the market factor, risk models, covariance denoising (Ledoit-Wolf / random matrix theory, Year 2–3),
+    OFI cross-impact (unit 063), and portfolio construction (units 081–087). The payoff is the lab: you will
+    run PCA on a real returns panel <em>by hand</em> (from the covariance matrix up), confirm that the first
+    component is essentially "the market," and measure how much of the panel's risk lives in a handful of
+    directions.
+  </p>
+
+  <h2>The returns panel is a matrix</h2>
+  <p>
+    Start concretely. Take <code>d</code> assets and record their (log) returns over <code>n</code> days.
+    Stack them into an <code>n × d</code> matrix <code>X</code>: one row per day, one column per asset.
+  </p>
+  <div class="formula">X<sub>ij</sub> = return of asset j on day i &nbsp;&nbsp;(i = 1…n days, j = 1…d assets)</div>
+  <p>
+    Every downstream object is built from <code>X</code>. A <strong>portfolio</strong> is a weight vector
+    <code>w</code> (one weight per asset, <code>d</code> numbers); the portfolio's daily return series is the
+    matrix–vector product <code>Xw</code>. The portfolio's <em>variance</em> — the thing risk management
+    actually cares about — is <code>wᵀΣw</code>, where <code>Σ</code> (capital sigma) is the covariance matrix
+    we build next. Linear algebra is not decoration here; it <em>is</em> the language in which "how risky is
+    this book?" is asked and answered.
+  </p>
+  <p>
+    One convention first, because everything depends on it. We almost always <strong>center</strong> each
+    column — subtract that asset's mean return so each column has mean zero. Centered data is written with a
+    tilde, <code>X̃</code>. Centering matters because covariance and PCA are about how assets <em>vary around
+    their means</em> and <em>co-move</em>; leaving the means in would let a large average return masquerade as
+    "variation." (Later we also often <em>scale</em> each column to unit variance — more on that in the trap.)
+  </p>
+
+  <h2>The covariance matrix Σ</h2>
+  <p>
+    The <strong>covariance</strong> of two assets measures how they move together. For centered return
+    columns <code>ã</code> and <code>b̃</code> (each of length <code>n</code>):
+  </p>
+  <div class="formula">Cov(A, B) = (1 / (n − 1)) · Σ<sub>i</sub> ã<sub>i</sub> · b̃<sub>i</sub></div>
+  <p>
+    Read it as an average product of co-deviations: on days both assets are above their mean, the product is
+    positive; when one is up and the other down, it is negative. If the positives dominate, the assets tend to
+    move together (positive covariance); if the negatives dominate, they move oppositely. The
+    <code>n − 1</code> (not <code>n</code>) is <strong>Bessel's correction</strong> — the same unbiased-variance
+    denominator you met in Lesson 006, because we estimated each mean from the same data. Note
+    <code>Cov(A, A) = Var(A)</code>: an asset's covariance with itself is just its variance.
+  </p>
+  <p>
+    The <strong>covariance matrix</strong> <code>Σ</code> collects every pairwise covariance into a
+    <code>d × d</code> grid: entry <code>Σ<sub>jk</sub> = Cov(asset j, asset k)</code>. In compact matrix form,
+    for centered data:
+  </p>
+  <div class="formula">Σ = (1 / (n − 1)) · X̃ᵀ X̃ &nbsp;&nbsp;(a d × d symmetric matrix)</div>
+  <p>
+    Two structural facts about <code>Σ</code> that we lean on for the rest of the lesson: it is
+    <strong>symmetric</strong> (<code>Cov(A,B) = Cov(B,A)</code>, so <code>Σ = Σᵀ</code>), and it is
+    <strong>positive semi-definite</strong> (<code>wᵀΣw ≥ 0</code> for any <code>w</code> — a variance can
+    never be negative). Those two properties are exactly what make its eigendecomposition so clean, as we will
+    see.
+  </p>
+  <div class="callout">
+    <strong>Worked example (two assets, five days).</strong> Centered returns (in %):
+    <code>ã = (+1, −2, +2, −1, 0)</code>, <code>b̃ = (+1, −2, +1, −1, +1)</code>.
+    Then <code>Var(A) = (1+4+4+1+0)/4 = 2.5</code>, <code>Var(B) = (1+4+1+1+1)/4 = 2.0</code>, and
+    <code>Cov(A,B) = (1·1 + (−2)(−2) + 2·1 + (−1)(−1) + 0·1)/4 = 8/4 = 2.0</code>. So
+    <div class="formula">Σ = [ [2.5, 2.0], [2.0, 2.0] ]</div>
+    The <strong>correlation</strong> (covariance rescaled to [−1, 1]) is
+    <code>ρ = Cov / (σ<sub>A</sub>σ<sub>B</sub>) = 2.0 / √(2.5·2.0) = 2.0/√5 ≈ 0.89</code> — these two assets
+    are strongly co-moving. Hold onto this <code>Σ</code>; we decompose it by hand below.
+  </div>
+  <p>
+    <strong>Covariance vs correlation — and why it bites.</strong> Covariance carries units (return²) and
+    scale: a high-volatility asset has large covariances with everything simply because it is loud, not because
+    it is specially related. <strong>Correlation</strong> divides that out (<code>Corr = Σ<sub>jk</sub> /
+    (σ<sub>j</sub>σ<sub>k</sub>)</code>), so it is comparable across pairs. This distinction is not academic:
+    PCA run on the raw covariance matrix will be <em>dominated by whichever assets happen to be most
+    volatile</em>. We return to this in the trap — it is the single most common way to run PCA wrong.
+  </p>
+
+  <h2>Eigenvectors and eigenvalues: the special directions of a matrix</h2>
+  <p>
+    A matrix <code>M</code> is a transformation: feed it a vector <code>v</code> and it returns another vector
+    <code>Mv</code>, generally pointing somewhere new. For <em>most</em> directions the matrix rotates and
+    stretches. But some special directions are only <strong>stretched, not rotated</strong>. A nonzero vector
+    <code>v</code> is an <strong>eigenvector</strong> of <code>M</code> if
+  </p>
+  <div class="formula">M v = λ v</div>
+  <p>
+    where the scalar <code>λ</code> (lambda) is the <strong>eigenvalue</strong> — the factor by which that
+    direction is stretched. "Eigen" is German for "own" or "characteristic": these are the matrix's own,
+    characteristic directions. Geometrically: apply <code>M</code> to an eigenvector and it lands on the same
+    line it started on, just <code>λ</code> times as long (flipped if <code>λ &lt; 0</code>). Every other
+    vector gets knocked off its line.
+  </p>
+  <p>
+    For a <strong>symmetric</strong> matrix — and a covariance matrix is always symmetric — the
+    <strong>spectral theorem</strong> guarantees three beautiful things, and they are the entire reason PCA
+    works:
+  </p>
+  <ul>
+    <li>All eigenvalues are <strong>real</strong> (no imaginary numbers to interpret).</li>
+    <li>Eigenvectors of distinct eigenvalues are <strong>orthogonal</strong> — mutually perpendicular, at right
+      angles. They form a clean set of axes.</li>
+    <li>A <code>d × d</code> symmetric matrix has a full set of <code>d</code> orthogonal eigenvectors that
+      <strong>span</strong> the whole space: any vector can be written as a combination of them. This is the
+      <strong>eigendecomposition</strong> <code>Σ = QΛQᵀ</code>, where the columns of <code>Q</code> are the
+      orthonormal eigenvectors and <code>Λ</code> is the diagonal matrix of eigenvalues.</li>
+  </ul>
+  <p>
+    Because <code>Σ</code> is also positive semi-definite, all its eigenvalues satisfy <code>λ ≥ 0</code>. That
+    is what lets us read each eigenvalue as a <strong>variance</strong> — a quantity that cannot be negative.
+  </p>
+  <div class="callout">
+    <strong>Worked example (decomposing our Σ by hand).</strong> For a 2 × 2 symmetric
+    <code>Σ = [[a, b], [b, c]]</code> the eigenvalues solve the quadratic
+    <code>λ = (tr/2) ± √((tr/2)² − det)</code>, with trace <code>tr = a + c</code> and determinant
+    <code>det = ac − b²</code>. For <code>Σ = [[2.5, 2.0], [2.0, 2.0]]</code>: <code>tr = 4.5</code>,
+    <code>det = 2.5·2.0 − 2.0² = 5 − 4 = 1</code>, so
+    <code>λ = 2.25 ± √(5.0625 − 1) = 2.25 ± 2.016</code>, giving
+    <strong>λ₁ ≈ 4.27</strong> and <strong>λ₂ ≈ 0.23</strong>. The first eigenvector (solving
+    <code>(Σ − λ₁I)v = 0</code>) comes out to <code>v₁ ≈ (0.75, 0.66)</code> — <em>both components positive</em>,
+    i.e. the "both assets rise together" direction. The second, <code>v₂ ≈ (−0.66, 0.75)</code>, is
+    perpendicular to it — the "A up, B down" spread direction. Sanity check:
+    <code>λ₁ + λ₂ = 4.27 + 0.23 = 4.5 = tr(Σ) = Var(A) + Var(B)</code>. The trace is conserved.
+  </div>
+
+  <h2>The covariance ellipse — seeing the decomposition</h2>
+  <p>
+    Here is the picture that makes all of this click. A cloud of two correlated returns forms a tilted
+    elliptical blob. That ellipse <em>is</em> the covariance matrix drawn out: its <strong>axes point along the
+    eigenvectors</strong> of <code>Σ</code>, and the <strong>length of each axis is √λ</strong> — the standard
+    deviation of the data along that direction. The longest axis is the first principal component, the
+    direction of maximum variance. Drag the correlation and watch the ellipse — and its principal axes —
+    respond:
+  </p>
+
+  <div id="cov"></div>
+  <p class="viz-cap">
+    The teal cloud is two assets' returns. The gold curve is the 2σ covariance ellipse. The red arrow is
+    <strong>PC1</strong> (the eigenvector with the larger eigenvalue — longest axis, most variance); the teal
+    arrow is <strong>PC2</strong>, exactly perpendicular. At <code>ρ = 0</code> the ellipse is upright and the
+    PCs line up with the raw axes; as <code>|ρ| → 1</code> it collapses toward a line and PC1 swallows almost
+    all the variance — that is the redundancy PCA is built to find.
+  </p>
+  <p>
+    Notice what the two eigenvalues are telling you: <code>λ₁</code> is the variance if you looked at the data
+    <em>along the long axis</em>, <code>λ₂</code> the variance along the short axis. PCA is nothing more than
+    "rotate your coordinate system so the axes line up with the ellipse." In the new coordinates the assets are
+    <strong>uncorrelated</strong> (the ellipse is axis-aligned) and sorted by how much they vary. No new
+    information is created; it is re-expressed along its natural axes.
+  </p>
+
+  <p>Commit a prediction before the next section reveals the number:</p>
+  <div id="predict1"></div>
+
+  <h2>PCA = the eigendecomposition of Σ</h2>
+  <p>
+    We can now state <strong>Principal Component Analysis</strong> exactly, with no hand-waving:
+  </p>
+  <ol>
+    <li>Center the returns panel (and usually standardize — see the trap).</li>
+    <li>Form the covariance (or correlation) matrix <code>Σ</code>.</li>
+    <li>Compute its eigenvectors and eigenvalues, sorted so <code>λ₁ ≥ λ₂ ≥ … ≥ λ<sub>d</sub></code>.</li>
+    <li>The eigenvectors are the <strong>principal components (PCs)</strong> — the directions; the eigenvalues
+      are the <strong>variance captured</strong> along each.</li>
+  </ol>
+  <p>
+    Each principal component is a fixed <strong>portfolio of the original assets</strong> (its eigenvector is a
+    set of weights), and these portfolios are mutually uncorrelated and ordered from most to least variance.
+    The fraction of the panel's total risk captured by PC <code>k</code> is its eigenvalue over the sum of all
+    eigenvalues:
+  </p>
+  <div class="formula">variance explained by PC<sub>k</sub> = λ<sub>k</sub> / (λ₁ + λ₂ + … + λ<sub>d</sub>) = λ<sub>k</sub> / tr(Σ)</div>
+  <p>
+    The denominator is the <strong>trace</strong> of <code>Σ</code> — the sum of the diagonal, i.e. the total
+    variance of all assets — and it equals the sum of the eigenvalues (as our worked example confirmed,
+    <code>4.27 + 0.23 = 4.5</code>). So in that two-asset example, PC1 explains
+    <code>4.27 / 4.5 ≈ 95%</code> of all variation: two correlated assets are, to 95%, <em>one</em> underlying
+    bet plus a little noise. That collapse from "two numbers" to "essentially one direction" is the entire
+    point — and it only gets more dramatic as the number of assets grows.
+  </p>
+
+  <h2>The scree plot and the market factor</h2>
+  <p>
+    Plot the sorted eigenvalues as bars and you get a <strong>scree plot</strong> (named for the rubble at the
+    foot of a cliff — a steep drop then a flat tail). For a real equity panel the picture is striking: one
+    giant bar, then a long low tail. Below is the exact spectrum of an idealized panel where every pair of
+    assets shares the same correlation <code>ρ</code> — the closed-form case
+    <code>λ₁ = 1 + (d−1)ρ</code>, <code>λ₂ = … = λ<sub>d</sub> = 1 − ρ</code>. Raise <code>ρ</code> and watch
+    PC1 devour the panel:
+  </p>
+
+  <div id="scree"></div>
+  <p class="viz-cap">
+    Bars are eigenvalues (the scree); the red bar is PC1. The gold line is cumulative variance explained. At
+    <code>ρ = 0</code> every bar is equal height (a flat scree — no structure, nothing to compress). As
+    <code>ρ</code> rises, PC1 alone explains <code>(1 + (d−1)ρ)/d</code> of everything: with 20 assets at
+    <code>ρ = 0.4</code> that is already ~43%, and at <code>ρ = 0.7</code> it is ~71%.
+  </p>
+  <p>
+    That dominant first component has a name in markets: it is the <strong>market factor</strong>. Its
+    eigenvector loads with the <em>same sign on essentially every stock</em> — it is the "everything moves
+    together" direction, the tide that lifts or sinks all boats. Empirically, on daily equity returns PC1
+    explains anywhere from ~25% (calm, diversified panels) to well over 50% (crises, when correlations spike
+    toward 1 and the whole market becomes a single trade). This is why "diversification fails exactly when you
+    need it" — a stress event is <code>ρ → 1</code>, which is <code>λ₁ → d</code>: the panel degenerates to one
+    factor and there is nowhere to hide.
+  </p>
+  <p>
+    The components after the first are interpretable too. PC2 on a stock panel is often a
+    <strong>sector or style spread</strong> (long one group, short another — it loads with opposite signs);
+    later PCs pick up finer structure, and the long flat tail is mostly <strong>noise</strong>. Deciding where
+    signal ends and noise begins is the subject of random matrix theory (Year 2–3, units 082–083) — previewed
+    in the trap.
+  </p>
+
+  <h2>Projection and reconstruction: PCA as compression</h2>
+  <p>
+    Once you have the principal directions, you can <strong>project</strong> the data onto them. The
+    projection of the return panel onto the PCs gives the <strong>scores</strong> (also called factor
+    returns): <code>Z = X̃ Q</code>, where column <code>k</code> of <code>Z</code> is the daily return of the
+    <code>k</code>-th principal-component portfolio. PC1's score series is, in the market example, essentially a
+    market-index return built purely from the data's own covariance structure.
+  </p>
+  <p>
+    The power move is <strong>dimensionality reduction</strong>: keep only the first <code>k</code> components
+    (the ones with meaningful eigenvalues) and discard the noisy tail. You can then <strong>reconstruct</strong>
+    an approximation of the original panel from just those <code>k</code> directions,
+    <code>X̃ ≈ Z<sub>1:k</sub> Q<sub>1:k</sub>ᵀ</code>. The Eckart–Young theorem guarantees this is the
+    <em>best possible</em> rank-<code>k</code> approximation in a least-squares sense — no other
+    <code>k</code>-factor model reproduces the panel with smaller error. That is why a handful of PCs can stand
+    in for hundreds of assets in a risk model: you are keeping the directions that carry the variance and
+    throwing away the rubble.
+  </p>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <div class="trap">
+    <strong>Trap — the four ways PCA lies to you.</strong>
+    <strong>(1) Scale.</strong> Run PCA on the raw covariance of assets with wildly different volatilities and
+    PC1 will just be "the loudest asset," not a real common factor. Fix: standardize each column to unit
+    variance first (equivalently, decompose the <em>correlation</em> matrix). Forgetting this is the #1 PCA
+    mistake.
+    <strong>(2) Non-stationarity.</strong> <code>Σ</code> is not a constant of nature — correlations drift and,
+    in crises, spike toward 1. A PCA fit on last year's calm data mis-states today's risk; the market factor
+    you estimated in June is not the one that hits you in a September sell-off. Always ask "over what window was
+    this covariance estimated, and is it still valid?"
+    <strong>(3) Noise eigenvalues.</strong> With <code>d</code> assets and only <code>n</code> days, most small
+    eigenvalues are pure estimation noise, not real directions — especially when <code>d</code> is comparable to
+    <code>n</code>. Random matrix theory (Marchenko–Pastur) predicts the noise band; eigenvalues inside it carry
+    no signal. Trading the tiny-eigenvalue "components" means trading noise, and inverting a noisy
+    <code>Σ</code> (for portfolio optimization) blows up on exactly those directions — the motivation for
+    Ledoit–Wolf shrinkage and RMT denoising in Year 2–3.
+    <strong>(4) Leakage.</strong> Fitting PCA on the <em>entire</em> sample and then using those components in a
+    backtest is look-ahead bias: your "factors" were built with knowledge of the future. In a real backtest the
+    covariance must be estimated only from data available up to each point in time. This is the same leakage
+    discipline as Lesson 007's multiple-testing warning, wearing a matrix hat.
+  </div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Are principal components the same thing as the real economic factors, like value or momentum?”</dt>
+    <dd>
+      No. PCs are <em>statistical</em> factors — the directions of maximum variance in <em>this</em> dataset,
+      defined purely by the covariance matrix. They are unsupervised and have no idea what "value" means. PC1
+      usually coincides with the market because the market really is the dominant source of common variance, but
+      PC2, PC3… rarely line up cleanly with named style factors. Economic factor models (Fama–French, etc.) are
+      <em>chosen</em> a priori; PCA factors are <em>discovered</em> from the data. Both are useful; don't confuse
+      them.
+    </dd>
+    <dt>“Why decompose Σ instead of just running SVD on the data matrix X?”</dt>
+    <dd>
+      They are the same thing. The singular value decomposition of the centered data <code>X̃</code> gives right
+      singular vectors that are exactly the eigenvectors of <code>X̃ᵀX̃ ∝ Σ</code>, and the singular values
+      squared are the eigenvalues. SVD is the numerically preferred route (it never forms <code>Σ</code>
+      explicitly, so it is more stable); eigendecomposition of <code>Σ</code> is the conceptually clearest route
+      and what you'll do by hand in the lab. Same answer, two doors.
+    </dd>
+    <dt>“The eigenvector's sign flipped when I re-ran it — is my code wrong?”</dt>
+    <dd>
+      No. An eigenvector is only defined up to sign: if <code>v</code> satisfies <code>Σv = λv</code> then so
+      does <code>−v</code>. Solvers pick a sign arbitrarily. It never changes the variance explained or the
+      subspace; it only flips the interpretation of "long vs short" on that component. Fix a convention (e.g.
+      make the largest loading positive) if you need reproducibility.
+    </dd>
+    <dt>“How many components should I keep?”</dt>
+    <dd>
+      There's no single rule, and anyone who gives you one is overselling. Common heuristics: keep components
+      until cumulative variance hits some target (say 90%); look for the "elbow" in the scree plot; or — the
+      principled one for finance — keep only eigenvalues above the random-matrix-theory noise band, since the
+      rest are statistically indistinguishable from noise. The honest answer is "it depends on why you're
+      reducing," and the RMT route (Year 2–3) is the defensible one.
+    </dd>
+    <dt>“If PC1 is basically the market, can't I just use an index and skip PCA?”</dt>
+    <dd>
+      For hedging the market, often yes. But PCA earns its keep beyond PC1: measuring how <em>concentrated</em>
+      risk is (is 80% of my book one bet?), building uncorrelated factor portfolios, cleaning the covariance
+      matrix before optimization, and detecting regime shifts (when PC1's share suddenly jumps, correlations are
+      spiking). The index is one output; PCA is the machine that also tells you everything the index leaves out.
+    </dd>
+  </dl>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    Gilbert <strong>Strang, <em>Introduction to Linear Algebra</em></strong> — the eigenvalues/eigenvectors
+    chapter and the section on symmetric matrices &amp; PCA (his MIT 18.06 lectures cover the same ground, free
+    online). Strang teaches eigen-thinking as <em>geometry</em>, which is exactly the framing this lesson uses.
+    For the spectral theorem stated cleanly (symmetric ⇒ real eigenvalues + orthogonal eigenvectors), Sheldon
+    <strong>Axler, <em>Linear Algebra Done Right</em></strong>, is the reference. See
+    <a href="../RESOURCES.md">RESOURCES.md</a> → Math foundations. This is the linear-algebra base for the
+    covariance-cleaning (Ledoit–Wolf, RMT), risk-model, and portfolio-construction units later in the track.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0008-pca-returns-panel.ipynb"><code>labs/0008-pca-returns-panel.ipynb</code></a>
+    — build the covariance matrix of a multi-asset returns panel, eigendecompose it by hand, confirm the trace
+    identity (Σλ = total variance), plot the scree, show PC1 is the market (near-equal positive loadings), and
+    measure how many components you need for 90% of the variance. As you work, write from memory the definition
+    of an eigenvector, the variance-explained formula, and why standardizing matters.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) write the definition of an eigenvector and
+    eigenvalue (<code>Mv = λv</code>) and say what each means geometrically. (2) Give the formula for the
+    covariance matrix from a centered panel, and state why <code>Σ</code> is symmetric and positive
+    semi-definite. (3) Write "variance explained by PC<sub>k</sub>" and explain why the denominator equals both
+    the trace and the sum of eigenvalues. (4) Name two of the four PCA traps and the fix for each. Re-read any
+    part that felt shaky.
+  </div>
+
+  <div class="ask-teacher">
+    Want the spectral theorem proved, the SVD-to-PCA equivalence shown in full, or the Marchenko–Pastur noise
+    band derived numerically on a simulated panel? Ask your teacher for a worked example.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Returns panel</strong> <code>X</code> (n × d), <strong>centering</strong> / standardizing.</li>
+    <li><strong>Covariance</strong> and <strong>correlation</strong>; the <strong>covariance matrix</strong>
+      <code>Σ = (1/(n−1)) X̃ᵀX̃</code> — symmetric, positive semi-definite.</li>
+    <li><strong>Eigenvector / eigenvalue</strong> (<code>Mv = λv</code>); the <strong>spectral theorem</strong>
+      (symmetric ⇒ real λ, orthogonal eigenvectors); <strong>eigendecomposition</strong> <code>Σ = QΛQᵀ</code>.</li>
+    <li><strong>Principal Component Analysis (PCA)</strong>: PCs = eigenvectors of <code>Σ</code>, sorted by
+      eigenvalue; each PC is an uncorrelated portfolio.</li>
+    <li><strong>Variance explained</strong> = <code>λ<sub>k</sub> / tr(Σ)</code>; the <strong>trace</strong> =
+      total variance = <code>Σλ</code>.</li>
+    <li><strong>Scree plot</strong>; the <strong>market factor</strong> (PC1); scores/projection and
+      rank-<code>k</code> <strong>reconstruction</strong>.</li>
+    <li>The four traps: <strong>scale</strong>, <strong>non-stationarity</strong>, <strong>noise
+      eigenvalues (RMT)</strong>, <strong>leakage</strong>.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    You can now go from a returns panel to its covariance matrix, decompose that matrix into uncorrelated
+    principal components, and read off how much risk each carries — the geometry, not a black-box recipe. This
+    is the second math pillar of Year 1 (statistics in 004–007, linear algebra here), and it is load-bearing
+    downstream: Lesson 009 does regression (which is projection onto column space — the same geometry);
+    Year 1 Q3's multivariate volatility and the dimensionality curse (unit 029) are PCA under stress; Year 2's
+    portfolio and risk work (Markowitz, Ledoit–Wolf shrinkage, RMT denoising, HRP) is <em>entirely</em> about
+    cleaning and inverting this covariance matrix; and unit 063's cross-impact OFI is literally PCA on order
+    flow. When someone later says "80% of the book's risk is in three factors," you now know exactly what
+    matrix they decomposed to say it.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0007-hypothesis-multiple-testing.html">← Lesson 007</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 009 — Regression done right →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/covariance-ellipse-viz.js"></script>
+<script src="../assets/scree-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 8, count: 3 });
+
+  CovEllipse.mount(document.getElementById("cov"), { rho: 0.7 });
+  Scree.mount(document.getElementById("scree"), { n: 20, rho: 0.4 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "Two assets are correlated ρ = 0.9. After PCA, roughly what share of their total variance does the first principal component (PC1) explain?",
+    options: [
+      { label: "About 50% (split evenly by symmetry)", value: "half" },
+      { label: "About 70% (a clear but partial majority)", value: "seventy" },
+      { label: "About 95% (nearly all of it)", value: "most" }
+    ],
+    correct: "most",
+    reveal: "For two standardized assets, λ₁ = 1 + ρ and λ₂ = 1 − ρ, so PC1 explains (1+ρ)/2 = 1.9/2 = 95%. High correlation means the pair is almost one bet — PCA finds that instantly."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: what is the first principal component of a panel of stock returns, why does it usually correspond to 'the market', and what does it mean when its share of variance suddenly jumps?",
+    points: [
+      "PC1 is the eigenvector of Σ with the largest eigenvalue — the max-variance direction",
+      "It loads with the same sign on nearly all stocks: the 'everything moves together' direction",
+      "Its variance share is λ₁/tr(Σ); empirically large because common (market) risk dominates",
+      "A sudden jump means correlations are spiking toward 1 — a crisis / regime shift",
+      "So diversification fails exactly then: the panel degenerates toward a single factor"
+    ],
+    model: "The first principal component is the eigenvector of the returns' covariance matrix with the largest eigenvalue — the single direction along which the panel varies most. On equities it comes out with roughly equal, same-sign loadings across all names, i.e. a portfolio that is long the whole market; that is why PC1 is essentially 'the market factor.' It dominates because common, systematic risk is the biggest shared source of variance among stocks. Its share of total variance is λ₁ / tr(Σ). When that share suddenly jumps, it means pairwise correlations are spiking toward 1 — the equicorrelation result λ₁ = 1 + (d−1)ρ shows PC1 → d as ρ → 1. That is the signature of a stress regime: the many-asset book collapses toward a single bet, idiosyncratic diversification evaporates, and 'everything sells off together.' Practically, a rising PC1 share is an early-warning gauge of crowding/regime change, and it's why risk models re-estimate Σ over rolling windows rather than trusting a static one."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "A nonzero vector v is an eigenvector of matrix M when:",
+    options: [
+      { label: "M v = λ v for some scalar λ (same direction)", value: "a" },
+      { label: "M v = 0 for every possible scalar λ value", value: "b" },
+      { label: "v ᵀ M v is exactly equal to zero always", value: "c" },
+      { label: "M v is perpendicular to the vector v", value: "d" }
+    ],
+    correct: "a",
+    explain: "An eigenvector is only stretched, not rotated: Mv lands on the same line, scaled by the eigenvalue λ."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "For a covariance matrix Σ, the fraction of total variance explained by PC k equals:",
+    options: [
+      { label: "λ_k divided by the sum of all eigenvalues", value: "a" },
+      { label: "λ_k divided by the largest eigenvalue λ₁", value: "b" },
+      { label: "The eigenvalue λ_k multiplied by the trace", value: "c" },
+      { label: "One over the total number of components d", value: "d" }
+    ],
+    correct: "a",
+    explain: "Variance explained = λ_k / tr(Σ) = λ_k / Σλ, because the trace (total variance) equals the sum of eigenvalues."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "The single most common way to run PCA incorrectly on assets with very different volatilities is to:",
+    options: [
+      { label: "Skip standardizing, so PC1 is just the loudest asset", value: "a" },
+      { label: "Use log returns instead of simple percent returns", value: "b" },
+      { label: "Compute eigenvalues before the eigenvectors are found", value: "c" },
+      { label: "Sort the components from smallest eigenvalue upward", value: "d" }
+    ],
+    correct: "a",
+    explain: "Raw covariance is scale-sensitive: a high-vol asset dominates by being loud. Standardize columns (or decompose the correlation matrix) first."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "Empirically, when a market enters a crisis, the first principal component's share of variance:",
+    options: [
+      { label: "Rises sharply, as correlations spike toward one", value: "a" },
+      { label: "Falls sharply, as assets decouple from each other", value: "b" },
+      { label: "Stays fixed, since Σ is a constant of nature", value: "c" },
+      { label: "Becomes negative, reversing the market factor", value: "d" }
+    ],
+    correct: "a",
+    explain: "Crises push pairwise correlations toward 1; with λ₁ = 1+(d−1)ρ, PC1 → d. The panel degenerates to one factor — diversification fails exactly when needed."
+  });
+</script>
+</body>
+</html>

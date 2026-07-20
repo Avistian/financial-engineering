@@ -336,6 +336,56 @@
       ],
       correct: "a",
       explain: "BH controls the FDR (expected fraction of discoveries that are false), keeping more power than Bonferroni's 'not even one' rule."
+    },
+
+    // ---- L008: linear algebra, covariance & PCA ----
+    {
+      id: "l008-eigen", lesson: 8, quarter: "Q1", concept: "eigen",
+      question: "A nonzero vector v is an eigenvector of a matrix M exactly when:",
+      options: [
+        { label: "M v = \u03bb v for some scalar \u03bb", value: "a" },
+        { label: "M v equals the zero vector always", value: "b" },
+        { label: "v is perpendicular to the vector M v", value: "c" },
+        { label: "M v has the same length as vector v", value: "d" }
+      ],
+      correct: "a",
+      explain: "An eigenvector keeps its direction under M; it is only scaled by its eigenvalue \u03bb (Mv = \u03bbv)."
+    },
+    {
+      id: "l008-var-explained", lesson: 8, quarter: "Q1", concept: "pca-variance",
+      question: "In PCA, the fraction of total variance explained by component k is:",
+      options: [
+        { label: "\u03bb\u2096 over the sum of all eigenvalues", value: "a" },
+        { label: "\u03bb\u2096 over the largest eigenvalue \u03bb\u2081", value: "b" },
+        { label: "\u03bb\u2096 multiplied by the matrix trace", value: "c" },
+        { label: "one over the number of components d", value: "d" }
+      ],
+      correct: "a",
+      explain: "Variance explained = \u03bb\u2096 / tr(\u03a3) = \u03bb\u2096 / \u03a3\u03bb, since the trace (total variance) equals the sum of eigenvalues."
+    },
+    {
+      id: "l008-scale", lesson: 8, quarter: "Q1", concept: "pca-scale", misconception: true,
+      question: "Running PCA on the raw covariance of assets with very different vols mainly risks:",
+      options: [
+        { label: "PC1 just being the loudest single asset", value: "a" },
+        { label: "Eigenvalues coming out complex-valued", value: "b" },
+        { label: "The components no longer being orthogonal", value: "c" },
+        { label: "Losing the sign of every eigenvector", value: "d" }
+      ],
+      correct: "a",
+      explain: "Covariance is scale-sensitive, so a high-vol asset dominates by being loud; standardize columns (decompose the correlation matrix) first."
+    },
+    {
+      id: "l008-market-factor", lesson: 8, quarter: "Q1", concept: "market-factor",
+      question: "On an equity returns panel, the first principal component usually represents:",
+      options: [
+        { label: "The market factor (all names, same sign)", value: "a" },
+        { label: "A long-short spread between two sectors", value: "b" },
+        { label: "The single lowest-variance idiosyncratic name", value: "c" },
+        { label: "Pure estimation noise with no interpretation", value: "d" }
+      ],
+      correct: "a",
+      explain: "PC1 loads with the same sign on nearly every stock \u2014 the 'everything moves together' direction \u2014 because common market risk dominates variance; its share spikes in crises as \u03c1\u21921."
     }
   ];
 })(window);

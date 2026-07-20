@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "lessons": [
     {
       "id": 1,
@@ -69,6 +69,16 @@
       "checkpoint": false,
       "labPath": "labs/0007-false-discoveries.ipynb",
       "title": "Hypothesis Testing & the Multiple-Testing Trap",
+      "published": true
+    },
+    {
+      "id": 8,
+      "slug": "0008-linear-algebra-pca",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": false,
+      "labPath": "labs/0008-pca-returns-panel.ipynb",
+      "title": "Linear Algebra for Quants: Covariance, Eigendecomposition, PCA",
       "published": true
     }
   ]

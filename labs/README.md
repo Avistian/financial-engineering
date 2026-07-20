@@ -57,6 +57,9 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
 - `0007-false-discoveries.ipynb` — simulate a universe of zero-edge strategies; measure the
   false-discovery rate and confirm the FWER formula; apply Bonferroni and Benjamini-Hochberg; then
   expose the selection bias of reporting the best-of-M t-stat (Lesson 007).
+- `0008-pca-returns-panel.ipynb` — build a returns panel's correlation matrix by hand,
+  eigendecompose it, confirm the trace identity, show PC1 is the (same-sign) market factor, and
+  measure how many components capture 90% of the panel's risk (Lesson 008).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 
