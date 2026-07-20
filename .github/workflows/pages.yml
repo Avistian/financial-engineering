@@ -26,7 +26,7 @@ jobs:
           VER=$(python3 -c "import json; print(json.load(open('lessons/manifest.json'))['version'])")
           sed -i "s/name=\"feq-manifest-version\" content=\"[0-9]*\"/name=\"feq-manifest-version\" content=\"$VER\"/" index.html
           mkdir -p public/labs
-          cp index.html .nojekyll public/
+          cp index.html notebooks.html .nojekyll public/
           cp -r assets lessons reference public/
           # Lab notebooks for the web: sources (download / Colab / Binder) + README.
           cp labs/*.ipynb public/labs/ 2>/dev/null || true
