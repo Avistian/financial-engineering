@@ -436,6 +436,56 @@
       ],
       correct: "a",
       explain: "HAC = Heteroskedasticity- And Autocorrelation-Consistent. It extends White with Bartlett-weighted residual autocovariances; it cannot cure bias or spurious level regressions."
+    },
+
+    // ---- L010: Q1 checkpoint (statistical hygiene) ----
+    {
+      id: "l010-se-lie", lesson: 10, quarter: "Q1", concept: "hygiene-core",
+      question: "Across heteroskedasticity, overlap, and selection bias, the thing that is usually wrong is the:",
+      options: [
+        { label: "Standard error, hence the t-statistic", value: "a" },
+        { label: "Point estimate of the slope \u03b2\u0302", value: "b" },
+        { label: "Sign of the fitted relationship", value: "c" },
+        { label: "Units the return was measured in", value: "d" }
+      ],
+      correct: "a",
+      explain: "In all three the estimate stays about right; the inference \u2014 the SE and the t-stat you claim \u2014 breaks. Fix the SE, keep the estimate."
+    },
+    {
+      id: "l010-selection-bar", lesson: 10, quarter: "Q1", concept: "selection-bar", misconception: true,
+      question: "A t-statistic that is the best of M = 100 tried signals should be judged against a bar of about:",
+      options: [
+        { label: "The expected max of M nulls (\u2248 2.5)", value: "a" },
+        { label: "The single-test 1.96, as usual", value: "b" },
+        { label: "Zero, since search cannot bias t", value: "c" },
+        { label: "The mean of the M t-statistics", value: "d" }
+      ],
+      correct: "a",
+      explain: "Under a search the fair benchmark is E[max of M] draws under H\u2080 (\u22482.5 for M=100), not 1.96 \u2014 that gap is the selection haircut."
+    },
+    {
+      id: "l010-neff", lesson: 10, quarter: "Q1", concept: "effective-n",
+      question: "If overlapping returns inflate the honest SE by a factor of 3, your effective sample size is about:",
+      options: [
+        { label: "n divided by nine (inflation squared)", value: "a" },
+        { label: "n divided by three (the inflation)", value: "b" },
+        { label: "n times three (more overlap, more data)", value: "c" },
+        { label: "n itself (overlap adds observations)", value: "d" }
+      ],
+      correct: "a",
+      explain: "n_eff = n / inflation\u00b2, so a 3\u00d7 SE inflation means only ~n/9 independent observations \u2014 the concrete cost of overlap."
+    },
+    {
+      id: "l010-verdict", lesson: 10, quarter: "Q1", concept: "kill-is-a-win",
+      question: "For a quant researcher, the professionally valuable result of an honest audit is often to:",
+      options: [
+        { label: "Correctly kill a great-looking backtest", value: "a" },
+        { label: "Report the highest in-sample R\u00b2", value: "b" },
+        { label: "Confirm every signal past t = 1.96", value: "c" },
+        { label: "Maximize the count of shipped signals", value: "d" }
+      ],
+      correct: "a",
+      explain: "The value is negative knowledge \u2014 not staking capital on noise. A killed bad backtest saves real out-of-sample money; that is the checkpoint's ethos."
     }
   ];
 })(window);

@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "lessons": [
     {
       "id": 1,
@@ -89,6 +89,16 @@
       "checkpoint": false,
       "labPath": "labs/0009-robust-standard-errors.ipynb",
       "title": "Regression Done Right: OLS, Robust Standard Errors, and When Regression Lies",
+      "published": true
+    },
+    {
+      "id": 10,
+      "slug": "0010-q1-checkpoint",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": true,
+      "labPath": "labs/0010-checkpoint-spurious-signal.ipynb",
+      "title": "Q1 Checkpoint: Statistical Hygiene",
       "published": true
     }
   ]

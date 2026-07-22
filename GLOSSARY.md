@@ -29,3 +29,7 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Heteroskedasticity | — | — | 009 |
 | Robust (White/HC) standard error | — | — | 009 |
 | Newey–West (HAC) standard error | — | — | 009 |
+| Statistical hygiene (the five questions) | — | — | 010 |
+| Spurious-signal autopsy | — | — | 010 |
+| Effective sample size (n_eff) | — | — | 010 |
+| Best-of-M / selection haircut | — | — | 010 |

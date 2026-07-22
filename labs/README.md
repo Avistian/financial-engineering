@@ -64,6 +64,10 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
   projection (residuals ⟂ X) and `β̂ = Cov/Var` by hand; then watch a gaudy naïve t-statistic
   deflate under White (HC) and Newey–West (HAC) standard errors, and translate the SE inflation
   into an effective sample size (Lesson 009).
+- `0010-checkpoint-spurious-signal.ipynb` — **Q1 checkpoint.** Audit a returns-analysis notebook
+  that "discovered" a signal with a gaudy t-statistic: run White (HC), Newey–West (HAC), the
+  effective sample size, the best-of-*M* selection haircut, and a Monte-Carlo empirical null, then
+  deliver a kill/confirm verdict on a *planted spurious* signal (Lesson 010).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 

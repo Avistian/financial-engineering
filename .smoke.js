@@ -54,6 +54,7 @@ const files = [
   "assets/ols-fit-viz.js",
   "assets/hsk-viz.js",
   "assets/hac-viz.js",
+  "assets/autopsy-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -123,6 +124,13 @@ trap("HAC.mount + slide", () => {
   window.HAC.mount(el, { phi: 0.5 });
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "85"; i.dispatch("input"); });
+});
+
+trap("Autopsy.mount + slide", () => {
+  const el = makeEl("div");
+  window.Autopsy.mount(el, { t0: 6.2, infl: 2.7, m: 50 });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "50"; i.dispatch("input"); i.value = "100"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 010 — Q1 Checkpoint: Statistical Hygiene</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+    .checkpoint-tag {
+      display: inline-block; font-family: var(--font-sans); font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
+      color: #fff; background: var(--wrong); padding: 0.15rem 0.55rem; border-radius: 4px;
+      margin-left: 0.4rem; vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>Q1 Checkpoint: Statistical Hygiene <span class="checkpoint-tag">Checkpoint</span></h1>
+  <p class="subtitle">Lesson 010 · Exit exam for Units 001–009 · ~60 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <p>
+    This is a <strong>checkpoint</strong>, not a new topic. Nine lessons ago you started from zero: what a
+    quant researcher actually does (001), the instruments and the order book (002–003), the shape of returns
+    (004), the probability language (005), and then the four-lesson <em>statistical-hygiene</em> spine —
+    estimation and uncertainty (006), hypothesis testing and the multiple-testing trap (007), the covariance
+    geometry behind PCA (008), and regression with a trustworthy standard error (009). The checkpoint asks one
+    thing: <strong>can you take a returns-analysis notebook that claims an edge and either kill it or confirm
+    it — catching a planted spurious signal — without being told where the flaw is?</strong> That is the
+    smallest possible version of your whole job, and per the rules of this track (<a href="../SESSION.md">SESSION.md</a>)
+    <strong>you do not advance to Q2 until you can pass it cold.</strong>
+  </p>
+  <p>
+    Everything in Q1 pointed here. The mission (<a href="../MISSION.md">MISSION.md</a>) is not "learn some
+    statistics"; it is to reach the level where <em>"when you claim an edge, you know exactly what you are
+    standing on."</em> A checkpoint is where that claim gets tested. So this lesson does three things: it
+    <strong>re-assembles</strong> the quarter into a single audit checklist, it teaches the one integrative
+    skill the pieces were building toward — <strong>the spurious-signal autopsy</strong> — and it hands you the
+    exit-ticket lab where a signal with a gaudy t-statistic is waiting to fool you.
+  </p>
+
+  <h2>What a checkpoint is (and why it is strict)</h2>
+  <p>
+    In this curriculum a <strong>unit</strong> is a concept plus its lab plus its quiz; a
+    <strong>checkpoint</strong> is the exit exam for a whole quarter, and it is deliberately harder than any
+    single lesson because it is <em>cumulative and un-signposted</em>. In a normal lesson you know the flaw is
+    the one just taught — of course the overlap inflated the t-stat, the lesson is <em>about</em> overlap. In
+    the real job, and in this checkpoint, nobody tells you which of the five failure modes is present, or
+    whether several are stacked. The skill being certified is <strong>diagnosis under uncertainty</strong>: run
+    the full battery, find what breaks, and report it honestly — including the outcome that a PM least wants to
+    hear, "there is no edge here."
+  </p>
+  <p>
+    Why strict? Because the entire economic value of a quant researcher is <em>negative</em> knowledge: the
+    ability to <strong>not</strong> stake capital on noise. A backtest you correctly killed is worth more than
+    a backtest you wrongly shipped, because the shipped one loses real money out of sample while quietly
+    destroying your credibility. The <code>teach</code>-skill's motto for this workspace is literal here:
+    <strong>"a killed bad backtest is a win."</strong> Passing this checkpoint means you can be trusted to kill
+    your own darlings.
+  </p>
+
+  <h2>The quarter in one diagram: five questions of statistical hygiene</h2>
+  <p>
+    Here is the whole quarter compressed into the audit you will run on any claimed edge. Each row is a
+    <em>question</em>, the <em>lesson</em> that answers it, the <em>failure mode</em> if you skip it, and the
+    <em>test</em> you actually run. Learn this table as a table — it is the checklist you carry into every
+    signal study for the next three years.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Question</th><th>From</th><th>Failure mode if skipped</th><th>The test you run</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Is the number even measurable?</strong> Do you have enough independent data to see an
+          effect this small?</td>
+        <td>006</td>
+        <td>You "measure" an edge smaller than your standard error — pure noise dressed as signal.</td>
+        <td>Standard error (<code>SE ∝ 1/√n</code>); a confidence interval or bootstrap CI that must exclude
+          zero.</td>
+      </tr>
+      <tr>
+        <td><strong>2. How many things did you try?</strong> Is this the best of a search, reported as if it
+          were the only test?</td>
+        <td>007</td>
+        <td>Multiple-testing / selection bias: with 100 zero-edge tries, a "t = 3 winner" is nearly
+          guaranteed by chance.</td>
+        <td>The fair bar is not 1.96 — it is the <strong>best-of-M</strong> null (Bonferroni / BH / the
+          expected max). Haircut the t.</td>
+      </tr>
+      <tr>
+        <td><strong>3. Are your observations really independent?</strong> Do the errors persist or overlap?</td>
+        <td>009</td>
+        <td>Autocorrelation / overlap shrinks the <em>effective</em> sample; the naïve t is inflated by
+          multiples.</td>
+        <td>Recompute the SE with <strong>Newey–West (HAC)</strong>; check <code>n_eff</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>4. Is the error variance constant?</strong> Or do the loud days / noisy names drive the
+          fit?</td>
+        <td>009</td>
+        <td>Heteroskedasticity mis-states the SE (usually too small); the t is overstated.</td>
+        <td><strong>White / HC</strong> robust standard errors.</td>
+      </tr>
+      <tr>
+        <td><strong>5. Did the future leak in?</strong> And are you regressing stationary things?</td>
+        <td>004, 008, 009</td>
+        <td>Leakage (full-sample scaling, look-ahead) or spurious regression on non-stationary levels
+          manufactures a huge, fake t.</td>
+        <td>Strict temporal discipline; regress <em>returns</em>, not <em>prices</em>; recheck any t that
+          survives.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Notice what every failure mode has in common — the load-bearing insight of the whole quarter, which you
+    proved formally in Lesson 009 and should now say in your sleep: <strong>in every one of these, the point
+    estimate can be perfectly fine; it is the <em>standard error</em> — and therefore the t-statistic, the
+    <em>claim</em> — that is the lie.</strong> A checkpoint failure is almost never "your β̂ was wrong." It is
+    "you believed a t-statistic you had not earned the right to believe."
+  </p>
+
+  <h2>The one skill: the spurious-signal autopsy</h2>
+  <p>
+    The integrative skill this checkpoint certifies is a <strong>procedure</strong>: given a claimed edge with
+    a headline t-statistic, subject it to the five questions <em>in order of how much they can inflate a
+    t</em>, and watch what survives. Call it the autopsy. It matters that you run all five even after one
+    already kills the signal, because in the real world the flaws stack — a signal can be simultaneously
+    overlap-inflated <em>and</em> cherry-picked <em>and</em> leakage-tainted, and a defensible write-up names
+    all of them, not just the first.
+  </p>
+  <p>
+    Two of those audits produce a clean, quantitative haircut you can compute on the spot, so let us make them
+    concrete before the visual. First, <strong>overlap (question 3)</strong>: from Lesson 009, overlapping
+    <code>h</code>-period returns give errors that are strongly positively autocorrelated, and for AR(1)-like
+    persistence the honest standard error is larger than the naïve one by roughly <code>√[(1+φ)/(1−φ)]</code>.
+    The honest t is the reported t <em>divided</em> by that inflation factor. Second, <strong>the search
+    (question 2)</strong>: from Lesson 007, if the reported t was the best of <code>M</code> tried strategies,
+    the fair benchmark is not the single-test 1.96 — it is the <strong>expected maximum of <code>M</code>
+    draws under the null</strong>, <code>E[max of M]</code>. A "surviving" statistic subtracts that bar. So the
+    autopsy turns one gaudy headline number into a chain:
+  </p>
+  <div class="formula">t<sub>reported</sub> &nbsp;→&nbsp; t<sub>NW</sub> = t<sub>reported</sub> / √[(1+φ)/(1−φ)] &nbsp;→&nbsp; t<sub>survives</sub> = t<sub>NW</sub> − E[max of M]</div>
+  <p>
+    The widget below runs exactly this chain on a headline <code>t = 6.2</code> (a number that would make any
+    junior researcher's heart race) that came from a 21-day overlapping regression, and lets you set how many
+    strategies <code>M</code> were tried before this "winner" was found. Predict first, then move the slider.
+  </p>
+
+  <p>Commit a prediction before you touch the slider:</p>
+  <div id="predict1"></div>
+
+  <div id="autopsy"></div>
+  <p class="viz-cap">
+    Three bars: the <strong>Reported</strong> naïve t (6.2); after the <strong>overlap</strong> audit
+    (Newey–West divides it by the SE-inflation factor, here ≈2.7, to ≈2.3 — still "significant"!); and after
+    the <strong>search</strong> audit (subtract the expected best-of-<code>M</code> null). The dashed line is
+    the naïve 1.96 bar. At <code>M = 1</code> a real, marginal edge survives; by <code>M = 10</code> and
+    beyond it is dead. A t of 6 that dies is not a paradox — it is what a heteroskedastic, overlap-inflated,
+    cherry-picked mirage looks like once you audit it.
+  </p>
+  <p>
+    Sit with the lesson of that widget, because it is the entire quarter in one picture: <strong>the same
+    dataset, the same β̂, the same "t = 6.2" — and the honest conclusion swings from "a real edge" to "pure
+    noise" depending only on questions the naïve analyst never asked.</strong> The number on the screen was
+    never the evidence. The evidence is the number <em>after</em> you have accounted for how many independent
+    observations you really had and how many things you tried. This is why the mission phrases success as
+    knowing "exactly what you are standing on": the autopsy is how you find the floor.
+  </p>
+
+  <h2>A worked autopsy (do this in your head before the lab)</h2>
+  <div class="callout">
+    <strong>The case.</strong> A colleague shows you a backtest: signal <code>S</code> predicts the next
+    month's (21-trading-day) return; regressing the overlapping monthly forward return on <code>S</code>, daily,
+    over ~3 years (<code>n ≈ 800</code>) gives β̂ &gt; 0 with a <strong>naïve t of 6.2</strong> and they are
+    already sizing the trade. Run the five questions.
+    <br><br>
+    <strong>Q1 — measurable?</strong> 800 rows, yes on paper — but see Q3, the <em>effective</em> n is far
+    smaller. <strong>Q4 — heteroskedasticity?</strong> Returns cluster in volatility (Lesson 004), so switch to
+    White SE; here it barely moves the t (≈6.2 → ≈6.2), which is itself a <em>clue</em>: the problem is not
+    variance, it is dependence. <strong>Q3 — overlap?</strong> Consecutive monthly windows share 20 of 21 days,
+    so the errors are massively autocorrelated. Newey–West with <code>L ≈ 21</code> lags inflates the SE by
+    ≈2.7×, so <code>t → 6.2 / 2.7 ≈ 2.3</code>, and the implied <code>n_eff = n / 2.7² ≈ 110</code> — you had
+    ~110 independent observations, not 800. <strong>Q2 — the search?</strong> Ask the colleague: "how many
+    signals did you try before this one?" If the answer is "about 50," the fair bar is <code>E[max of 50] ≈
+    2.25</code>, so the surviving margin is <code>2.3 − 2.25 ≈ 0.05</code> — <strong>gone.</strong>
+    <strong>Q5 — leakage?</strong> Was <code>S</code> standardized using the whole sample's mean and vol? If so,
+    even the 2.3 is optimistic. <strong>Verdict: kill it.</strong> The β̂ was fine; the t-statistic was a
+    stack of three lies.
+  </div>
+  <p>
+    That worked case is the exact shape of the lab, and of a real research meeting. Note the discipline: you
+    did not need to be <em>told</em> the flaw. You ran the battery, and the battery found it. That is the
+    difference between a data-miner and a researcher, and it is the difference this checkpoint grades.
+  </p>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <div class="trap">
+    <strong>Trap — the ways a checkpoint (and a career) is failed.</strong>
+    <strong>(1) Stopping at the first green light.</strong> The naïve t cleared 1.96, so you shipped. The whole
+    point is that 1.96 is the <em>start</em> of the audit, not the end.
+    <strong>(2) Fixing the estimate instead of the standard error.</strong> Chasing a "better β̂" when the
+    problem was always the SE / the effective sample size. Keep the estimate; fix the inference.
+    <strong>(3) Forgetting the trials you did not report.</strong> The single most common way real research
+    fools itself: the reported t is the survivor of a silent search, benchmarked against 1.96 as if it were the
+    only test. Always ask "best of how many?"
+    <strong>(4) Confusing in-sample fit with edge.</strong> A high R² on returns is a red flag, not a
+    trophy — it usually means leakage (Lesson 009). Real edges have tiny R².
+    <strong>(5) Regressing levels, not returns.</strong> Two unrelated random walks look strongly "related";
+    the giant t is spurious. Difference your data (this becomes rigorous in Q3, units 021/027).
+    <strong>(6) Performing fluency instead of admitting confusion.</strong> The meta-trap. If you cannot
+    explain <em>why</em> a t deflated, you have not passed — you have memorized. Say "I don't know yet" and run
+    the test.
+  </div>
+
+  <h2>The exit criteria (the bar you must clear)</h2>
+  <p>
+    You have <strong>passed Unit 010</strong>, and may advance to Q2, when you can do all of the following cold
+    — no notes, no re-reading the lessons:
+  </p>
+  <ul class="checklist">
+    <li>Run the <strong>lab</strong> (<code>labs/0010-checkpoint-spurious-signal.ipynb</code>) end to end: its
+      CHECK cells pass and the EXIT TICKET prints a correct verdict on the planted signal.</li>
+    <li>State the <strong>five questions</strong> of the audit from memory, and for each, name the failure mode
+      and the test.</li>
+    <li>Explain in one sentence <strong>why the point estimate survives but the t-statistic lies</strong> under
+      heteroskedasticity, autocorrelation, and selection.</li>
+    <li>Given a claimed t and (a) an overlap horizon and (b) a search count <code>M</code>, produce the
+      <strong>honest, deflated t</strong> — dividing by the overlap inflation and subtracting the best-of-M
+      bar.</li>
+    <li>Correctly <strong>kill or confirm</strong> the lab's signal <em>and</em> a second scenario you have not
+      seen (ask your teacher for a fresh one), articulating <em>which</em> of the five questions did the
+      killing.</li>
+  </ul>
+  <p>
+    If any of these is shaky, that is not a failure — it is information. Re-quiz on the specific lesson (say
+    <code>Re-quiz me on Lesson 007</code>) and return. <strong>Do not advance on a shaky checkpoint;</strong>
+    Q2 (stochastic calculus and pricing) assumes this hygiene is automatic, and it does not get easier to
+    install later.
+  </p>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“The overlap audit already killed the naïve t. Why run the other four?”</dt>
+    <dd>
+      Two reasons. First, in a real notebook you do not know in advance which audit will bite — running only
+      the one you guessed is exactly the un-signposted trap the checkpoint tests. Second, a defensible write-up
+      quantifies <em>all</em> the damage: "the t fell from 6.2 to 2.3 for overlap, and the fair bar given 50
+      trials is 2.25, so there is no surviving edge" is a far stronger statement than "overlap was a problem."
+      A PM will attack every angle; you want to have closed them all first.
+    </dd>
+    <dt>“Isn't subtracting E[max of M] just double-counting if I also Bonferroni-correct?”</dt>
+    <dd>
+      They are two encodings of the same idea (control false discoveries under a search), so you use
+      <em>one</em>, not both. Lesson 007's Bonferroni/BH raise the <em>p-value hurdle</em>; the "subtract
+      E[max of M]" haircut lowers the <em>statistic</em> to a surviving margin. The autopsy widget uses the
+      expected-max form because it plots cleanly as a single deflating bar, and because it is the exact spirit
+      of the deflated Sharpe ratio you will meet in Year 2 (unit 055). Pick the tool that fits the write-up;
+      never stack two multiple-testing corrections.
+    </dd>
+    <dt>“How would I know M — the number of strategies tried — if I'm auditing someone else's work?”</dt>
+    <dd>
+      You ask, and you count generously. The honest M includes every variant silently discarded: parameter
+      grids, alternative signals, universes, look-back windows, and the "I just eyeballed a few charts"
+      trials that never got logged. Researchers systematically under-report M, which is why selection bias is
+      the most common cause of false discoveries. When you cannot pin it down, report the surviving t as a
+      function of M (as the widget does) and let the reader see how fragile the "edge" is.
+    </dd>
+    <dt>“White barely changed the t in the worked case. Doesn't that mean robust SEs don't matter?”</dt>
+    <dd>
+      No — it means you matched the fix to the violation and learned something. White ≈ classical here says the
+      trouble is <em>not</em> heteroskedasticity; the near-identical result is a diagnostic that points you at
+      autocorrelation instead (where Newey–West then moves the t a lot). On a pure cross-section of noisy
+      small-caps, White would be the one doing the heavy lifting and Newey–West would add little. Run both;
+      which one bites tells you what kind of dependence you are facing.
+    </dd>
+    <dt>“I passed the quizzes but the lab feels hard. Am I ready for Q2?”</dt>
+    <dd>
+      The lab <em>is</em> the checkpoint; the quizzes are warm-ups. Recognition (multiple choice) is the
+      weakest form of knowing. If you can run the autopsy on the lab's planted signal, explain which question
+      killed it, and reproduce the deflated-t arithmetic on a fresh case from your teacher, you are ready. If
+      not, you have found precisely the lesson to revisit — that is the checkpoint doing its job, not a verdict
+      on you.
+    </dd>
+  </dl>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    No new source — a checkpoint <em>consolidates</em>. Revisit the two or three passages that felt shakiest
+    when you answered the warm-up: the multiple-testing sections of your Lesson 007 source and
+    <strong>Harvey, Liu &amp; Zhu (2016), <em>“…and the Cross-Section of Expected Returns,”</em></strong> for
+    why the factor-zoo needed a much higher t-hurdle; and the heteroskedasticity/HAC chapters of
+    <strong>Wooldridge</strong> and <strong>Newey &amp; West (1987)</strong> for questions 3–4. See
+    <a href="../RESOURCES.md">RESOURCES.md</a>. The best "reading," though, is the lab: reproduction under your
+    own hands is what makes the audit automatic.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0010-checkpoint-spurious-signal.ipynb"><code>labs/0010-checkpoint-spurious-signal.ipynb</code></a>
+    — a returns-analysis notebook hands you a signal with a headline t-statistic and asks: real or spurious?
+    You will run the full battery (White, Newey–West, effective sample size, the best-of-M haircut, and a
+    leakage check), then print a verdict. One of the signals is planted to fool exactly the analyst who stops
+    at 1.96. As you work, write the five questions from memory across the top of a page and tick each off.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) list the <em>five questions</em>, each
+    with its failure mode and its test. (2) Why is it always the standard error, not the coefficient, that
+    lies? (3) A signal reports <code>t = 5.0</code> from 21-day overlapping returns; the overlap SE-inflation
+    is ≈2.7 and the researcher admits trying ~20 signals (<code>E[max of 20] ≈ 1.87</code>). Is there a
+    surviving edge? (4) Name the one outcome a good quant researcher is <em>proud</em> to report. Re-read any
+    part that felt shaky before starting the lab.
+  </div>
+
+  <div class="ask-teacher">
+    Want a fresh checkpoint scenario to test yourself cold, a walk-through of the deflated-Sharpe connection,
+    or the spurious-regression (two random walks, giant fake t) demo? Ask your teacher — and paste your lab
+    EXIT TICKET for grading.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Checkpoint</strong> — a cumulative, un-signposted exit exam for a quarter; you do not advance
+      until you pass it cold.</li>
+    <li><strong>Statistical hygiene</strong> — the standing battery of audits (the five questions) that turn a
+      claimed edge into a defensible one.</li>
+    <li><strong>Spurious-signal autopsy</strong> — the procedure: deflate a headline t by overlap
+      (Newey–West), then by the best-of-M search bar, then check heteroskedasticity and leakage.</li>
+    <li><strong>Effective sample size</strong> <code>n_eff = n / (SE inflation)²</code> — how many independent
+      observations your overlapping data were really worth.</li>
+    <li><strong>Best-of-M bar / selection haircut</strong> — the fair benchmark is <code>E[max of M]</code>
+      under the null, not 1.96, when the t is the winner of a search.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    Passing this closes <strong>Year 1, Quarter 1</strong>. You arrived with strong math and code and near-zero
+    finance; you leave able to speak the market's vocabulary, read the shape of returns, and — the part that
+    earns the paycheck — <strong>audit a claimed edge and refuse to be fooled by a t-statistic.</strong> That
+    hygiene is not a phase you pass through; it is the permanent backbone of everything downstream. Q2 (units
+    011–020) turns to the math bridge — measure-theoretic probability, Brownian motion, Itô's lemma, SDEs, and
+    pricing a European option three independent ways — a very different flavor, but you will still be asking
+    "how do I know this number is real?" at every step. In Year 2 the same five questions reappear with sharper
+    teeth as purged cross-validation, the deflated Sharpe ratio, and the probability of backtest overfitting.
+    You just built the floor they all stand on. Confirm the lab passes, then advance.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0009-regression-done-right.html">← Lesson 009</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 011 — Measure-theoretic probability (Q2) →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/autopsy-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 10, count: 4 });
+
+  Autopsy.mount(document.getElementById("autopsy"), { t0: 6.2, infl: 2.7, m: 50 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "A signal reports a naïve t = 6.2 from 21-day OVERLAPPING returns, and it was the best of ~50 signals the researcher tried. After a full statistical-hygiene audit, the honest verdict is most likely:",
+    options: [
+      { label: "A strong, clearly real edge (t stays high)", value: "strong" },
+      { label: "A marginal but real edge worth trading", value: "marginal" },
+      { label: "No surviving edge — the t was a mirage", value: "dead" }
+    ],
+    correct: "dead",
+    reveal: "Overlap alone divides the t by ≈2.7 (→ ≈2.3). Then the fair bar for the best of 50 tries is E[max of 50] ≈ 2.25, so the surviving margin is ≈0.05 — gone. A t of 6.2 can be pure noise once you account for effective sample size and the silent search."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: you're handed a returns-analysis notebook claiming an edge, with no hint about what (if anything) is wrong. Walk through how you decide whether the edge is real — and name what you're testing at each step.",
+    points: [
+      "It's the standard error / t-statistic that's suspect, not the point estimate",
+      "Q1 measurable: enough independent data vs. SE (∝1/√n); CI must exclude zero",
+      "Q2 search: fair bar is E[max of M] / Bonferroni-BH, not 1.96 — haircut the t",
+      "Q3 overlap/autocorrelation: Newey–West SE, check n_eff",
+      "Q4 heteroskedasticity: White/HC robust SE",
+      "Q5 leakage / non-stationarity: temporal discipline, regress returns not prices",
+      "Run all five even after one kills it; report which question did the killing"
+    ],
+    model: "I never trust the headline t-statistic on sight, because everything I learned this quarter says the coefficient can be fine while the standard error — and therefore the t, which is the actual claim — is a lie. So I run a fixed battery in order of how badly each issue can inflate a t. First, is the effect even measurable: with SE shrinking only as 1/√n, a tiny edge needs a long, genuinely independent history, and a bootstrap or CI on the statistic must exclude zero. Second, how many things were tried: if this t is the best of M searched signals, the fair benchmark is the expected maximum of M draws under the null (or a Bonferroni/BH hurdle), not the single-test 1.96, so I haircut the t by that bar. Third, are the observations independent: overlapping multi-period returns and persistent signals make the errors autocorrelated, so I recompute the SE with Newey–West and translate the inflation into an effective sample size n_eff = n/inflation² — often a tiny fraction of the raw count. Fourth, is the error variance constant: I switch to White/HC robust SEs; whether they move the t tells me if heteroskedasticity is the culprit. Fifth, did the future leak in or am I regressing non-stationary levels: I check for full-sample scaling and look-ahead, and I regress returns rather than prices to avoid spurious relationships. Crucially I run all five even after one already kills the signal, because in the real world the flaws stack, and a defensible verdict names every one of them and says which question did the killing. If the deflated, de-overlapped, search-corrected t no longer clears a fair bar, I kill it — and killing a bad backtest is a win, not a failure."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "Across heteroskedasticity, autocorrelation, and selection bias, the thing that is actually wrong is usually the:",
+    options: [
+      { label: "Standard error (and thus the t-stat)", value: "a" },
+      { label: "Point estimate of the coefficient β̂", value: "b" },
+      { label: "Sign of the estimated relationship", value: "c" },
+      { label: "Units the outcome was measured in", value: "d" }
+    ],
+    correct: "a",
+    explain: "In all three, β̂ stays (about) right; the inference — the standard error and the t-statistic that is your claim — is what breaks. Fix the SE, keep the estimate."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "A t-statistic that is the best of M = 100 tried strategies should be compared against a bar of roughly:",
+    options: [
+      { label: "E[max of 100 nulls] ≈ 2.5, well above 1.96", value: "a" },
+      { label: "The single-test 1.96, exactly as usual", value: "b" },
+      { label: "Zero, since selection cannot bias a t-stat", value: "c" },
+      { label: "The mean of the 100 t-stats you computed", value: "d" }
+    ],
+    correct: "a",
+    explain: "Under a search, the fair benchmark is the expected maximum of M draws under H₀ (≈2.5 for M=100), not 1.96 — that gap is the selection haircut (Lesson 007)."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "You regress 21-day overlapping forward returns on a signal and get a huge naïve t. The single most important correction is to:",
+    options: [
+      { label: "Recompute the SE with Newey–West (HAC)", value: "a" },
+      { label: "Add more predictors to raise the R²", value: "b" },
+      { label: "Drop the intercept from the regression", value: "c" },
+      { label: "Standardize the signal on the full sample", value: "d" }
+    ],
+    correct: "a",
+    explain: "Overlap makes the errors strongly autocorrelated, so the naïve SE is far too small. Newey–West restores an honest (larger) SE; option (d) would actually introduce leakage."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "For a quant researcher, the professionally valuable outcome of an honest audit is often to:",
+    options: [
+      { label: "Correctly kill a backtest that looked great", value: "a" },
+      { label: "Report the highest possible in-sample R²", value: "b" },
+      { label: "Confirm every signal that clears t = 1.96", value: "c" },
+      { label: "Maximize the number of signals shipped", value: "d" }
+    ],
+    correct: "a",
+    explain: "The value is negative knowledge — not staking capital on noise. A killed bad backtest saves real money out of sample; that is the checkpoint's whole ethos."
+  });
+</script>
+</body>
+</html>

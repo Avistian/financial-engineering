@@ -589,6 +589,46 @@ dl.objections dd {
 }
 .ols-slider, .hsk-slider, .hac-slider { flex: 1; }
 
+/* ---- Lesson 010 checkpoint visualization (spurious-signal autopsy) ---- */
+
+.autopsy-viz { margin: 1.25rem 0; }
+.autopsy-canvas {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fffdf8;
+}
+.autopsy-readout {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  min-height: 2.6rem;
+}
+.autopsy-readout strong { color: var(--ink); }
+.autopsy-verdict { font-weight: 700; }
+.autopsy-verdict.dead { color: var(--wrong); }
+.autopsy-verdict.alive { color: var(--correct); }
+.autopsy-controls {
+  display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;
+}
+.autopsy-slider-label {
+  font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted);
+  white-space: nowrap; min-width: 12.5rem;
+}
+.autopsy-slider { flex: 1; }
+
+/* ---- Checkpoint exit-criteria checklist ---- */
+ul.checklist { list-style: none; padding: 0; margin: 1rem 0; }
+ul.checklist li {
+  position: relative; padding: 0.5rem 0.5rem 0.5rem 2rem; margin: 0.4rem 0;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--bg-soft);
+  font-size: 0.92rem;
+}
+ul.checklist li::before {
+  content: "\2713"; position: absolute; left: 0.7rem; top: 0.55rem;
+  color: var(--accent); font-weight: 700;
+}
+
 @media (max-width: 480px) {
   html { font-size: 17px; }
   body { padding: 1.25rem 1rem 3rem; }

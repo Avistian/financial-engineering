@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>0004-returns-stylized-facts</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>0010-checkpoint-spurious-signal</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7796,15 +7796,21 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=64ec879f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cd4101d2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Lab-004-%E2%80%94-Returns-&amp;-the-Stylized-Facts">Lab 004 — Returns &amp; the Stylized Facts<a class="anchor-link" href="#Lab-004-%E2%80%94-Returns-&amp;-the-Stylized-Facts">¶</a></h1><p><strong>Lesson:</strong> <a href="../lessons/0004-returns-stylized-facts.html"><code>0004-returns-stylized-facts.html</code></a> · <strong>Cheat sheet:</strong> <a href="../reference/stylized-facts.html"><code>stylized-facts.html</code></a></p>
-<p><strong>The one skill:</strong> compute log returns and <em>verify the stylized facts</em> in data — fat tails, absent linear autocorrelation, volatility clustering — and see what a Gaussian series is missing.</p>
-<p><strong>Exit criteria:</strong> the EXIT TICKET cell prints cleanly (all CHECK cells pass).</p>
+<h1 id="Lab-010-%E2%80%94-Q1-Checkpoint:-is-this-signal-real,-or-spurious?">Lab 010 — Q1 Checkpoint: is this signal real, or spurious?<a class="anchor-link" href="#Lab-010-%E2%80%94-Q1-Checkpoint:-is-this-signal-real,-or-spurious?">¶</a></h1><p><strong>Lesson:</strong> <a href="../lessons/0010-q1-checkpoint.html"><code>0010-q1-checkpoint.html</code></a></p>
+<p><strong>The one skill (the whole quarter):</strong> you are handed a returns-analysis notebook that has
+<em>already discovered</em> a signal predicting next month's return, with a <strong>headline t-statistic that
+looks spectacular</strong>. Nobody tells you whether it is real. Run the full <strong>statistical-hygiene
+audit</strong> — heteroskedasticity (White), autocorrelation/overlap (Newey–West), effective sample size,
+the best-of-<em>M</em> selection haircut, and a proper empirical null — then deliver a verdict: <strong>real, or
+spurious?</strong> One signal here is <em>planted</em> to fool the analyst who stops at t = 1.96.</p>
+<p><strong>Exit criteria:</strong> every CHECK passes and the EXIT TICKET prints the correct verdict (spurious),
+naming <em>which</em> audits killed it.</p>
 <p><strong>How this notebook works</strong></p>
 <table>
 <thead>
@@ -7816,7 +7822,7 @@ a.anchor-link {
 <tbody>
 <tr>
 <td><strong>PROVIDED</strong></td>
-<td>Run it. Imports, data, helpers.</td>
+<td>Run it. Imports, the "research" data, helpers.</td>
 </tr>
 <tr>
 <td><strong>TODO</strong></td>
@@ -7828,30 +7834,30 @@ a.anchor-link {
 </tr>
 <tr>
 <td><strong>EXIT TICKET</strong></td>
-<td>Final deliverable. Prints your findings.</td>
+<td>Final deliverable. Prints your verdict.</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Environment:</strong> Python 3 + <code>numpy</code>, <code>pandas</code>, <code>scipy</code>. See <a href="./README.md"><code>labs/README.md</code></a>.</p>
+<p><strong>Environment:</strong> Python 3 + <code>numpy</code> + <code>scipy</code> + <code>statsmodels</code>. Fully self-contained (simulated —
+no network). One cell runs a small Monte-Carlo null (~15–30 s). See <a href="./README.md"><code>labs/README.md</code></a>.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=57872aa8">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3bd69764">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Running-on-Google-Colab?">Running on Google Colab?<a class="anchor-link" href="#Running-on-Google-Colab?">¶</a></h3><p>Colab opens only this single file, so the lab dependencies (numpy, scipy, statsmodels,
-yfinance, …) and the course repo are <strong>not</strong> guaranteed to be present. The cell below fixes
-that: on Colab it shallow-clones the course repo, installs <code>requirements-labs.txt</code>, and
-switches into <code>labs/</code> so relative paths resolve. <strong>On a local venv or Binder it does nothing —
-just run it and continue.</strong></p>
+<h3 id="Running-on-Google-Colab?">Running on Google Colab?<a class="anchor-link" href="#Running-on-Google-Colab?">¶</a></h3><p>Colab opens only this single file, so the lab dependencies (numpy, scipy, statsmodels, …) and
+the course repo are <strong>not</strong> guaranteed to be present. The cell below fixes that: on Colab it
+shallow-clones the course repo, installs <code>requirements-labs.txt</code>, and switches into <code>labs/</code> so
+relative paths resolve. <strong>On a local venv or Binder it does nothing — just run it and continue.</strong></p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=29de1b74">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=0bf3dcd7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7859,13 +7865,13 @@ just run it and continue.</strong></p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># @colab-bootstrap — PROVIDED. Makes the lab self-sufficient on Google Colab; a no-op elsewhere.</span>
+<div class="highlight hl-python"><pre><span></span><span class="c1"># @colab-bootstrap — PROVIDED. Makes the lab self-sufficient on Google Colab; a no-op elsewhere.</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
 
 <span class="k">if</span> <span class="s2">"google.colab"</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="s2">"/content/financial-engineering"</span><span class="p">):</span>
-        <span class="o">!</span>git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>https://github.com/Avistian/financial-engineering.git<span class="w"> </span>/content/financial-engineering
-    <span class="o">%</span><span class="k">pip</span> install -q -r /content/financial-engineering/requirements-labs.txt
+        <span class="err">!</span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">depth</span> <span class="mi">1</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Avistian</span><span class="o">/</span><span class="n">financial</span><span class="o">-</span><span class="n">engineering</span><span class="o">.</span><span class="n">git</span> <span class="o">/</span><span class="n">content</span><span class="o">/</span><span class="n">financial</span><span class="o">-</span><span class="n">engineering</span>
+    <span class="o">%</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">q</span> <span class="o">-</span><span class="n">r</span> <span class="o">/</span><span class="n">content</span><span class="o">/</span><span class="n">financial</span><span class="o">-</span><span class="n">engineering</span><span class="o">/</span><span class="n">requirements</span><span class="o">-</span><span class="n">labs</span><span class="o">.</span><span class="n">txt</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s2">"/content/financial-engineering/labs"</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">"Colab ready — working dir:"</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
 <span class="k">else</span><span class="p">:</span>
@@ -7876,374 +7882,64 @@ just run it and continue.</strong></p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a692d728">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2f450cc1">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Concept-recap-(read-before-coding)">Concept recap (read before coding)<a class="anchor-link" href="#Concept-recap-(read-before-coding)">¶</a></h2><p><strong>Log return:</strong> $r_t = \ln(P_t / P_{t-1})$. Log returns are additive across time and symmetric around 0.</p>
-<p><strong>The three facts you'll measure:</strong></p>
-<ol>
-<li><strong>Fat tails</strong> — excess kurtosis $\gg 0$ (a normal has excess kurtosis 0). Extreme moves are far more common than Gaussian predicts.</li>
-<li><strong>No linear autocorrelation</strong> — $\mathrm{corr}(r_t, r_{t+1}) \approx 0$. You can't predict direction from the last return alone.</li>
-<li><strong>Volatility clustering</strong> — $\mathrm{corr}(|r_t|, |r_{t+1}|) &gt; 0$. Big moves follow big moves, so <em>volatility</em> is forecastable even though direction isn't.</li>
-</ol>
-<p><strong>Toy worked example</strong> (not the lab's answer). For returns <code>[0.01, -0.02, 0.015, -0.03]</code>, the sign flips every step → raw lag-1 autocorrelation is <em>negative</em>, while the magnitudes <code>[.01,.02,.015,.03]</code> trend up → |r| autocorrelation is <em>positive</em>. That gap between raw and absolute autocorrelation is exactly volatility clustering.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bb753a75">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># PROVIDED — imports and data. Tries real data; falls back to a realistic</span>
-<span class="c1"># simulation with fat tails + volatility clustering so the lab always runs offline.</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">load_prices</span><span class="p">(</span><span class="n">ticker</span><span class="o">=</span><span class="s2">"SPY"</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Return a pandas Series of daily close prices."""</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">yfinance</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">yf</span>  <span class="c1"># optional; only if you have it + network</span>
-        <span class="n">px</span> <span class="o">=</span> <span class="n">yf</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">ticker</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s2">"10y"</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"Close"</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Loaded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)</span><span class="si">}</span><span class="s2"> real daily closes for </span><span class="si">{</span><span class="n">ticker</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">px</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"(Real data unavailable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">) — using a simulated series."</span><span class="p">)</span>
-    <span class="c1"># Fallback: GARCH-like vol clustering + Student-t (fat-tailed) innovations.</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="n">omega</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.90</span>
-    <span class="n">var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">);</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-    <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="n">var</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">ret</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">var</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">ret</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_t</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">price</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">ret</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Simulated </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> daily closes (fat tails + vol clustering)."</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"close"</span><span class="p">)</span>
-
-<span class="n">px</span> <span class="o">=</span> <span class="n">load_prices</span><span class="p">()</span>
-<span class="n">px</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Loaded 2512 real daily closes for SPY.
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
+<h2 id="Concept-recap-%E2%80%94-the-five-questions-(read-before-coding)">Concept recap — the five questions (read before coding)<a class="anchor-link" href="#Concept-recap-%E2%80%94-the-five-questions-(read-before-coding)">¶</a></h2><p>You are auditing a claimed edge. In <strong>every</strong> failure mode below the point estimate $\hat\beta$ can
+be fine — it is the <strong>standard error</strong>, and therefore the <strong>t-statistic (your claim)</strong>, that lies.</p>
+<table>
 <thead>
-<tr style="text-align: right;">
-<th>Ticker</th>
-<th>SPY</th>
-</tr>
 <tr>
-<th>Date</th>
-<th></th>
+<th>#</th>
+<th>Question</th>
+<th>Failure mode</th>
+<th>The test</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<th>2016-07-14</th>
-<td>184.093842</td>
+<td>1</td>
+<td>Measurable?</td>
+<td>edge smaller than its SE</td>
+<td>$SE\propto 1/\sqrt n$; CI excludes 0</td>
 </tr>
 <tr>
-<th>2016-07-15</th>
-<td>183.846893</td>
+<td>2</td>
+<td>How many tried?</td>
+<td>selection / multiple testing</td>
+<td>fair bar = $E[\max\text{ of }M]$, not 1.96</td>
 </tr>
 <tr>
-<th>2016-07-18</th>
-<td>184.340897</td>
+<td>3</td>
+<td>Independent obs?</td>
+<td>autocorrelation / overlap</td>
+<td><strong>Newey–West</strong> SE; $n_\text{eff}=n/\text{inflation}^2$</td>
 </tr>
 <tr>
-<th>2016-07-19</th>
-<td>184.153488</td>
+<td>4</td>
+<td>Constant variance?</td>
+<td>heteroskedasticity</td>
+<td><strong>White / HC</strong> SE</td>
 </tr>
 <tr>
-<th>2016-07-20</th>
-<td>184.920151</td>
+<td>5</td>
+<td>Future leaked?</td>
+<td>look-ahead / non-stationary</td>
+<td>temporal discipline; regress <em>returns</em></td>
 </tr>
 </tbody>
 </table>
+<p><strong>The autopsy chain:</strong> $\;t_\text{reported}\;\to\;t_\text{NW}=t_\text{reported}/\sqrt{(1+\varphi)/(1-\varphi)}\;\to\;t_\text{survives}=t_\text{NW}-E[\max\text{ of }M].$</p>
+<p><strong>Ground truth of this lab (so you can grade yourself):</strong> the daily returns are <strong>pure
+heteroskedastic noise with zero true edge</strong> from any signal. Every "discovery" here is therefore
+spurious <em>by construction</em> — the audit must be able to <em>reveal</em> that without being told.</p>
 </div>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=08d85c81">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Task-1-%E2%80%94-Log-returns">Task 1 — Log returns<a class="anchor-link" href="#Task-1-%E2%80%94-Log-returns">¶</a></h3><p><strong>Goal:</strong> turn the price series into a clean log-return series <code>r</code>.</p>
-<p><strong>Why it matters:</strong> every downstream fact is a property of returns, not prices. Getting the transform right (and dropping the first NaN) is the foundation.</p>
-<p><strong>Hint boundary:</strong> use <code>np.log</code> on the ratio of consecutive prices, then drop the NaN. Do <em>not</em> use simple percentage returns here.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1eeee03c">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TODO — compute log returns of px, drop the leading NaN, name the result `r`.</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">px</span> <span class="o">/</span> <span class="n">px</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">SPY</span>
-<span class="n">r</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[13]:</div>
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>count    2511.000000
-mean        0.000559
-std         0.011320
-min        -0.115887
-25%        -0.003587
-50%         0.000718
-75%         0.005931
-max         0.099863
-Name: SPY, dtype: float64</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f6493689">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CHECK — do not edit</span>
-<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">),</span> <span class="s2">"r must be a pandas Series"</span>
-<span class="k">assert</span> <span class="n">r</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"drop the NaN(s)"</span>
-<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s2">"daily log returns should have a near-zero mean"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 1 OK — </span><span class="si">%d</span><span class="s2"> log returns"</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Task 1 OK — 2511 log returns
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=62d651ed">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Task-2-%E2%80%94-Fat-tails">Task 2 — Fat tails<a class="anchor-link" href="#Task-2-%E2%80%94-Fat-tails">¶</a></h3><p><strong>Goal:</strong> compute the <strong>excess kurtosis</strong> of <code>r</code> and compare it to a normal (0).</p>
-<p><strong>Why it matters:</strong> if kurtosis is large, any risk model built on the normal distribution will undercount crash risk.</p>
-<p><strong>Hint boundary:</strong> <code>scipy.stats.kurtosis</code> returns <em>excess</em> kurtosis by default (Fisher). Store it in <code>excess_kurt</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ac4a4154">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TODO — excess kurtosis of r (scipy Fisher definition).</span>
-<span class="n">excess_kurt</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"excess kurtosis = </span><span class="si">{</span><span class="n">excess_kurt</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  (normal = 0)"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>excess kurtosis = 15.39  (normal = 0)
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=185ac734">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CHECK — do not edit</span>
-<span class="k">assert</span> <span class="n">excess_kurt</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"real/simulated returns should show clear excess kurtosis (fat tails)"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 2 OK — fat tails confirmed"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Task 2 OK — fat tails confirmed
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=46348934">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Task-3-%E2%80%94-The-autocorrelation-gap-(volatility-clustering)">Task 3 — The autocorrelation gap (volatility clustering)<a class="anchor-link" href="#Task-3-%E2%80%94-The-autocorrelation-gap-(volatility-clustering)">¶</a></h3><p><strong>Goal:</strong> compute lag-1 autocorrelation of <strong>raw</strong> returns vs <strong>absolute</strong> returns.</p>
-<p><strong>Why it matters:</strong> raw ≈ 0 (direction unpredictable) but |r| &gt; 0 (volatility predictable) is the single most important asymmetry a QR exploits — model vol, not direction, from the past.</p>
-<p><strong>Hint boundary:</strong> <code>Series.autocorr(lag=1)</code>. Apply it to <code>r</code> and to <code>r.abs()</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8da4d46a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TODO — lag-1 autocorrelation of raw and absolute returns.</span>
-<span class="n">ac_raw</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">autocorr</span><span class="p">(</span><span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">ac_abs</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">autocorr</span><span class="p">(</span><span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"autocorr(r, 1)   = </span><span class="si">{</span><span class="n">ac_raw</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"autocorr(|r|, 1) = </span><span class="si">{</span><span class="n">ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>autocorr(r, 1)   = -0.133
-autocorr(|r|, 1) = +0.363
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=358cf9c2">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CHECK — do not edit</span>
-<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ac_raw</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.15</span><span class="p">,</span> <span class="s2">"raw-return autocorrelation should be small"</span>
-<span class="k">assert</span> <span class="n">ac_abs</span> <span class="o">&gt;</span> <span class="n">ac_raw</span><span class="p">,</span> <span class="s2">"|return| autocorrelation should exceed raw — that's volatility clustering"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 3 OK — volatility clustering confirmed"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Task 3 OK — volatility clustering confirmed
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d33a6cda">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Task-4-%E2%80%94-What-a-Gaussian-is-missing">Task 4 — What a Gaussian is missing<a class="anchor-link" href="#Task-4-%E2%80%94-What-a-Gaussian-is-missing">¶</a></h3><p><strong>Goal:</strong> simulate an IID normal series with the <em>same mean and std</em> as <code>r</code>, and compare its excess kurtosis and |r| autocorrelation.</p>
-<p><strong>Why it matters:</strong> this makes concrete <em>why</em> the normal-IID assumption (behind naïve Sharpe/t-stat significance) is wrong for markets.</p>
-<p><strong>Hint boundary:</strong> draw <code>len(r)</code> samples from <code>np.random.default_rng(0).normal(mean, std, size)</code>; wrap in a <code>pd.Series</code>; reuse the same two measurements.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d8b109c9">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=aac227f2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8251,19 +7947,71 @@ autocorr(|r|, 1) = +0.363
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TODO — build a Gaussian comparison series `g` and measure it.</span>
-<span class="n">g</span> <span class="o">=</span> 
-<span class="n">g</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
-<span class="n">g_kurt</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
-<span class="n">g_ac_abs</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">autocorr</span><span class="p">(</span><span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Gaussian excess kurtosis = </span><span class="si">{</span><span class="n">g_kurt</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">  (vs real </span><span class="si">{</span><span class="n">excess_kurt</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Gaussian autocorr(|g|,1) = </span><span class="si">{</span><span class="n">g_ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">  (vs real </span><span class="si">{</span><span class="n">ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<div class="highlight hl-python"><pre><span></span><span class="c1"># PROVIDED — the "research notebook" you were handed. Run it; do not change it.</span>
+<span class="c1"># A junior researcher searched M persistent signals for one that predicts the next month's</span>
+<span class="c1"># (h=21-day) return, sampled DAILY so the forward windows overlap. They report the best signal's</span>
+<span class="c1"># naive t-statistic and are ready to trade. You know (they do not) that returns are pure noise.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span><span class="p">,</span> <span class="n">integrate</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_research_case</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">2024</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="n">h</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="c1"># Daily returns: PURE NOISE with volatility clustering (heteroskedastic), NO signal edge.</span>
+    <span class="n">lv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="n">lv</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">lv</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">vol</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">lv</span> <span class="o">-</span> <span class="n">lv</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">lv</span><span class="o">.</span><span class="n">std</span><span class="p">()))</span>
+    <span class="n">daily_ret</span> <span class="o">=</span> <span class="n">vol</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>
+    <span class="c1"># Overlapping h-day FORWARD return aligned to each day t.</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">daily_ret</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+    <span class="c1"># M candidate persistent (AR(1)) signals, all INDEPENDENT of returns.</span>
+    <span class="n">sigs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">M</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+            <span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.95</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">sigs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">s</span> <span class="o">-</span> <span class="n">s</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">s</span><span class="o">.</span><span class="n">std</span><span class="p">())[:</span><span class="n">n</span><span class="p">]</span>
+    <span class="c1"># The search: pick the signal with the biggest naive |t| (this is the "discovery").</span>
+    <span class="n">naive_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">sigs</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span><span class="o">.</span><span class="n">tvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">)])</span>
+    <span class="n">best</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">naive_t</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">sigs</span><span class="p">[</span><span class="n">best</span><span class="p">],</span> <span class="n">best</span><span class="p">,</span> <span class="n">naive_t</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">M</span>
+
+<span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">best_j</span><span class="p">,</span> <span class="n">naive_t</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">build_research_case</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Searched M = </span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2"> signals over n = </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> overlapping </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">-day windows."</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"WINNER: signal #</span><span class="si">{</span><span class="n">best_j</span><span class="si">}</span><span class="s2">  -&gt;  headline naive t = </span><span class="si">{</span><span class="n">naive_t</span><span class="p">[</span><span class="n">best_j</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">   (looks amazing!)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"(for context, |t| of the M candidates ranged </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">naive_t</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">naive_t</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">expected_max_normal</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""E[max of M i.i.d. standard normals] — the fair 'best-of-M' bar under the null."""</span>
+    <span class="k">if</span> <span class="n">M</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span> <span class="o">*</span> <span class="n">M</span> <span class="o">*</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">val</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">val</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f2259b03">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b13fe679">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-1-%E2%80%94-Reproduce-the-headline-t-(the-na%C3%AFve-claim)">Task 1 — Reproduce the headline t (the naïve claim)<a class="anchor-link" href="#Task-1-%E2%80%94-Reproduce-the-headline-t-(the-na%C3%AFve-claim)">¶</a></h3><p><strong>Goal:</strong> regress the overlapping forward return <code>y</code> on the winning signal <code>x</code> with plain OLS and
+read off the naïve slope t-statistic. Store <code>t_classical</code> and <code>se_classical</code>.</p>
+<p><strong>Why:</strong> this is the number the researcher is excited about. Everything after this is you refusing
+to take it at face value.</p>
+<p><strong>Hint boundary:</strong> <code>t_classical = fit.tvalues[1]</code>, <code>se_classical = fit.bse[1]</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=157e065e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8271,16 +8019,19 @@ autocorr(|r|, 1) = +0.363
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CHECK — do not edit</span>
-<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">g_kurt</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"a Gaussian series should have ~0 excess kurtosis"</span>
-<span class="k">assert</span> <span class="n">g_ac_abs</span> <span class="o">&lt;</span> <span class="n">ac_abs</span><span class="p">,</span> <span class="s2">"the Gaussian series should NOT show volatility clustering"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 4 OK — the Gaussian is missing both fat tails and clustering"</span><span class="p">)</span>
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — reproduce the naive OLS t-statistic on the winning signal.</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">fit</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">beta1</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">t_classical</span> <span class="o">=</span> <span class="n">____</span>                    <span class="c1"># fit.tvalues[1]</span>
+<span class="n">se_classical</span> <span class="o">=</span> <span class="n">____</span>                   <span class="c1"># fit.bse[1]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"beta1 = </span><span class="si">{</span><span class="n">beta1</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,  classical SE = </span><span class="si">{</span><span class="n">se_classical</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,  naive t = </span><span class="si">{</span><span class="n">t_classical</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=757fdc5d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=97f4b0a0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8288,33 +8039,309 @@ autocorr(|r|, 1) = +0.363
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># EXIT TICKET — paste this output to your teacher.</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"=== Stylized-facts report ==="</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n returns              : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"excess kurtosis (real) : </span><span class="si">{</span><span class="n">excess_kurt</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">   [fat tails: &gt;0]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"autocorr raw returns   : </span><span class="si">{</span><span class="n">ac_raw</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">   [~0: no linear predictability]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"autocorr |returns|     : </span><span class="si">{</span><span class="n">ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">   [&gt;raw: volatility clustering]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Gaussian kurtosis      : </span><span class="si">{</span><span class="n">g_kurt</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">   [~0: thin tails]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Gaussian autocorr |g|  : </span><span class="si">{</span><span class="n">g_ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">   [~0: no clustering]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">One-sentence takeaway (edit me):"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Real returns show fat tails and volatility clustering that an IID-normal series lacks,"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"so any Sharpe/t-stat assuming normal-IID overstates significance."</span><span class="p">)</span>
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t_classical</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">,</span> <span class="s2">"the headline naive t should be gaudy (the search + overlap saw to that)"</span>
+<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">t_classical</span><span class="p">,</span> <span class="n">fit</span><span class="o">.</span><span class="n">tvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">se_classical</span><span class="p">,</span> <span class="n">fit</span><span class="o">.</span><span class="n">bse</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Task 1 OK — reproduced the headline: naive |t| = </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">t_classical</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">. Now audit it."</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=901e9aca">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9c167a9f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-2-%E2%80%94-Question-4:-heteroskedasticity-(White-/-HC)">Task 2 — Question 4: heteroskedasticity (White / HC)<a class="anchor-link" href="#Task-2-%E2%80%94-Question-4:-heteroskedasticity-(White-/-HC)">¶</a></h3><p><strong>Goal:</strong> recompute the slope's SE with <strong>White HC1</strong> robust errors. Store <code>se_white</code>, <code>t_white</code>.</p>
+<p><strong>Why:</strong> returns cluster in volatility, so heteroskedasticity is the prime suspect. But watch what
+happens — if White barely moves the t, that near-equality is itself a <strong>diagnostic</strong>: the problem
+is <em>not</em> variance, it is dependence (Task 3).</p>
+<p><strong>Hint boundary:</strong> <code>fit_white = fit.get_robustcov_results(cov_type="HC1")</code>, <code>se_white = fit_white.bse[1]</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ba48e5e3">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — White (heteroskedasticity-robust) SE.</span>
+<span class="n">fit_white</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">get_robustcov_results</span><span class="p">(</span><span class="n">cov_type</span><span class="o">=</span><span class="s2">"HC1"</span><span class="p">)</span>
+<span class="n">se_white</span> <span class="o">=</span> <span class="n">____</span>                       <span class="c1"># fit_white.bse[1]</span>
+<span class="n">t_white</span> <span class="o">=</span> <span class="n">fit_white</span><span class="o">.</span><span class="n">tvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"classical : SE = </span><span class="si">{</span><span class="n">se_classical</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,  t = </span><span class="si">{</span><span class="n">t_classical</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"White HC1 : SE = </span><span class="si">{</span><span class="n">se_white</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,  t = </span><span class="si">{</span><span class="n">t_white</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">   (ratio White/classical = </span><span class="si">{</span><span class="n">se_white</span><span class="o">/</span><span class="n">se_classical</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3fd36a82">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="n">se_white</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">t_white</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">se_white</span> <span class="o">/</span> <span class="n">se_classical</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s2">"White ~ classical here: heteroskedasticity is NOT the main issue"</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 2 OK — White barely moves the t. That is a clue: the culprit is autocorrelation, not variance."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=85cd55bf">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-3-%E2%80%94-Question-3:-overlap-/-autocorrelation-(Newey%E2%80%93West)-and-effective-n">Task 3 — Question 3: overlap / autocorrelation (Newey–West) and effective n<a class="anchor-link" href="#Task-3-%E2%80%94-Question-3:-overlap-/-autocorrelation-(Newey%E2%80%93West)-and-effective-n">¶</a></h3><p><strong>Goal:</strong> recompute the SE with <strong>Newey–West (HAC)</strong> using <code>maxlags = h</code>, then convert the SE
+inflation into an <strong>effective sample size</strong>. Store <code>se_nw</code>, <code>t_nw</code>, <code>inflation</code>, <code>n_eff</code>.</p>
+<p><strong>Why:</strong> consecutive 21-day windows share 20 days, so the errors are massively autocorrelated and
+the naïve SE is far too small. Newey–West restores an honest (larger) SE; <code>n_eff = n / inflation²</code>
+tells you how few <em>independent</em> observations you truly had.</p>
+<p><strong>Hint boundary:</strong> <code>fit_nw = fit.get_robustcov_results(cov_type="HAC", maxlags=h, use_correction=True)</code>;
+<code>inflation = se_nw / se_classical</code>; <code>n_eff = n / inflation**2</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8b7bf88b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — Newey-West (HAC) SE + effective sample size.</span>
+<span class="n">fit_nw</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">get_robustcov_results</span><span class="p">(</span><span class="n">cov_type</span><span class="o">=</span><span class="s2">"HAC"</span><span class="p">,</span> <span class="n">maxlags</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">use_correction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">se_nw</span> <span class="o">=</span> <span class="n">____</span>                          <span class="c1"># fit_nw.bse[1]</span>
+<span class="n">t_nw</span> <span class="o">=</span> <span class="n">fit_nw</span><span class="o">.</span><span class="n">tvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">inflation</span> <span class="o">=</span> <span class="n">se_nw</span> <span class="o">/</span> <span class="n">se_classical</span>
+<span class="n">n_eff</span> <span class="o">=</span> <span class="n">____</span>                          <span class="c1"># n / inflation**2</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Newey-West: SE = </span><span class="si">{</span><span class="n">se_nw</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,  t = </span><span class="si">{</span><span class="n">t_nw</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">   (maxlags = </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SE inflation = </span><span class="si">{</span><span class="n">inflation</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">x   -&gt;   n_eff = </span><span class="si">{</span><span class="n">n_eff</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> independent obs (out of </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=dca17f7e">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="n">se_nw</span> <span class="o">&gt;</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">se_classical</span><span class="p">,</span> <span class="s2">"with 21-day overlap the HAC SE should dwarf the naive one"</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t_nw</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t_classical</span><span class="p">),</span> <span class="s2">"the naive t must deflate once autocorrelation is accounted for"</span>
+<span class="k">assert</span> <span class="n">n_eff</span> <span class="o">&lt;</span> <span class="n">n</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Task 3 OK — the headline t deflated to </span><span class="si">{</span><span class="n">t_nw</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">; you really had ~</span><span class="si">{</span><span class="n">n_eff</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> independent obs."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=97e8bbd1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-4-%E2%80%94-Question-2:-the-best-of-M-selection-haircut">Task 4 — Question 2: the best-of-<em>M</em> selection haircut<a class="anchor-link" href="#Task-4-%E2%80%94-Question-2:-the-best-of-M-selection-haircut">¶</a></h3><p><strong>Goal:</strong> the reported signal was the <strong>winner of a search over M candidates</strong>, so the fair bar is
+not 1.96 — it is <code>E[max of M]</code> draws under the null. Compute the <strong>surviving margin</strong>
+<code>surviving = |t_nw| - E[max of M]</code>. Store <code>emax</code> and <code>surviving</code>.</p>
+<p><strong>Why:</strong> picking the best of many noisy tries manufactures large statistics for free (Lesson 007).
+Only the margin <em>above</em> the best-of-M bar is potential evidence.</p>
+<p><strong>Hint boundary:</strong> <code>emax = expected_max_normal(M)</code>; <code>surviving = abs(t_nw) - emax</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=1c542d68">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — subtract the fair best-of-M null bar.</span>
+<span class="n">emax</span> <span class="o">=</span> <span class="n">expected_max_normal</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>         <span class="c1"># E[max of M standard normals]</span>
+<span class="n">surviving</span> <span class="o">=</span> <span class="n">____</span>                      <span class="c1"># abs(t_nw) - emax</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"best-of-</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2"> bar  E[max] = </span><span class="si">{</span><span class="n">emax</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"surviving margin = |t_nw| - E[max] = </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">t_nw</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">emax</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">surviving</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=dae9c89f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="n">emax</span> <span class="o">&gt;</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s2">"E[max of 60 normals] should be well above the single-test 1.96"</span>
+<span class="k">assert</span> <span class="n">surviving</span> <span class="o">&lt;</span> <span class="mf">1.96</span><span class="p">,</span> <span class="s2">"after de-overlapping AND the selection haircut, the signal must not clear the bar"</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Task 4 OK — surviving margin </span><span class="si">{</span><span class="n">surviving</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> &lt; 1.96: the 'edge' does not clear an honest bar."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=962bacf2">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-5-%E2%80%94-The-decisive-test:-a-proper-empirical-null-(kill-or-confirm)">Task 5 — The decisive test: a proper empirical null (kill or confirm)<a class="anchor-link" href="#Task-5-%E2%80%94-The-decisive-test:-a-proper-empirical-null-(kill-or-confirm)">¶</a></h3><p><strong>Goal:</strong> the analytic haircut is a shortcut; the rigorous test is to simulate the <em>whole search
+under the null</em> and ask how often pure noise produces a best-of-M Newey–West |t| at least as big
+as ours. Compute a Monte-Carlo <code>p_value</code> and set the verdict <code>is_spurious</code>.</p>
+<p><strong>Why:</strong> this fuses Lesson 007 (multiple testing) and Lesson 009 (HAC) into one honest number — the
+probability that the whole <em>procedure</em> (search + overlap) fakes a result this good with no edge at
+all. A large p-value means "indistinguishable from noise."</p>
+<p><strong>Hint boundary:</strong> <code>p_value = (np.sum(null_best &gt;= abs(t_nw)) + 1) / (len(null_best) + 1)</code>;
+<code>is_spurious = p_value &gt; 0.10</code>. (The null is PROVIDED; ~15–30 s to run.)</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=dff46975">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># PROVIDED — simulate the best-of-M Newey-West |t| under NO edge (fresh noise each rep). ~15-30s.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">best_of_M_nw_t_under_null</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">):</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="n">h</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">lv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="n">lv</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="n">lv</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">vol</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">lv</span> <span class="o">-</span> <span class="n">lv</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">lv</span><span class="o">.</span><span class="n">std</span><span class="p">()))</span>
+    <span class="n">daily</span> <span class="o">=</span> <span class="n">vol</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">daily</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+    <span class="n">best</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+            <span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.95</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">xx</span> <span class="o">=</span> <span class="p">((</span><span class="n">s</span> <span class="o">-</span> <span class="n">s</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">s</span><span class="o">.</span><span class="n">std</span><span class="p">())[:</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">yy</span><span class="p">,</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">xx</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get_robustcov_results</span><span class="p">(</span><span class="n">cov_type</span><span class="o">=</span><span class="s2">"HAC"</span><span class="p">,</span> <span class="n">maxlags</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">use_correction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">best</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">tvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">best</span>
+
+<span class="n">rng_null</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">null_best</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">best_of_M_nw_t_under_null</span><span class="p">(</span><span class="n">rng_null</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">)])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"null best-of-</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2"> NW |t|: mean </span><span class="si">{</span><span class="n">null_best</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, 95th pct </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">null_best</span><span class="p">,</span><span class="mf">0.95</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, max </span><span class="si">{</span><span class="n">null_best</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=cbe74f27">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — turn the empirical null into a p-value and a verdict.</span>
+<span class="n">p_value</span> <span class="o">=</span> <span class="n">____</span>                        <span class="c1"># (np.sum(null_best &gt;= abs(t_nw)) + 1) / (len(null_best) + 1)</span>
+<span class="n">is_spurious</span> <span class="o">=</span> <span class="n">____</span>                    <span class="c1"># p_value &gt; 0.10</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"observed best-of-</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2"> NW |t| = </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">t_nw</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"empirical p-value = </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   -&gt;   is_spurious = </span><span class="si">{</span><span class="n">is_spurious</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c189f51f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">p_value</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+<span class="k">assert</span> <span class="n">is_spurious</span><span class="p">,</span> <span class="s2">"the winning signal is noise by construction; a proper null must fail to reject"</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Task 5 OK — p = </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">: the headline is exactly what a search over pure noise produces."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3a0d5696">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># EXIT TICKET — paste this output to your teacher.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"=== Q1 CHECKPOINT: spurious-signal autopsy ==="</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Claim              : signal #</span><span class="si">{</span><span class="n">best_j</span><span class="si">}</span><span class="s2"> predicts </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">-day fwd returns  (searched M = </span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Q1 measurable?     : n = </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> overlapping obs, but effective n_eff = </span><span class="si">{</span><span class="n">n_eff</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Q4 heteroskedastic?: White t = </span><span class="si">{</span><span class="n">t_white</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  vs classical </span><span class="si">{</span><span class="n">t_classical</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  -&gt; not the issue"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Q3 overlap/autocorr: Newey-West t = </span><span class="si">{</span><span class="n">t_nw</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  (SE inflated </span><span class="si">{</span><span class="n">inflation</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">x)  &lt;- big deflation"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Q2 selection (M=</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2">): E[max] bar = </span><span class="si">{</span><span class="n">emax</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  -&gt;  surviving margin = </span><span class="si">{</span><span class="n">surviving</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Decisive null test : empirical p = </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  (best-of-M under pure noise)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VERDICT: </span><span class="si">{</span><span class="s1">'SPURIOUS - do not trade'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">is_spurious</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'survives - investigate further'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"One-sentence defense (edit me):"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A headline t of </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">t_classical</span><span class="p">)</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> collapsed to an honest t of </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">t_nw</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> once 21-day overlap was"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"accounted for (n_eff ~ </span><span class="si">{</span><span class="n">n_eff</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">), and even that is a routine best-of-</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2"> outcome under pure noise"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"(p = </span><span class="si">{</span><span class="n">p_value</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">) - the standard error and the silent search, not the slope, were the lie."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=927334e2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="Stretch-(optional,-ungraded)">Stretch (optional, ungraded)<a class="anchor-link" href="#Stretch-(optional,-ungraded)">¶</a></h3><ul>
-<li>Plot <code>r.rolling(21).std()</code> — see the vol clusters with your eyes.</li>
-<li>Fit a Student-t to <code>r</code> with <code>stats.t.fit</code> and read off the degrees of freedom (lower ν = fatter tails).</li>
-<li>Compute the autocorrelation of <code>|r|</code> out to lag 20 and observe the slow decay (long memory in volatility → motivates HAR-RV in Unit 025).</li>
+<li><strong>Non-overlapping baseline.</strong> Rebuild <code>y</code> sampling every <code>h</code>-th day (no overlap) and re-audit the
+same winning signal: classical and Newey–West SEs should now roughly agree and <code>n_eff ≈ n</code>. The
+cleanest fix is not to overlap in the first place.</li>
+<li><strong>Vary M.</strong> Re-run <code>build_research_case</code> with <code>M ∈ {1, 5, 20, 100}</code> and watch the headline naïve t
+climb purely because you searched harder — while the empirical p-value stays unremarkable.</li>
+<li><strong>Spurious regression (Q5).</strong> Regress one random-walk <em>level</em> (<code>np.cumsum</code> of noise) on another,
+independent one. Watch a huge R² and |t| &gt; 4 appear between two unrelated series — then confirm it
+vanishes when you regress their <em>differences</em> (returns). This is Q3 (units 021/027) previewed.</li>
+<li><strong>Plant a real edge.</strong> Add a tiny true slope (<code>y += 0.02 * x</code>) to the winner and re-audit: now the
+Newey–West t and the empirical p-value should tell a different, honest story. Prove to yourself the
+audit does not kill <em>everything</em> — only the unearned claims.</li>
 </ul>
 </div>
 </div>
