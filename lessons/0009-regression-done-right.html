@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 009 — Regression Done Right: OLS, Robust Standard Errors, and When Regression Lies</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q1</p>
+  <h1>Regression Done Right: OLS, Robust Standard Errors, and When Regression Lies</h1>
+  <p class="subtitle">Lesson 009 · Foundations · ~60 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <p>
+    Regression is the single most-used tool in quantitative research: does this signal predict next
+    period's return? By how much? And — the question that separates a researcher from a data-miner —
+    <em>are we sure the relationship is real, or did we just fit noise?</em> Every factor model, every
+    "signal → return" study, every risk decomposition you will build is a regression underneath. Lesson 008
+    gave you the geometry of projection; this lesson cashes it in, because <strong>ordinary least squares
+    (OLS) regression is projection</strong> — the same picture, now doing the work.
+  </p>
+  <p>
+    This lesson's single skill: <strong>run a regression of returns on a signal, read off the slope and its
+    t-statistic, and — crucially — know when that t-statistic is a lie.</strong> Because the two things that
+    make markets hard, both of which you already met, are exactly the two things that break the textbook
+    regression formulas: <strong>heteroskedasticity</strong> (volatility clustering, Lesson 004 — the error
+    variance is not constant) and <strong>autocorrelation</strong> (overlapping returns and persistent
+    signals — the errors are serially correlated). Under either one, OLS still gives you the right
+    <em>slope</em>, but the naïve standard error is wrong, the t-stat is inflated, and you manufacture a
+    "discovery" that is really a multiple-testing accident waiting to happen (Lesson 007). The fixes —
+    <strong>White (heteroskedasticity-robust)</strong> and <strong>Newey–West (HAC)</strong> standard errors —
+    are the payoff, and the lab.
+  </p>
+
+  <h2>The linear model</h2>
+  <p>
+    Write down what we are assuming. We have <code>n</code> observations. For each one, an outcome
+    <code>y<sub>i</sub></code> (say, an asset's return next period) and a row of <code>p</code> predictors
+    <code>x<sub>i</sub></code> (signals, factor exposures, a constant). The <strong>linear model</strong> says
+    the outcome is a weighted sum of the predictors plus an error:
+  </p>
+  <div class="formula">y<sub>i</sub> = β₀ + β₁ x<sub>i1</sub> + … + β<sub>p</sub> x<sub>ip</sub> + ε<sub>i</sub>&nbsp;&nbsp;⇔&nbsp;&nbsp; y = Xβ + ε</div>
+  <p>
+    Every symbol, defined:
+  </p>
+  <ul>
+    <li><strong><code>y</code></strong> — the <code>n</code>-vector of outcomes (the thing we want to explain
+      or predict).</li>
+    <li><strong><code>X</code></strong> — the <code>n × p</code> <strong>design matrix</strong>: one row per
+      observation, one column per predictor. The first column is usually all 1s, so that <code>β₀</code> is an
+      <strong>intercept</strong> (the predicted <code>y</code> when every signal is zero).</li>
+    <li><strong><code>β</code></strong> — the <code>p</code>-vector of <strong>coefficients</strong> we want to
+      estimate. <code>β<sub>k</sub></code> is the change in <code>y</code> per one-unit change in predictor
+      <code>k</code>, <em>holding the others fixed</em>. In markets, a signal's <code>β</code> is its
+      predictive strength; the intercept on a return regression is the ghost of Lesson 001's
+      <strong>alpha</strong>.</li>
+    <li><strong><code>ε</code></strong> — the <strong>error</strong> (or disturbance): everything about
+      <code>y</code> that the predictors do not capture. This term is where all the trouble — and all the
+      honesty — lives.</li>
+  </ul>
+  <p>
+    We do not know <code>β</code>; we estimate it from data and call the estimate <code>β̂</code> ("beta hat").
+    The <strong>fitted value</strong> is <code>ŷ<sub>i</sub> = x<sub>i</sub>β̂</code> and the
+    <strong>residual</strong> is <code>e<sub>i</sub> = y<sub>i</sub> − ŷ<sub>i</sub></code> — the model's
+    miss on observation <code>i</code>. Note the distinction we will keep sharp all lesson: <code>ε</code> is
+    the <em>true, unobservable</em> error; <code>e</code> is the <em>observed</em> residual, our estimate of
+    it.
+  </p>
+
+  <h2>OLS: minimize the squared misses</h2>
+  <p>
+    There are infinitely many lines you could draw through a cloud of points. <strong>Ordinary least
+    squares</strong> picks the one <code>β̂</code> that makes the residuals smallest in a specific sense: it
+    minimizes the <strong>sum of squared residuals (SSR)</strong>.
+  </p>
+  <div class="formula">β̂ = argmin<sub>β</sub> Σ<sub>i</sub> (y<sub>i</sub> − x<sub>i</sub>β)² = argmin<sub>β</sub> ‖y − Xβ‖²</div>
+  <p>
+    Why squared, not absolute, misses? Two reasons that matter. First, squaring makes the objective smooth and
+    gives a unique closed-form answer (below). Second — and this is a real modelling choice — squaring
+    <em>punishes large misses disproportionately</em>, so OLS is sensitive to outliers, a fact we return to in
+    the trap. Setting the derivative of the objective to zero gives the <strong>normal equations</strong>
+    <code>XᵀXβ̂ = Xᵀy</code>, whose solution is the formula you must be able to write from memory:
+  </p>
+  <div class="formula">β̂ = (XᵀX)<sup>−1</sup> Xᵀy</div>
+  <p>
+    For a <strong>single</strong> predictor plus a constant (the case to internalize), this collapses to
+    something you already know from Lesson 008:
+  </p>
+  <div class="formula">β̂₁ = Cov(x, y) / Var(x) = Σ(x<sub>i</sub>−x̄)(y<sub>i</sub>−ȳ) / Σ(x<sub>i</sub>−x̄)² , &nbsp; β̂₀ = ȳ − β̂₁x̄</div>
+  <p>
+    The slope is the covariance of predictor and outcome, <em>normalized by how much the predictor itself
+    varies</em>. A signal that co-moves strongly with returns but barely moves itself gets a large
+    coefficient; a signal that swings wildly gets its co-movement divided down. And the intercept is pinned so
+    the line passes through the center of mass <code>(x̄, ȳ)</code> — a fact worth remembering.
+  </p>
+  <div class="callout">
+    <strong>Worked example (five days, one signal).</strong> Signal <code>x = (−2, −1, 0, 1, 2)</code> (say a
+    standardized order-flow imbalance) and next-day returns (in %) <code>y = (−1.5, −0.5, 0.5, 0.5, 2.0)</code>.
+    Then <code>x̄ = 0</code>, <code>ȳ = 0.2</code>. <code>Sxy = Σ(x−x̄)(y−ȳ) = 3.4 + 0.7 + 0 + 0.3 + 3.6 = 8.0</code>
+    and <code>Sxx = Σ(x−x̄)² = 4+1+0+1+4 = 10</code>. So <strong>β̂₁ = 8.0/10 = 0.80</strong> and
+    <code>β̂₀ = 0.2 − 0.80·0 = 0.20</code>. The fitted line is <code>ŷ = 0.2 + 0.8x</code>. Residuals
+    <code>e = (−0.1, +0.1, +0.3, −0.5, +0.2)</code>. Check two things:
+    <code>Σe<sub>i</sub> = 0</code> and <code>Σx<sub>i</sub>e<sub>i</sub> = 0</code> — the residuals are
+    <em>orthogonal</em> to both the constant and the signal. That orthogonality is not a coincidence; it is
+    the whole geometry, next.
+  </div>
+
+  <h2>OLS is projection (the Lesson 008 payoff)</h2>
+  <p>
+    Here is the picture that makes least squares click. The columns of <code>X</code> span a subspace — the
+    <strong>column space</strong>, all the vectors you can build as <code>Xβ</code> for some <code>β</code>.
+    The outcome <code>y</code> almost never lies in that subspace (that is what the error is). OLS finds the
+    point in the column space <em>closest</em> to <code>y</code>: it drops a perpendicular from <code>y</code>
+    onto the subspace. The foot of that perpendicular is the fitted vector <code>ŷ</code>, and the perpendicular
+    itself is the residual vector <code>e</code>. In symbols, <code>ŷ = Hy</code> where
+    <code>H = X(XᵀX)<sup>−1</sup>Xᵀ</code> is the <strong>hat matrix</strong> (it "puts the hat on"
+    <code>y</code>) — a projection matrix onto the column space. The residual <code>e = (I − H)y</code> is
+    orthogonal to every column of <code>X</code>, which is exactly the <code>Σe = 0</code> and
+    <code>Σxe = 0</code> you just verified.
+  </p>
+  <p>
+    "Closest point in a subspace" is precisely the projection you saw in Lesson 008 when PCA reconstructed a
+    panel from a few components. Least squares is that same operation, and it is why the residual carries no
+    remaining linear information about the predictors: any leftover correlation would mean <code>y</code> was
+    not yet at its closest approach. Drag the slope below and watch the sum of squared residuals bottom out
+    exactly at the projection line:
+  </p>
+
+  <div id="ols"></div>
+  <p class="viz-cap">
+    Teal dots are (signal, return) pairs; the black dot is the center of mass <code>(x̄, ȳ)</code> that every
+    candidate line passes through. Gold is the candidate line; the red stubs are residuals. The readout tracks
+    SSR. It reaches its minimum — and the residuals balance to zero and become orthogonal to <code>x</code> —
+    exactly when the slope equals <code>β̂ = Cov/Var</code>. No other line does better; that is what
+    "projection" means.
+  </p>
+
+  <h2>How good is the fit? R² and the residual variance</h2>
+  <p>
+    Two summaries of a fit you must read fluently. The <strong>residual variance</strong>
+    <code>σ̂² = SSR / (n − p)</code> estimates the error variance <code>Var(ε)</code>; the divisor
+    <code>n − p</code> (degrees of freedom, <code>p</code> = number of coefficients including the intercept) is
+    the regression cousin of Lesson 006's Bessel correction — we used up <code>p</code> pieces of information
+    fitting the coefficients. The <strong>coefficient of determination</strong>
+  </p>
+  <div class="formula">R² = 1 − SSR / SST , &nbsp; SST = Σ(y<sub>i</sub> − ȳ)²</div>
+  <p>
+    is the fraction of the outcome's variance the model explains: <code>R² = 0</code> means the predictors add
+    nothing beyond the mean, <code>R² = 1</code> means a perfect fit. In our worked example
+    <code>SST = 6.80</code> and <code>SSR = 0.40</code>, so <code>R² = 1 − 0.40/6.80 ≈ 0.94</code> — a
+    suspiciously good fit, because it is a toy. <strong>A warning you will need constantly in finance:</strong>
+    real return-prediction regressions have <em>tiny</em> R² — an R² of 0.01 (1%) on daily returns can be a
+    genuinely valuable signal. Chasing high R² is a beginner's error; the money is in a small, <em>robust</em>
+    edge, not a high in-sample fit. High R² on returns usually means you have leaked the future into the
+    predictors.
+  </p>
+
+  <h2>Inference: the coefficient's standard error and t-stat</h2>
+  <p>
+    A slope of 0.80 is worthless without knowing its <strong>uncertainty</strong>. If we drew a different
+    sample, we would get a different <code>β̂</code>; the spread of <code>β̂</code> across hypothetical samples
+    is its <strong>standard error</strong> <code>SE(β̂)</code> — the regression version of Lesson 006's
+    standard error. Under the <strong>classical assumptions</strong> — errors have mean zero, constant variance
+    <code>σ²</code> (<strong>homoskedastic</strong>), and are uncorrelated across observations (no
+    autocorrelation) — the sampling variance of the coefficient vector has a clean closed form:
+  </p>
+  <div class="formula">Var(β̂) = σ² (XᵀX)<sup>−1</sup>&nbsp;&nbsp;;&nbsp;&nbsp; single predictor: &nbsp; Var(β̂₁) = σ² / Σ(x<sub>i</sub>−x̄)² = σ² / Sxx</div>
+  <p>
+    Read the single-predictor formula: your slope is more precise when the error variance <code>σ²</code> is
+    small and when the predictor varies a lot (large <code>Sxx</code> — a signal that spans a wide range pins
+    the slope down better). We do not know <code>σ²</code>, so we plug in <code>σ̂²</code> and take the square
+    root to get <code>SE(β̂₁) = √(σ̂²/Sxx)</code>. Then, exactly as in Lesson 007, we form the
+    <strong>t-statistic</strong>
+  </p>
+  <div class="formula">t = β̂₁ / SE(β̂₁)</div>
+  <p>
+    to test the null "this predictor has no effect" (<code>β₁ = 0</code>). In our worked example
+    <code>σ̂² = SSR/(n−2) = 0.40/3 = 0.133</code>, so <code>SE(β̂₁) = √(0.133/10) = 0.115</code> and
+    <code>t = 0.80/0.115 ≈ 6.9</code> — comfortably past the ±1.96 bar. <strong>This is the number a PM will
+    grill you on</strong>, and it is exactly the number the next two sections show you how to compute
+    <em>wrong</em> without noticing.
+  </p>
+  <p>
+    The theorem underneath all this is <strong>Gauss–Markov</strong>: under those classical assumptions, OLS is
+    <strong>BLUE</strong> — the Best (minimum-variance) Linear Unbiased Estimator. The word doing the heavy
+    lifting is "under those assumptions." Markets violate two of them routinely, and when they do, the
+    <code>β̂</code> stays unbiased but the SE formula above quietly breaks.
+  </p>
+
+  <p>Commit a prediction before the reveal:</p>
+  <div id="predict1"></div>
+
+  <h2>When regression lies I: heteroskedasticity</h2>
+  <p>
+    <strong>Heteroskedasticity</strong> (Greek: "different scatter") means the error variance is not constant —
+    <code>Var(ε<sub>i</sub>) = σ<sub>i</sub>²</code> changes across observations. This is the <em>default</em>
+    in finance, not the exception: volatility clusters (Lesson 004), so calm days have small errors and turbulent
+    days have large ones; and cross-sectionally, small-cap or high-beta names are simply noisier than blue chips.
+    The classical formula <code>Var(β̂₁) = σ²/Sxx</code> assumed one <code>σ²</code> for everyone. When that is
+    false, two things happen — and only one of them is obvious:
+  </p>
+  <ul>
+    <li><strong>The coefficient <code>β̂</code> is still unbiased and consistent.</strong> OLS does not need
+      homoskedasticity to find the right slope <em>on average</em>. Do not throw out your point estimate.</li>
+    <li><strong>The classical standard error is wrong</strong> — often badly, and usually <em>too small</em>
+      when the loudest errors sit on the highest-leverage (most extreme-<code>x</code>) points. A too-small SE
+      means a too-big t-stat: you declare significance that is not there.</li>
+  </ul>
+  <p>
+    The fix is the <strong>White (heteroskedasticity-robust, "HC") standard error</strong> (White, 1980). Instead
+    of assuming one <code>σ²</code>, it estimates each observation's error variance by its own squared residual
+    <code>e<sub>i</sub>²</code> and plugs that into a "sandwich" formula. For a single predictor:
+  </p>
+  <div class="formula">Var<sub>White</sub>(β̂₁) = Σ(x<sub>i</sub>−x̄)² e<sub>i</sub>² / (Sxx)²</div>
+  <p>
+    Compare it to the classical <code>σ̂²/Sxx = [Σe<sub>i</sub>²/(n−2)]/Sxx</code>: the classical version pulls
+    the residuals out as one average variance, while White keeps each <code>e<sub>i</sub>²</code> attached to its
+    own leverage weight <code>(x<sub>i</sub>−x̄)²</code>. If big residuals coincide with extreme
+    <code>x</code>, White is larger — and correct. In practice you almost never hand-derive this; you pass one
+    argument (<code>cov_type='HC1'</code> in <code>statsmodels</code>, <code>vcovHC</code> in R). But you must
+    know <em>why</em> and <em>when</em>. Slide the heteroskedasticity up and watch the honest SE pull away from
+    the naïve one:
+  </p>
+
+  <div id="hsk"></div>
+  <p class="viz-cap">
+    The gold band is <code>±2σ<sub>i</sub></code> around the fitted line — it fans out with <code>|x|</code> as
+    you raise <code>k</code>. The slope <code>β̂</code> stays unbiased (it just gets noisier). But the classical
+    SE lags the truth while the White SE tracks it: at high <code>k</code> the robust SE is meaningfully larger,
+    so the naïve t-stat is overstated. The naïve regression would call this signal "significant" more often than
+    it deserves.
+  </p>
+
+  <h2>When regression lies II: autocorrelation & Newey–West</h2>
+  <p>
+    The second violation is subtler and, in finance, more dangerous: <strong>autocorrelated errors</strong> —
+    <code>ε<sub>t</sub></code> is correlated with <code>ε<sub>t−1</sub></code>. The classic culprit is
+    <strong>overlapping returns</strong>. Suppose you regress the <em>next 21-day (monthly) return</em> on a
+    signal, but you do it every day. Consecutive observations share 20 of their 21 days, so consecutive errors
+    are mechanically almost identical — hugely positively autocorrelated. Persistent regressors (a slow-moving
+    valuation signal) do the same thing. You <em>think</em> you have thousands of independent data points; you
+    effectively have a handful.
+  </p>
+  <p>
+    The consequence mirrors heteroskedasticity but is usually worse: <code>β̂</code> stays unbiased, but
+    positive autocorrelation makes the classical SE <strong>far too small</strong>, so t-stats can be inflated
+    by <em>multiples</em>. A "t = 4" monthly-overlap result can be a genuine "t = 1.5" once you account for the
+    overlap. The general fix is the <strong>Newey–West</strong> standard error (Newey &amp; West, 1987), a
+    <strong>HAC</strong> estimator — <strong>H</strong>eteroskedasticity- <strong>A</strong>nd-
+    <strong>A</strong>utocorrelation- <strong>C</strong>onsistent. It generalizes White by adding in the
+    autocovariances of the residuals out to <code>L</code> lags, down-weighted by the <strong>Bartlett
+    kernel</strong> <code>w<sub>l</sub> = 1 − l/(L+1)</code> (the taper is what guarantees the estimated variance
+    stays non-negative):
+  </p>
+  <div class="formula">LRV = γ̂₀ + 2 Σ<sub>l=1</sub><sup>L</sup> (1 − l/(L+1)) γ̂<sub>l</sub></div>
+  <p>
+    where <code>γ̂<sub>l</sub></code> is the lag-<code>l</code> autocovariance of the (leverage-weighted)
+    residuals and <code>LRV</code> is the <strong>long-run variance</strong> that replaces the naïve one. For
+    the simplest case — the standard error of a mean when the series is <code>AR(1)</code> with autocorrelation
+    <code>φ</code> — there is a clean closed form for how badly the naïve SE understates: the true variance is
+    inflated by the factor <code>(1+φ)/(1−φ)</code>, so the SE (and the honest t-stat correction) scales by its
+    square root. At <code>φ = 0.5</code> that is <code>√3 ≈ 1.7×</code>; at <code>φ = 0.8</code> it is
+    <code>√9 = 3×</code>. Move <code>φ</code> and watch the "sticky" error path and the SE gap:
+  </p>
+
+  <div id="hac"></div>
+  <p class="viz-cap">
+    The teal line is the error series over time; as <code>φ</code> rises it becomes visibly persistent (long
+    excursions away from zero — the signature of overlap). The naïve SE barely moves because it only sees the
+    one-period variance; the Newey–West SE climbs to track the true (inflated) SE. When Newey–West falls a
+    little short of "true" at very high <code>φ</code>, that is the finite-lag truncation being honest — you
+    need enough lags <code>L</code> to span the overlap.
+  </p>
+  <p>
+    Practical rule of thumb: with <code>h</code>-period overlapping returns, use at least
+    <code>L ≈ h</code> lags (many use the automatic <code>L ≈ 4(n/100)<sup>2/9</sup></code> rule). The one-line
+    takeaway you must carry into every backtest: <strong>if your observations overlap or your errors persist,
+    a naïve t-stat is not evidence — recompute it Newey–West before you believe any number.</strong>
+  </p>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <div class="trap">
+    <strong>Trap — the ways a regression lies to you.</strong>
+    <strong>(1) Heteroskedasticity.</strong> Non-constant error variance (vol clustering, noisy small-caps)
+    leaves <code>β̂</code> unbiased but breaks the classical SE — usually making the t-stat too big. Fix:
+    White/HC robust SEs, always, on financial data.
+    <strong>(2) Autocorrelation / overlapping returns.</strong> Serially correlated errors (overlapping
+    horizons, persistent signals) shrink your <em>effective</em> sample size and inflate t-stats by multiples.
+    Fix: Newey–West (HAC) with enough lags; better yet, avoid overlap by sampling non-overlapping periods.
+    <strong>(3) Spurious regression.</strong> Regressing one <em>non-stationary</em> (trending, unit-root)
+    series on another manufactures a huge R² and a giant t-stat between things that have nothing to do with
+    each other — the reason we regress <em>returns</em>, not <em>prices</em>. This is previewed here and made
+    rigorous in Q3 (stationarity &amp; cointegration, units 021, 027).
+    <strong>(4) Omitted-variable bias.</strong> Leave out a predictor that belongs in the model and is
+    correlated with the ones you kept, and the coefficients you kept absorb its effect — now <code>β̂</code> is
+    <em>biased</em>, not just imprecise. "Controlling for the market" exists because of this.
+    <strong>(5) Multicollinearity.</strong> Two nearly-redundant predictors (correlated signals) make
+    <code>XᵀX</code> nearly singular; individual coefficients get huge, unstable, and sign-flipping SEs even
+    though the joint fit is fine. Echo of Lesson 008's noise-eigenvalue problem.
+    <strong>(6) Influential outliers.</strong> Because OLS squares residuals, one bad tick or a crash day can
+    swing the whole line. Always look at the scatter, not just the coefficients.
+    <strong>(7) Look-ahead / leakage.</strong> Standardizing, winsorizing, or picking the signal using the full
+    sample bleeds the future into <code>X</code>. Same discipline as Lessons 007–008, wearing a regression hat.
+  </div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“If robust standard errors are almost always right, why not just use them everywhere and forget the classical ones?”</dt>
+    <dd>
+      Largely, do. On real financial data you should default to White (for cross-sections) or Newey–West (for
+      time series / overlap). The one caveat: robust SEs are <em>large-sample</em> justified, so in very small
+      samples they can be noisy or even slightly anti-conservative (HC1/HC3 corrections help). They also cannot
+      rescue a <em>biased</em> <code>β̂</code> — if you have omitted-variable bias or leakage, no SE fixes that.
+      Robust SEs cure the <em>precision</em> lie, not the <em>estimate</em> lie.
+    </dd>
+    <dt>“Heteroskedasticity and autocorrelation both leave β̂ unbiased. So why do I care — I just want the coefficient.”</dt>
+    <dd>
+      Because a coefficient without a trustworthy standard error is not a research result; it is a number. Your
+      whole job (the mission) is to say "this edge is real" and survive a skeptical audit. The t-stat is the
+      claim; if it is inflated 3× by overlap you will confidently ship noise, and it will die out of sample. The
+      point estimate tells you the <em>size</em> of the effect; the honest SE tells you whether you are allowed
+      to believe it exists.
+    </dd>
+    <dt>“Is OLS the same as the correlation or the beta I keep hearing about?”</dt>
+    <dd>
+      They are cousins. A single-predictor slope is <code>β̂ = Cov(x,y)/Var(x)</code>; the correlation is
+      <code>ρ = Cov(x,y)/(σ<sub>x</sub>σ<sub>y</sub>)</code> — same numerator, different normalizer, so
+      <code>β̂ = ρ · σ<sub>y</sub>/σ<sub>x</sub></code>. "Market beta" is literally the slope of a stock's
+      returns regressed on the market's returns. And <code>R²</code> in a single regression is exactly
+      <code>ρ²</code>. Regression, correlation, and beta are three views of the same covariance.
+    </dd>
+    <dt>“Why regress returns on the signal and not prices on prices?”</dt>
+    <dd>
+      Because prices are non-stationary (they wander), and regressing one wandering series on another produces a
+      <em>spurious</em> relationship: high R², high t-stat, zero meaning (trap 3). Two unrelated random walks
+      will look strongly "related" in levels. Returns are (nearly) stationary, so their regression is
+      interpretable. The formal machinery — unit roots, cointegration — is Q3; for now, the rule is "regress
+      returns, difference your data, be suspicious of any regression on raw price levels."
+    </dd>
+    <dt>“How many lags should Newey–West use?”</dt>
+    <dd>
+      Enough to span the dependence. With <code>h</code>-period overlapping returns, the errors have an
+      <code>MA(h−1)</code> structure, so use at least <code>L = h − 1</code> lags; a common automatic choice is
+      <code>L ≈ 4(n/100)<sup>2/9</sup></code>. Too few lags and you under-correct (t-stat still inflated); far
+      too many and the estimate gets noisy. When in doubt, check that your conclusion is stable as you vary
+      <code>L</code> — if "significance" evaporates at a reasonable lag count, it was never there.
+    </dd>
+  </dl>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    Jeffrey <strong>Wooldridge, <em>Introductory Econometrics: A Modern Approach</em></strong> — the chapters on
+    the simple and multiple regression model, then the chapter on heteroskedasticity (OLS still unbiased; robust
+    SEs). It is the standard, readable treatment and it foregrounds exactly the "when does this break?" thinking
+    this track cares about. For the autocorrelation/HAC fix, the source is Whitney <strong>Newey &amp; Kenneth
+    West (1987), <em>“A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent
+    Covariance Matrix,”</em> Econometrica 55(3)</strong> — skim it for the Bartlett-kernel idea, not the proofs.
+    See <a href="../RESOURCES.md">RESOURCES.md</a> → Math foundations. This is the inference backbone for every
+    signal study, factor regression, and IC calculation later in the track (units 062–064 OFI→impact, unit 085
+    the Fundamental Law).
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0009-robust-standard-errors.ipynb"><code>labs/0009-robust-standard-errors.ipynb</code></a>
+    — regress overlapping returns on a signal, get a gaudy naïve t-stat, then watch it deflate under White and
+    Newey–West standard errors; confirm OLS-as-projection (residuals orthogonal to X) and the
+    <code>β̂ = Cov/Var</code> identity by hand. As you work, write from memory the OLS formula, the classical
+    <code>Var(β̂)</code>, and the one-sentence reason overlap inflates a t-stat.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) write <code>β̂ = (XᵀX)<sup>−1</sup>Xᵀy</code>
+    and, for one predictor, <code>β̂₁ = Cov(x,y)/Var(x)</code>. (2) State what "OLS is projection" means and why
+    the residuals are orthogonal to <code>X</code>. (3) Under heteroskedasticity, what stays right and what
+    breaks — and what fixes it? (4) Explain in one sentence why overlapping monthly returns inflate a daily
+    regression's t-stat, and name the fix. Re-read any part that felt shaky.
+  </div>
+
+  <div class="ask-teacher">
+    Want the normal equations derived from the projection picture, a full worked White vs. Newey–West on a real
+    overlapping-return series, or the spurious-regression simulation (two random walks, giant fake t-stat)? Ask
+    your teacher for a worked example.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Linear model</strong> <code>y = Xβ + ε</code>; <strong>design matrix</strong> <code>X</code>,
+      <strong>coefficients</strong> <code>β</code>, <strong>error</strong> <code>ε</code> vs. observed
+      <strong>residual</strong> <code>e</code>.</li>
+    <li><strong>OLS</strong>: <code>β̂ = (XᵀX)<sup>−1</sup>Xᵀy</code> minimizes SSR; one predictor
+      <code>β̂₁ = Cov(x,y)/Var(x)</code>.</li>
+    <li><strong>OLS as projection</strong>: <code>ŷ = Hy</code>, hat matrix
+      <code>H = X(XᵀX)<sup>−1</sup>Xᵀ</code>; residuals orthogonal to the column space.</li>
+    <li><strong>R²</strong> <code>= 1 − SSR/SST</code>; residual variance <code>σ̂² = SSR/(n−p)</code>;
+      <strong>Gauss–Markov / BLUE</strong>.</li>
+    <li><strong>Standard error</strong> and <strong>t-stat</strong> of a coefficient; classical
+      <code>Var(β̂) = σ²(XᵀX)<sup>−1</sup></code>.</li>
+    <li><strong>Heteroskedasticity</strong> → <strong>White / HC robust SE</strong>;
+      <strong>autocorrelation</strong> → <strong>Newey–West (HAC) SE</strong>, Bartlett kernel, long-run
+      variance.</li>
+    <li>Traps: <strong>spurious regression</strong>, <strong>omitted-variable bias</strong>,
+      <strong>multicollinearity</strong>, <strong>outliers/leverage</strong>, <strong>leakage</strong>.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    You can now run a regression, read its slope as <code>Cov/Var</code>, see it as a projection, and — the part
+    that earns the paycheck — tell when its t-statistic is honest. That closes the statistical-hygiene thread of
+    Q1: Lesson 006 gave you standard errors and the bootstrap, 007 gave you multiple-testing discipline, 008 the
+    covariance geometry, and 009 the workhorse that turns a signal into a defensible number with a trustworthy
+    error bar. Next is <a href="../reference/curriculum.html">Unit 010, the Q1 checkpoint</a>: you will reproduce
+    a returns-analysis notebook and catch a <em>planted</em> spurious signal — which is precisely a heteroskedastic,
+    overlap-inflated, leakage-tainted regression wearing a disguise. Everything downstream (OFI→impact regressions
+    in Y2 Q3, the Fundamental Law's information coefficient in Y3 Q1, every factor model) is this lesson, scaled up.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0008-linear-algebra-pca.html">← Lesson 008</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 010 — Q1 checkpoint →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/ols-fit-viz.js"></script>
+<script src="../assets/hsk-viz.js"></script>
+<script src="../assets/hac-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 9, count: 3 });
+
+  OLSFit.mount(document.getElementById("ols"), { seed: 7 });
+  HSK.mount(document.getElementById("hsk"), { k: 2.5 });
+  HAC.mount(document.getElementById("hac"), { phi: 0.5 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "You regress next-month (21-day) returns on a signal, sampled every day so consecutive windows overlap by 20 days. Compared with the truth, the naïve OLS t-statistic will most likely be:",
+    options: [
+      { label: "About right — OLS handles this automatically", value: "ok" },
+      { label: "Too small — overlap hides real significance", value: "small" },
+      { label: "Too large — overlap fakes extra significance", value: "large" }
+    ],
+    correct: "large",
+    reveal: "Overlapping windows make consecutive errors highly positively autocorrelated, which shrinks your effective sample size. The naïve SE is too small, so the t-stat is inflated — often by 2–3×. Recompute it Newey–West before believing it."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: under heteroskedasticity or autocorrelation, why is the OLS slope β̂ still fine but its usual t-statistic untrustworthy — and what do you do about it?",
+    points: [
+      "OLS β̂ is unbiased/consistent without the constant-variance or no-autocorrelation assumptions",
+      "Those assumptions only enter the SE formula Var(β̂)=σ²(XᵀX)⁻¹",
+      "Heteroskedasticity: classical SE mis-stated (usually too small) → t too big",
+      "Autocorrelation/overlap: effective n shrinks → SE far too small → t inflated by multiples",
+      "Fix: White/HC robust SE for heteroskedasticity, Newey–West (HAC) for autocorrelation",
+      "The point estimate survives; only the reported precision needed fixing"
+    ],
+    model: "OLS finds the slope by minimizing squared errors — the projection of y onto the column space — and that operation needs neither constant error variance nor independent errors to land on the right β̂ on average, so β̂ stays unbiased and consistent under both problems. What those two classical assumptions actually buy you is the tidy formula Var(β̂)=σ²(XᵀX)⁻¹. Under heteroskedasticity (non-constant σᵢ², e.g. volatility clustering), that single-σ² formula is simply the wrong variance — usually too small when the biggest errors sit at extreme x — so the t-stat is overstated; the White/HC 'sandwich' SE, which uses each residual's own eᵢ², fixes it. Under autocorrelation (overlapping returns, persistent signals), consecutive errors move together, so you have far fewer independent observations than n suggests; the naïve SE understates the truth by roughly √[(1+φ)/(1−φ)] for AR(1) errors, and the Newey–West HAC estimator restores it by adding Bartlett-weighted autocovariances out to L lags. In both cases the discipline is the same: keep the estimate, replace the standard error, and only then read the t-stat — because the t-stat, not the coefficient, is the claim a PM will attack."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "For a single predictor plus a constant, the OLS slope β̂₁ equals:",
+    options: [
+      { label: "Cov(x, y) divided by the variance of x", value: "a" },
+      { label: "Cov(x, y) divided by the variance of y", value: "b" },
+      { label: "The correlation of x and y exactly", value: "c" },
+      { label: "The mean of y minus the mean of x", value: "d" }
+    ],
+    correct: "a",
+    explain: "β̂₁ = Cov(x,y)/Var(x): co-movement normalized by how much the predictor itself varies. (β̂₁ = ρ·σ_y/σ_x, so it equals the correlation only when the two SDs match.)"
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "Under heteroskedasticity (non-constant error variance), ordinary least squares gives you:",
+    options: [
+      { label: "An unbiased β̂ but a mis-stated standard error", value: "a" },
+      { label: "A biased β̂ and a correct standard error", value: "b" },
+      { label: "Both a biased β̂ and a wrong standard error", value: "c" },
+      { label: "Everything correct — nothing needs adjusting", value: "d" }
+    ],
+    correct: "a",
+    explain: "OLS needs neither homoskedasticity nor independence to be unbiased; only the SE formula breaks. Fix the SE (White/HC), keep the estimate."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Regressing overlapping multi-period returns sampled every day mainly inflates the t-statistic because it:",
+    options: [
+      { label: "Positively autocorrelates the regression errors", value: "a" },
+      { label: "Makes the point estimate β̂ strongly biased", value: "b" },
+      { label: "Raises the residual variance σ̂² artificially", value: "c" },
+      { label: "Turns the design matrix exactly singular", value: "d" }
+    ],
+    correct: "a",
+    explain: "Overlapping windows share most of their days, so consecutive errors are highly correlated; the effective sample is tiny, the naïve SE too small, and the t-stat inflated. Fix with Newey–West."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "The Newey–West standard error is specifically designed to be consistent under:",
+    options: [
+      { label: "Heteroskedasticity and autocorrelation together", value: "a" },
+      { label: "Only heteroskedasticity, never autocorrelation", value: "b" },
+      { label: "Omitted-variable bias in the coefficients", value: "c" },
+      { label: "A perfectly non-stationary price-on-price fit", value: "d" }
+    ],
+    correct: "a",
+    explain: "HAC = Heteroskedasticity- And Autocorrelation-Consistent. It extends White by adding Bartlett-weighted residual autocovariances out to L lags. It cannot fix bias (omitted variables) or spurious level regressions."
+  });
+</script>
+</body>
+</html>

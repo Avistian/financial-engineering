@@ -51,6 +51,9 @@ const files = [
   "assets/haircut-viz.js",
   "assets/covariance-ellipse-viz.js",
   "assets/scree-viz.js",
+  "assets/ols-fit-viz.js",
+  "assets/hsk-viz.js",
+  "assets/hac-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -99,6 +102,27 @@ trap("Scree.mount + slide", () => {
   window.Scree.mount(el, { n: 20, rho: 0.4 });
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "90"; i.dispatch("input"); });
+});
+
+trap("OLSFit.mount + slide", () => {
+  const el = makeEl("div");
+  window.OLSFit.mount(el, { seed: 7 });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "50"; i.dispatch("input"); i.value = "100"; i.dispatch("input"); });
+});
+
+trap("HSK.mount + slide", () => {
+  const el = makeEl("div");
+  window.HSK.mount(el, { k: 1.2 });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "100"; i.dispatch("input"); });
+});
+
+trap("HAC.mount + slide", () => {
+  const el = makeEl("div");
+  window.HAC.mount(el, { phi: 0.5 });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "85"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

@@ -15,6 +15,7 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 - ★ **Strang — *Introduction to Linear Algebra*** (Wellesley-Cambridge). Eigen-thinking as geometry; symmetric matrices, the spectral theorem, and PCA. His MIT **18.06** lectures cover the same ground free online. Use for: Year 1 Q1 (unit 008) and every covariance/PCA/risk-model unit after.
 - ◆ **Axler — *Linear Algebra Done Right***. Clean, proof-first treatment of the spectral theorem (symmetric ⇒ real eigenvalues + orthogonal eigenvectors). Reach for when you want the theorem stated and proved, not just applied.
 - ★ **Wasserman — *All of Statistics*** (Springer). Fast, rigorous coverage of probability, estimation, inference, and hypothesis testing. Use for: Year 1 Q1 (units 005–007).
+- ★ **Wooldridge — *Introductory Econometrics: A Modern Approach*** (Cengage). The standard, readable regression text: simple/multiple OLS, the Gauss–Markov assumptions, and — foregrounded — heteroskedasticity and robust standard errors. Use for: Year 1 Q1 (unit 009) and every signal/factor regression after.
 
 ### Stochastic calculus & pricing
 - ★ **Shreve — *Stochastic Calculus for Finance II: Continuous-Time Models*** (Springer, 2004).
@@ -66,6 +67,7 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 ### Statistics of markets / overfitting
 - ★ Cont (2001), *Empirical properties of asset returns: stylized facts and statistical issues.* — the 5 stylized facts (unit 004).
 - ★ Harvey, Liu & Zhu (2016), *…and the Cross-Section of Expected Returns.* — multiple-testing in finance (unit 007).
+- ★ Newey & West (1987), *A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix*, Econometrica 55(3):703–708. — HAC standard errors for regressions with serially correlated / overlapping-return errors (unit 009). Companion: White (1980), *A Heteroskedasticity-Consistent Covariance Matrix Estimator*, Econometrica 48(4):817–838.
 - ★ Bailey & López de Prado (2014), *The Deflated Sharpe Ratio.* — unit 055.
 - ★ Bailey, Borwein, López de Prado & Zhu (2014/2015), *The Probability of Backtest Overfitting.* — unit 056.
 

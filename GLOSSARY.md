@@ -23,3 +23,9 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Principal component (PCA) | — | — | 008 |
 | Variance explained | — | — | 008 |
 | Market factor (PC1) | — | — | 008 |
+| OLS / least squares | — | — | 009 |
+| Regression coefficient (β̂) | — | — | 009 |
+| R² | — | — | 009 |
+| Heteroskedasticity | — | — | 009 |
+| Robust (White/HC) standard error | — | — | 009 |
+| Newey–West (HAC) standard error | — | — | 009 |

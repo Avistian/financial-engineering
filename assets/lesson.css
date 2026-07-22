@@ -561,6 +561,34 @@ dl.objections dd {
 }
 .cov-slider, .scree-slider { flex: 1; }
 
+/* ---- Lesson 009 visualizations (OLS projection, heteroskedasticity, HAC) ---- */
+
+.ols-viz, .hsk-viz, .hac-viz { margin: 1.25rem 0; }
+.ols-canvas, .hsk-canvas, .hac-canvas {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fffdf8;
+}
+.ols-readout, .hsk-readout, .hac-readout {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  min-height: 2.6rem;
+}
+.ols-readout strong, .hsk-readout strong, .hac-readout strong { color: var(--ink); }
+.ols-min { color: var(--correct); font-weight: 700; }
+.ols-off { color: var(--muted); }
+.hsk-verdict, .hac-verdict { color: var(--wrong); font-weight: 700; }
+.ols-controls, .hsk-controls, .hac-controls {
+  display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;
+}
+.ols-slider-label, .hsk-slider-label, .hac-slider-label {
+  font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted);
+  white-space: nowrap; min-width: 11.5rem;
+}
+.ols-slider, .hsk-slider, .hac-slider { flex: 1; }
+
 @media (max-width: 480px) {
   html { font-size: 17px; }
   body { padding: 1.25rem 1rem 3rem; }

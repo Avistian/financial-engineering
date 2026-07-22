@@ -60,6 +60,10 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
 - `0008-pca-returns-panel.ipynb` — build a returns panel's correlation matrix by hand,
   eigendecompose it, confirm the trace identity, show PC1 is the (same-sign) market factor, and
   measure how many components capture 90% of the panel's risk (Lesson 008).
+- `0009-robust-standard-errors.ipynb` — regress overlapping returns on a signal; confirm OLS is
+  projection (residuals ⟂ X) and `β̂ = Cov/Var` by hand; then watch a gaudy naïve t-statistic
+  deflate under White (HC) and Newey–West (HAC) standard errors, and translate the SE inflation
+  into an effective sample size (Lesson 009).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 

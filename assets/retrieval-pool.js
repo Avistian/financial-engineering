@@ -386,6 +386,56 @@
       ],
       correct: "a",
       explain: "PC1 loads with the same sign on nearly every stock \u2014 the 'everything moves together' direction \u2014 because common market risk dominates variance; its share spikes in crises as \u03c1\u21921."
+    },
+
+    // ---- L009: regression, robust standard errors ----
+    {
+      id: "l009-slope", lesson: 9, quarter: "Q1", concept: "ols-slope",
+      question: "In a one-predictor regression, the OLS slope \u03b2\u0302\u2081 equals:",
+      options: [
+        { label: "Cov(x, y) over the variance of x", value: "a" },
+        { label: "Cov(x, y) over the variance of y", value: "b" },
+        { label: "The plain correlation of x and y", value: "c" },
+        { label: "Mean of y minus the mean of x", value: "d" }
+      ],
+      correct: "a",
+      explain: "\u03b2\u0302\u2081 = Cov(x,y)/Var(x): co-movement normalized by the predictor's own spread (= \u03c1\u00b7\u03c3_y/\u03c3_x)."
+    },
+    {
+      id: "l009-hetero", lesson: 9, quarter: "Q1", concept: "robust-se", misconception: true,
+      question: "Under heteroskedasticity, ordinary least squares gives you:",
+      options: [
+        { label: "An unbiased \u03b2\u0302 but a wrong standard error", value: "a" },
+        { label: "A biased \u03b2\u0302 but a correct standard error", value: "b" },
+        { label: "Both a biased \u03b2\u0302 and a wrong error", value: "c" },
+        { label: "Everything correct \u2014 no fix is needed", value: "d" }
+      ],
+      correct: "a",
+      explain: "OLS needs neither constant variance nor independence to be unbiased; only the SE breaks. Fix it with White/HC, keep the estimate."
+    },
+    {
+      id: "l009-overlap", lesson: 9, quarter: "Q1", concept: "overlap", misconception: true,
+      question: "Regressing overlapping multi-period returns sampled daily inflates the t-stat because it:",
+      options: [
+        { label: "Positively autocorrelates the errors", value: "a" },
+        { label: "Strongly biases the estimate \u03b2\u0302", value: "b" },
+        { label: "Inflates the residual variance \u03c3\u0302\u00b2", value: "c" },
+        { label: "Makes the design matrix singular", value: "d" }
+      ],
+      correct: "a",
+      explain: "Overlapping windows share most of their days, so consecutive errors correlate; the effective sample shrinks, the naïve SE is too small, and t is inflated. Fix with Newey\u2013West."
+    },
+    {
+      id: "l009-hac", lesson: 9, quarter: "Q1", concept: "newey-west",
+      question: "The Newey\u2013West (HAC) standard error is consistent under:",
+      options: [
+        { label: "Heteroskedasticity and autocorrelation both", value: "a" },
+        { label: "Only heteroskedasticity, not autocorrelation", value: "b" },
+        { label: "Omitted-variable bias in the coefficients", value: "c" },
+        { label: "A non-stationary price-on-price regression", value: "d" }
+      ],
+      correct: "a",
+      explain: "HAC = Heteroskedasticity- And Autocorrelation-Consistent. It extends White with Bartlett-weighted residual autocovariances; it cannot cure bias or spurious level regressions."
     }
   ];
 })(window);

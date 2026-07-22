@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "lessons": [
     {
       "id": 1,
@@ -79,6 +79,16 @@
       "checkpoint": false,
       "labPath": "labs/0008-pca-returns-panel.ipynb",
       "title": "Linear Algebra for Quants: Covariance, Eigendecomposition, PCA",
+      "published": true
+    },
+    {
+      "id": 9,
+      "slug": "0009-regression-done-right",
+      "year": 1,
+      "quarter": 1,
+      "checkpoint": false,
+      "labPath": "labs/0009-robust-standard-errors.ipynb",
+      "title": "Regression Done Right: OLS, Robust Standard Errors, and When Regression Lies",
       "published": true
     }
   ]
