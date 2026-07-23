@@ -41,6 +41,31 @@
 - Applies to **all future lessons**, not just 006. Encoded in `.agents/skills/lesson-pedagogy/SKILL.md`
   ("Explain everything you introduce").
 
+## Standing decision — pace for a struggling learner; depth over length (from 2026-07-23)
+- **The learner finds quant hard at the current pace and wants even better explanations, explicitly
+  accepting longer lessons as the cost.** This *strengthens* the 2026-07-17 "explain everything"
+  decision: the size band is now firmly a floor, not a target — never trade clarity for brevity.
+- **The four levers the learner asked for (apply to every lesson, hardest on math-heavy units):**
+  1. **Intuition before symbols.** Open each concept with a plain-English picture / analogy / the
+     problem it solves. No symbol appears before the reader already has the mental image it names.
+  2. **Smaller steps.** One new idea per beat. Never stack two hard concepts in a single paragraph;
+     split a dense idea into several short sub-steps, each with its own mini-takeaway.
+  3. **Re-warm the prerequisite inline.** Do NOT assume prior undergrad math/prob (or an earlier
+     lesson) is fresh. Before using a building block, recall it in a sentence or two (+ link to where
+     it was taught) so the learner never hits an unexplained dependency.
+  4. **A "slow lane" for derivations.** For any multi-line derivation, show *every* algebra step and
+     annotate *why* each step is legal (what rule/assumption licenses it). No "it can be shown that."
+- **Where it bites most:** the math-heavy lessons. The learner named **008 (linear algebra/PCA)** and
+  **009 (regression)** as the hardest. Q2 (011–020: measure theory → Brownian motion → Itô → SDEs →
+  pricing) is the densest math yet — treat it as the primary test of this decision: slower ramp, more
+  scaffolding, a geometric/probabilistic picture for every abstraction, and a worked slow-lane
+  derivation for Itô's lemma, the BS PDE, etc.
+- **Retrieval unchanged in rigor.** Easier *exposition* does not mean easier *retrieval* — keep the
+  warm-ups, predict-before-reveal, teach-backs and quizzes as effortful as ever (desirable difficulty
+  is the point). We slow the teaching, not the testing.
+- Encoded in `.agents/skills/lesson-pedagogy/SKILL.md` ("Pace for understanding"). Applies to all
+  future lessons.
+
 ## Standing weekly habits (don't let these lapse)
 - 10 mental-math drills + 5 probability brainteasers/week (Green Book / Heard on the Street).
 - 3–5 LeetCode problems/week from Year 1 (rotating arrays → DP → graphs → trees).

@@ -28,6 +28,40 @@ anyway. It is better to overrun the ~22–30 KB / ~55–60 min band than to leav
 under-explained — treat that band as a floor for depth, not a cap. This is the learner's explicit standing
 preference (see `NOTES.md`) and applies to every future lesson.
 
+### Pace for understanding (standing decision, 2026-07-23)
+
+The learner finds quant **hard at the current pace** and asked for **even better explanations, at the
+explicit price of longer lessons**. This sharpens "explain everything you introduce": the size band is
+a **floor, not a target** — never trade clarity for brevity. On top of thoroughness, teach with four
+levers (the learner chose these), applied to every lesson and **hardest on math-heavy units**:
+
+1. **Intuition before symbols.** Open each concept with a plain-English picture, analogy, or the
+   concrete problem it solves. The mental image comes *first*; the notation names something the reader
+   can already see. Never let a symbol appear before its intuition.
+2. **Smaller steps.** One new idea per beat. Never stack two hard concepts in one paragraph — split a
+   dense idea into several short sub-steps, each ending in a one-line takeaway. A longer lesson made of
+   small, digestible steps beats a shorter dense one.
+3. **Re-warm the prerequisite inline.** Do **not** assume prior undergrad math/probability or an earlier
+   lesson is fresh. Before using a building block (a covariance identity, Bayes, a projection, a limit),
+   recall it in a sentence or two and link back to where it was taught. The learner should never hit an
+   unexplained dependency mid-derivation.
+4. **A "slow lane" for derivations.** For any multi-line derivation, show **every** algebra step and
+   annotate **why** each step is legal (which rule, identity, or assumption licenses it). Ban "it can be
+   shown that" and skipped steps on anything the lesson actually relies on. Put the full walk in the
+   prose or a callout; a compressed summary can follow, not replace it.
+
+**Math-heavy lesson protocol.** The learner named **008 (linear algebra/PCA)** and **009 (regression)**
+as the hardest, and **Q2 (011–020: measure theory → Brownian motion → Itô → SDEs → pricing)** is the
+densest math on the whole track. For these: lead with a geometric or probabilistic *picture* for every
+abstraction; introduce one operator/definition at a time; give the slow-lane derivation for the load-
+bearing result (Itô's lemma, the Black–Scholes PDE, the OU solution, …) with each step justified; and
+add a plain-English "what we just did and why it matters" after each hard section. Overrunning the
+~22–30 KB band is expected here — depth wins.
+
+**Slow the teaching, not the testing.** Easier exposition must **not** soften retrieval. Keep warm-ups,
+predict-before-reveal, teach-backs, and quizzes as effortful as ever — desirable difficulty in the
+*practice* is what builds storage strength. We lower the cost of the first encounter, not the cost of recall.
+
 ## 1. Open every lesson with a spaced-retrieval warm-up (`assets/retrieval-bank.js`)
 
 Before new material, make the learner recall **older** material from memory. Spacing + interleaving +
