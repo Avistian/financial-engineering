@@ -14,6 +14,8 @@
 - Cite sources inline (link to RESOURCES.md entries). No parametric hand-waving on the moving parts (TFMs, deep LOB, RL).
 - Quiz answers must be equal length (words/chars) so formatting leaks no hint.
 - Be strict at checkpoints: no advancing past a failed exit criterion.
+- **Plain language first (2026-07-27).** See standing decision below — terms and concepts must be
+  explained in simple everyday words before any jargon or formula sticks.
 
 ## Lesson authoring patterns (adopted from the `relational` workspace, 2026-07-08)
 - Lessons should be **long and substantial (~22–30 KB, target ~55–60 min)** — the learner prefers
@@ -65,6 +67,32 @@
   is the point). We slow the teaching, not the testing.
 - Encoded in `.agents/skills/lesson-pedagogy/SKILL.md` ("Pace for understanding"). Applies to all
   future lessons.
+
+## Standing decision — plain language for every term (from 2026-07-27)
+- **Feedback:** even with the "explain everything" and "pace for understanding" decisions in place,
+  the learner still finds the **language and concepts unclear**. Thoroughness alone is not enough
+  if the prose stays in specialist register.
+- **Rule for all future lessons, labs, memos, and tutor answers:** write as if explaining to a
+  strong programmer with **near-zero finance vocabulary**. Every load-bearing word gets a simple
+  definition *in the same breath it appears* — not a later glossary dump, not "as we saw," not a
+  circular definition that uses other jargon.
+- **Litmus test (must pass before a section ships):** could the learner answer *"what does this
+  word literally mean here?"* after one short plain sentence, without needing markets experience?
+  If the answer is no, rewrite. Examples of words that failed this recently: *book*, *the market*,
+  *neutralize*, *exposure*, *alpha*, *beta*, *PC1 as portfolio weights*.
+- **How to write a term the first time it appears:**
+  1. Everyday picture in one sentence ("the book = the portfolio of positions you hold right now").
+  2. Then the standard name, if useful ("traders call that your book").
+  3. Then, only if needed, the symbol / formula.
+  4. One tiny numeric or concrete example before moving on.
+- **Forbidden shortcuts:** assuming the reader half-knows a term; defining jargon with more jargon;
+  using a word in a finance-specific sense without flagging that the everyday meaning differs
+  (*book*, *security*, *option*, *hedge*, *signal*).
+- **Does not weaken rigor.** Quizzes, teach-backs, and CHECK cells stay hard. Only the *way in*
+  gets simpler.
+- Encoded in `.agents/skills/lesson-pedagogy/SKILL.md` ("Plain language for every term") and
+  `.cursor/rules/lesson-plain-language.mdc`. Applies to **all future lessons** (and to tutor chat
+  when teaching from this curriculum).
 
 ## Standing weekly habits (don't let these lapse)
 - 10 mental-math drills + 5 probability brainteasers/week (Green Book / Heard on the Street).

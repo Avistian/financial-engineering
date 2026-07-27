@@ -1,0 +1,18 @@
+---
+description: Plain-language teaching for financial-engineering lessons, labs, and tutor answers
+globs: lessons/**/*,labs/**/*,NOTES.md,GLOSSARY.md
+alwaysApply: false
+---
+
+# Plain language for every term
+
+When writing or revising lessons, labs, glossary entries, or teaching from this curriculum:
+
+1. Read `NOTES.md` standing decisions — especially **plain language for every term (2026-07-27)**.
+2. Follow `.agents/skills/lesson-pedagogy/SKILL.md`.
+3. **Litmus test:** a strong programmer with near-zero finance vocabulary must understand each
+   load-bearing word after one short everyday sentence, before jargon or formulas.
+4. First appearance of a term = everyday picture → standard name → symbol (if needed) → tiny example.
+5. Never define jargon with more jargon. Flag finance-specific senses of everyday words (*book*,
+   *the market*, *security*, *hedge*, *signal*).
+6. Rigor of quizzes/CHECKs stays high; only the exposition gets simpler.
