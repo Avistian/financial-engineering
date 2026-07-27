@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — Filtrations, Conditional Expectation &amp; Martingales</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    code { font-size: 0.85em; }
+  </style>
+</head>
+<body>
+<article>
+  <h1>Filtrations, Conditional Expectation &amp; Martingales</h1>
+  <p class="subtitle">Reference · print-friendly cheat sheet · Units 011–020 (Year 1 Q2)</p>
+
+  <p>
+    The working rules for the language every Q2 unit is written in. Taught in
+    <a href="../lessons/0011-filtrations-conditional-expectation.html">Lesson 011</a>; source
+    Shreve II Ch. 1–2.
+  </p>
+
+  <h2>The four objects</h2>
+  <table>
+    <thead><tr><th>Object</th><th>Is</th><th>Read it as</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Ω</strong></td><td>the sample space; one element ω is a <em>complete</em> future</td><td>"the set of possible futures"</td></tr>
+      <tr><td><strong>ℱ</strong> (σ-algebra)</td><td>a collection of subsets of Ω closed under complement and countable union</td><td>"the questions I can answer" / a partition of Ω into indistinguishable cells (<em>atoms</em>)</td></tr>
+      <tr><td><strong>P</strong></td><td>a measure on ℱ with P(Ω)=1 and countable additivity</td><td>"mass on <em>events</em>" — single outcomes may have mass 0</td></tr>
+      <tr><td><strong>{ℱ_t}</strong> (filtration)</td><td>ℱ₀ ⊆ ℱ₁ ⊆ … ⊆ ℱ_T</td><td>"the growing record of what is known"</td></tr>
+    </tbody>
+  </table>
+  <div class="formula">"X is ℱ_t-measurable" &nbsp;=&nbsp; "X's value is knowable at time t" &nbsp;=&nbsp; "X is constant on each atom of ℱ_t"</div>
+  <p>
+    A process is <strong>adapted</strong> if <code>X_t</code> is ℱ_t-measurable for every <em>t</em>.
+    <strong>Almost surely (a.s.)</strong> = true except on a set of probability 0 (so no expectation, price,
+    or hedge is affected).
+  </p>
+
+  <h2>Conditional expectation — three equivalent descriptions</h2>
+  <table>
+    <thead><tr><th>View</th><th>Statement</th><th>Use it when</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Recipe</strong> (finite)</td>
+        <td>E[X|ℱ] averages X within each atom of ℱ</td>
+        <td>computing on a tree, by hand or in code</td>
+      </tr>
+      <tr>
+        <td><strong>Definition</strong> (general)</td>
+        <td>the unique Y with (1) Y is ℱ-measurable, (2) <code>E[Y·1_A] = E[X·1_A]</code> for all A ∈ ℱ
+          (<em>partial averaging</em>)</td>
+        <td>proving things; continuous time, where atoms have probability 0</td>
+      </tr>
+      <tr>
+        <td><strong>Projection</strong> (L²)</td>
+        <td><code>E[X|ℱ] = argmin E[(X−Y)²]</code> over ℱ-measurable Y; the residual
+          <code>X − E[X|ℱ]</code> is orthogonal to every ℱ-measurable variable</td>
+        <td>reasoning about forecasts, signals, R², leakage</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>E[X|ℱ] is a random variable</strong>, not a number — ℱ-measurable, one value per atom. It is a
+    <em>plan for guessing</em>, revealed when the information arrives. Conditioning on an <em>event</em>
+    (<code>E[X|A] = E[X·1_A]/P(A)</code>) is the one that returns a number.
+  </div>
+
+  <h2>The rules (memorise these)</h2>
+  <table>
+    <thead><tr><th>Rule</th><th>Statement</th><th>In words</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tower</strong></td><td><code>E[E[X|ℱ_t]|ℱ_s] = E[X|ℱ_s]</code>, s ≤ t</td><td>a guess about a guess collapses to the coarser guess</td></tr>
+      <tr><td>— special case</td><td><code>E[E[X|ℱ_t]] = E[X]</code></td><td>condition on something convenient, then average out</td></tr>
+      <tr><td><strong>Take out what is known</strong></td><td><code>E[Y·X|ℱ] = Y·E[X|ℱ]</code> if Y is ℱ-measurable</td><td>a known factor is a constant here (this is why hedges factor out)</td></tr>
+      <tr><td><strong>Independence</strong></td><td><code>E[X|ℱ] = E[X]</code> if X ⫫ ℱ</td><td>irrelevant information changes nothing</td></tr>
+      <tr><td><strong>Linearity</strong></td><td><code>E[aX + bZ|ℱ] = aE[X|ℱ] + bE[Z|ℱ]</code></td><td>as usual</td></tr>
+      <tr><td><strong>Measurable target</strong></td><td><code>E[X|ℱ] = X</code> if X is ℱ-measurable</td><td>nothing left to average</td></tr>
+      <tr><td><strong>Conditional Jensen</strong></td><td><code>E[φ(X)|ℱ] ≥ φ(E[X|ℱ])</code>, φ convex</td><td>averaging inside a convex payoff throws away the value of uncertainty</td></tr>
+      <tr><td><strong>Variance split</strong></td><td><code>Var(X) = E[Var(X|ℱ)] + Var(E[X|ℱ])</code></td><td>total = unexplained + explained (R² is the linear-only case)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Martingales</h2>
+  <div class="formula">M adapted, E|M_t| &lt; ∞, and &nbsp;E[M_t | ℱ_s] = M_s &nbsp;for all s ≤ t</div>
+  <p>
+    Best forecast of any future value = today's value: a fair game. <strong>Supermartingale</strong>:
+    <code>≤</code> (drifts down — costs, unfair games). <strong>Submartingale</strong>: <code>≥</code>.
+    Checking one step suffices; the tower property extends it to all horizons.
+  </p>
+  <p>
+    <strong>Always name the measure and the filtration.</strong> A process can be a martingale under one
+    measure and drift under another — that fact <em>is</em> risk-neutral pricing (unit 015).
+  </p>
+
+  <h2>The standard tree (keep these numbers)</h2>
+  <p>
+    <code>S₀ = 100</code>, <code>u = 1.1</code>, <code>d = 0.9</code>, 3 periods, <code>p = ½</code>, call
+    payoff <code>V = (S₃ − 100)⁺</code>. Since <code>(u+d)/2 = 1</code>, the price is a martingale, so
+    <code>E[S₃|ℱ_t] = S_t</code>. Backward averaging of V:
+  </p>
+  <table>
+    <thead><tr><th>t</th><th>atoms of ℱ_t</th><th>values of E[V|ℱ_t]</th></tr></thead>
+    <tbody>
+      <tr><td class="num">3</td><td class="num">8</td><td><code>33.1, 8.9, 8.9, 0, 8.9, 0, 0, 0</code> (= V)</td></tr>
+      <tr><td class="num">2</td><td class="num">4</td><td><code>21.00, 4.45, 4.45, 0.00</code></td></tr>
+      <tr><td class="num">1</td><td class="num">2</td><td><code>12.725, 2.225</code></td></tr>
+      <tr><td class="num">0</td><td class="num">1</td><td><code>7.475</code> (= E[V], and the option's price at zero rates)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Handy checks on this tree: partial averaging on <code>A = {H··}</code> gives
+    <code>12.725 × ½ = 6.3625 = 50.9/8</code>; tower gives <code>(21.00 + 4.45)/2 = 12.725</code>;
+    the projection minimum is <code>E[(V − E[V|ℱ₁])²] = 83.22</code> and
+    <code>Var(V) = 110.78 = 83.22 + 27.56</code>. The risk-neutral probability is
+    <code>p* = (1 − d)/(u − d) = ½</code>.
+  </p>
+
+  <div class="trap">
+    <strong>Traps.</strong> (1) Treating <code>E[X|ℱ_t]</code> as a number. (2) Conditioning on an event
+    when you meant a σ-algebra. (3) Forgetting that a finer σ-algebra <em>always</em> fits better in
+    sample — which is why <strong>leakage = conditioning on a σ-algebra bigger than the one you had</strong>,
+    and it always flatters a backtest. (4) Assuming the price tells you the path
+    (<code>σ(S_t) ⊊ ℱ_t</code> when up-then-down and down-then-up land on the same price). (5) Reading
+    "probability zero" as "impossible." (6) Saying "martingale" without naming the measure.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="../lessons/0011-filtrations-conditional-expectation.html">Lesson 011</a></li>
+      <li><a href="../labs/0011-conditional-expectation-tree.ipynb">Lab 011</a></li>
+      <li><a href="curriculum.html">Curriculum</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

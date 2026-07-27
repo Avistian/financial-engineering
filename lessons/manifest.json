@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 8,
   "lessons": [
     {
       "id": 1,
@@ -99,6 +99,23 @@
       "checkpoint": true,
       "labPath": "labs/0010-checkpoint-spurious-signal.ipynb",
       "title": "Q1 Checkpoint: Statistical Hygiene",
+      "published": true,
+      "extraLabs": [
+        {
+          "label": "Lab 0010.2",
+          "labPath": "labs/0010-2-q1-synthesis-walkthrough.ipynb",
+          "title": "Q1 Synthesis: A Fully Worked Research Case (Units 001-009)"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "slug": "0011-filtrations-conditional-expectation",
+      "year": 1,
+      "quarter": 2,
+      "checkpoint": false,
+      "labPath": "labs/0011-conditional-expectation-tree.ipynb",
+      "title": "Information, Filtrations & Conditional Expectation",
       "published": true
     }
   ]

@@ -33,3 +33,15 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Spurious-signal autopsy | — | — | 010 |
 | Effective sample size (n_eff) | — | — | 010 |
 | Best-of-M / selection haircut | — | — | 010 |
+| Sample space Ω | — | — | 011 |
+| σ-algebra (and its atoms) | — | — | 011 |
+| Probability measure / space | — | — | 011 |
+| Almost surely | — | — | 011 |
+| Filtration | — | — | 011 |
+| Measurable / adapted | — | — | 011 |
+| Conditional expectation E[X\|ℱ] | — | — | 011 |
+| Partial averaging | — | — | 011 |
+| Tower property | — | — | 011 |
+| Taking out what is known | — | — | 011 |
+| L² projection (of a forecast) | — | — | 011 |
+| Martingale | — | — | 011 |

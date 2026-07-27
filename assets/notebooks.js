@@ -27,13 +27,34 @@
     return "https://colab.research.google.com/github/" + REPO + "/blob/" + BRANCH + "/" + labPath;
   }
 
+  /**
+   * Flatten lessons into one entry per lab. A lesson normally has a single lab
+   * (`labPath`); it may also carry `extraLabs` — companion notebooks such as the
+   * fully worked Q1 synthesis — each with its own label, title and path.
+   */
+  function labEntries(lessons) {
+    var out = [];
+    lessons.forEach(function (l) {
+      if (!l.published) return;
+      if (l.labPath) {
+        out.push({ label: "Lesson " + padId(l.id), title: l.title,
+                   labPath: l.labPath, id: l.id, sub: 0 });
+      }
+      (l.extraLabs || []).forEach(function (x, i) {
+        out.push({ label: x.label || ("Lesson " + padId(l.id)), title: x.title || l.title,
+                   labPath: x.labPath, id: l.id, sub: i + 1 });
+      });
+    });
+    return out.sort(function (a, b) { return (b.id - a.id) || (b.sub - a.sub); });
+  }
+
   function row(lesson) {
     var li = document.createElement("li");
 
     var head = document.createElement("div");
     head.className = "nb-head";
     head.innerHTML =
-      "<span class=\"num\">Lesson " + padId(lesson.id) + "</span>" +
+      "<span class=\"num\">" + lesson.label + "</span>" +
       "<span class=\"title\">" + lesson.title + "</span>";
     li.appendChild(head);
 
@@ -74,9 +95,7 @@
     fetch(manifestFetchUrl(config.manifestUrl))
       .then(function (r) { if (!r.ok) throw new Error("manifest"); return r.json(); })
       .then(function (data) {
-        var labs = (data.lessons || [])
-          .filter(function (l) { return l.published && l.labPath; })
-          .sort(function (a, b) { return b.id - a.id; }); // newest first
+        var labs = labEntries(data.lessons || []); // newest first
         if (!labs.length) { el.innerHTML = "<p class=\"nav-error\">No notebooks yet.</p>"; return; }
         var ul = document.createElement("ul");
         ul.className = "nb-gallery";

@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 011 — Information, Filtrations &amp; Conditional Expectation</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+    .step { margin: 0.9rem 0 0.9rem 0; padding-left: 0.9rem; border-left: 3px solid var(--border); }
+    .step strong { color: var(--accent); }
+    .newq { font-family: var(--font-sans); font-size: 0.78rem; text-transform: uppercase;
+            letter-spacing: 0.06em; font-weight: 700; color: #fff; background: var(--accent);
+            padding: 0.15rem 0.55rem; border-radius: 4px; margin-left: 0.4rem;
+            vertical-align: middle; }
+    .takeaway { font-family: var(--font-sans); font-size: 0.85rem; color: var(--accent);
+                font-weight: 600; margin: 0.6rem 0 1.1rem; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q2</p>
+  <h1>Information, Filtrations &amp; Conditional Expectation <span class="newq">Q2 begins</span></h1>
+  <p class="subtitle">Lesson 011 · Measure-theoretic probability, lite · ~70 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <p>
+    Quarter 1 was about <em>not fooling yourself with data you already have</em>. Quarter 2 is a different
+    animal: it builds the mathematical language in which prices, hedges, and option values are actually
+    written. Over the next ten units you will construct Brownian motion, learn Itô's lemma, solve stochastic
+    differential equations, change probability measures, and price a European option three independent ways.
+    All of it — every single unit — rests on two ideas introduced today: <strong>what an observer knows at
+    time <em>t</em></strong>, and <strong>the best guess of an unknown quantity given what is known</strong>.
+    Those are the filtration and the conditional expectation.
+  </p>
+  <p>
+    Here is the honest warning and the honest reassurance. The warning: this is the start of the most
+    mathematically demanding stretch of the whole three-year track, and the notation is unfamiliar — curly
+    ℱ's, subscripted σ-algebras, phrases like "almost surely." The reassurance: <strong>today's mathematics
+    is arithmetic on a tree with eight outcomes.</strong> Every abstraction below is introduced only after
+    you have seen the concrete thing it names, and every formula is checked against numbers you can verify
+    by hand. There is no step in this lesson you cannot do with a pencil.
+  </p>
+  <p>
+    One more promise, to keep the effort honest: by the end you will have computed the price of a call option
+    (7.475, on the tree below) using nothing but conditional expectation. Not a formula you were handed — a
+    number you built.
+  </p>
+
+  <h2>Why Q1's probability is not enough</h2>
+  <p>
+    You already know probability: random variables, expectations, variance, the CLT (Lesson
+    <a href="0005-probability-refresher.html">005</a>). So why relearn the foundations with heavier
+    machinery? Because three specific things you are about to do <em>break</em> the undergraduate setup, and
+    each break is repaired by exactly one piece of today's vocabulary.
+  </p>
+  <div class="step">
+    <strong>Break 1 — "what did the trader know?" has no expression.</strong> A backtest is a sequence of
+    decisions, each made with only the information available at that instant. In undergraduate probability
+    there is no object that <em>is</em> "the information available at time <em>t</em>." You have random
+    variables and you have their distributions, but nothing that says <em>this rule may only look at the
+    past</em>. That missing object is a <strong>σ-algebra</strong>, and the growing family of them is a
+    <strong>filtration</strong>. This is not decoration: leakage — the sin the whole of Q1 was built to
+    detect — becomes a precise, checkable statement about which σ-algebra a quantity is measurable with
+    respect to.
+  </div>
+  <div class="step">
+    <strong>Break 2 — in continuous time, every individual outcome has probability zero.</strong> Prices
+    move in continuous time, so a single "outcome" is an entire path of the price over a whole year. There
+    are uncountably many such paths, and each specific one has probability exactly 0 — so a definition of
+    the form "add up the probabilities of the outcomes where the option pays off" adds up zeros and returns
+    nothing. The repair is to assign probability to <strong>sets</strong> of outcomes (events) from the
+    start, which is what a <strong>measure</strong> does, and to stop expecting outcomes to carry mass
+    individually.
+  </div>
+  <div class="step">
+    <strong>Break 3 — pricing changes the probabilities.</strong> The central move of derivatives pricing
+    (unit 015) is to compute an expectation under a <em>different probability measure</em> than the real
+    one — the "risk-neutral" measure. To even state that sentence you need probability to be an object you
+    can swap: a measure <em>P</em> on a fixed space of outcomes, replaceable by another measure <em>Q</em>
+    on the same space. Undergraduate probability blurs the space, the measure, and the distribution
+    together, so it cannot express the swap. Measure theory separates them, and that separation is the
+    whole point.
+  </div>
+  <p class="takeaway">
+    Takeaway: measure theory is not rigour for its own sake here. It is the minimum vocabulary needed to say
+    "what was known when," "how do we assign probability when single outcomes are impossible," and "let us
+    now change the probabilities."
+  </p>
+  <p>
+    What we will <em>not</em> do: construct the Lebesgue integral, prove the monotone convergence theorem,
+    or worry about non-measurable sets. Those are Shreve's Chapter 1 appendices and they buy you nothing at
+    the bench. This is measure theory <em>lite</em>: the four objects (Ω, ℱ, P, and conditional
+    expectation), their working rules, and total fluency on a finite tree.
+  </p>
+
+  <h2>Ω: the set of possible futures</h2>
+  <p>
+    Start with the concrete object we will use for the entire lesson. A stock begins at
+    <code>S₀ = 100</code>. Over each of three periods it either goes <strong>up</strong> (multiplied by
+    <code>u = 1.1</code>) or <strong>down</strong> (multiplied by <code>d = 0.9</code>). Write H for an up
+    move and T for a down move, so a complete history is a string of three letters like <code>HTH</code>.
+  </p>
+  <p>
+    The <strong>sample space</strong> <code>Ω</code> (capital omega) is the set of all complete histories —
+    all the ways the world could turn out, at the finest resolution the model admits. Here there are
+    <code>2³ = 8</code> of them:
+  </p>
+  <div class="formula">Ω = { HHH, HHT, HTH, HTT, THH, THT, TTH, TTT }</div>
+  <p>
+    Two things to internalise about Ω, because they are what make it different from "the set of prices."
+    First, an element <code>ω ∈ Ω</code> (a single lowercase omega) is an <em>entire future</em>, not a
+    state at one moment: it fixes what happens at every date. Second, Ω is fixed once and for all before any
+    probabilities are mentioned. It is the stage; the probability measure is the lighting.
+  </p>
+  <p>
+    Now the numbers. The price at time <em>t</em> depends only on the first <em>t</em> letters of ω, and the
+    quantity we will condition on all lesson is the payoff of a <strong>European call option</strong> struck
+    at <code>K = 100</code> — a contract that pays whatever <code>S₃</code> exceeds 100, and nothing if
+    <code>S₃</code> ends at or below 100:
+  </p>
+  <div class="formula">V(ω) = max(S₃(ω) − 100, 0) &nbsp;&nbsp;— written (S₃ − K)⁺</div>
+  <p>
+    Every outcome, its price path, and its payoff (verify a row or two by hand — <code>100 × 1.1 × 0.9 ×
+    1.1 = 108.9</code>):
+  </p>
+  <table class="tight">
+    <thead>
+      <tr><th>ω</th><th>S₁</th><th>S₂</th><th>S₃</th><th>V = (S₃−100)⁺</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>HHH</code></td><td class="num">110</td><td class="num">121</td><td class="num">133.1</td><td class="num">33.1</td></tr>
+      <tr><td><code>HHT</code></td><td class="num">110</td><td class="num">121</td><td class="num">108.9</td><td class="num">8.9</td></tr>
+      <tr><td><code>HTH</code></td><td class="num">110</td><td class="num">99</td><td class="num">108.9</td><td class="num">8.9</td></tr>
+      <tr><td><code>HTT</code></td><td class="num">110</td><td class="num">99</td><td class="num">89.1</td><td class="num">0</td></tr>
+      <tr><td><code>THH</code></td><td class="num">90</td><td class="num">99</td><td class="num">108.9</td><td class="num">8.9</td></tr>
+      <tr><td><code>THT</code></td><td class="num">90</td><td class="num">99</td><td class="num">89.1</td><td class="num">0</td></tr>
+      <tr><td><code>TTH</code></td><td class="num">90</td><td class="num">81</td><td class="num">89.1</td><td class="num">0</td></tr>
+      <tr><td><code>TTT</code></td><td class="num">90</td><td class="num">81</td><td class="num">72.9</td><td class="num">0</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Notice already something the price alone cannot tell you: <code>HT</code> and <code>TH</code> both end
+    period 2 at <code>S₂ = 99</code>. The price has forgotten the order of the moves; the path has not. Hold
+    that thought — it becomes an important subtlety later.
+  </p>
+
+  <h2>A σ-algebra is a list of questions you can answer</h2>
+  <p>
+    Here is the intuition, before any symbol. Imagine you are standing at time 1. One flip has happened;
+    you saw it. Somebody asks you yes/no questions about the future:
+  </p>
+  <ul>
+    <li>"Did the first move go up?" — <strong>you can answer that.</strong> You watched it.</li>
+    <li>"Will the option finish in the money?" — <strong>you cannot answer that yet.</strong> It depends on
+      flips you have not seen.</li>
+  </ul>
+  <p>
+    So your position at time 1 is completely described by the <em>list of questions you are able to answer</em>.
+    Each yes/no question about the world corresponds to the set of outcomes for which the answer is "yes" —
+    for instance the question "did the first move go up?" is the set <code>{HHH, HHT, HTH, HTT}</code>, which
+    we abbreviate <code>{H··}</code>. A set of outcomes is called an <strong>event</strong>. Therefore:
+  </p>
+  <div class="formula">a σ-algebra ℱ = the collection of events whose "did it happen?" you can settle</div>
+  <p>
+    That is all a σ-algebra <em>is</em> — a collection of subsets of Ω, thought of as resolvable questions.
+    The name is intimidating; the object is a to-do list of answerable questions. (It is also called a
+    σ-<em>field</em>; the two words mean the same thing, and Shreve uses both.)
+  </p>
+  <h3>Why the axioms are obvious once you read them this way</h3>
+  <p>
+    Textbooks define a σ-algebra ℱ on Ω by three requirements. Read each as a statement about answering
+    questions and it stops being arbitrary:
+  </p>
+  <div class="step">
+    <strong>(i) Ω ∈ ℱ.</strong> The question "did <em>something</em> happen?" is answerable — yes,
+    trivially. (And so is its opposite, "did nothing happen?", giving <code>∅ ∈ ℱ</code>.)
+  </div>
+  <div class="step">
+    <strong>(ii) If A ∈ ℱ then Aᶜ ∈ ℱ</strong> (the complement, "not A"). If you can settle whether the
+    first move went up, you can settle whether it did <em>not</em> go up. Knowing an answer means knowing
+    its negation.
+  </div>
+  <div class="step">
+    <strong>(iii) If A₁, A₂, A₃, … ∈ ℱ then A₁ ∪ A₂ ∪ … ∈ ℱ</strong> (countably many unions). If you can
+    settle each of a list of questions, you can settle "did at least one of them happen?" Combined with
+    (ii) you also get intersections, because "both A and B" is "not (not-A or not-B)" — the same trick as
+    De Morgan's law.
+  </div>
+  <p>
+    Why <em>countably</em> many and not arbitrarily many? Because with arbitrary unions the requirement
+    becomes so strong that consistent probability assignment collapses: in a continuous setting you could
+    union together uncountably many single points, each of probability zero, and demand that the total be
+    zero — which would force intervals to have zero length. Countable additivity is the exact amount of
+    combining that keeps measure well behaved. You will never test this at the bench; you just need to know
+    that "σ" in σ-algebra means "closed under countable operations," and that this is why.
+  </p>
+  <h3>The three σ-algebras of our tree, written out</h3>
+  <p>
+    Now build them explicitly for the price model. At time 0, before any flip, the only questions you can
+    settle are the trivial ones:
+  </p>
+  <div class="formula">ℱ₀ = { ∅, Ω } &nbsp;&nbsp;(2 events — "you know nothing")</div>
+  <p>
+    At time 1, you have seen the first flip, so you can additionally settle "was it up?" and "was it down?":
+  </p>
+  <div class="formula">ℱ₁ = { ∅, Ω, {H··}, {T··} } &nbsp;&nbsp;(4 events)</div>
+  <p>
+    At time 2 you can settle any question about the first two flips: the four basic events
+    <code>{HH·}, {HT·}, {TH·}, {TT·}</code>, plus every union of them — for example "did the two flips
+    differ?" is <code>{HT·} ∪ {TH·}</code>. Counting all unions of 4 basic blocks gives <code>2⁴ = 16</code>
+    events. At time 3 everything is known, so <em>every</em> subset of Ω is answerable:
+    <code>2⁸ = 256</code> events. Written as a sequence, the number of answerable questions goes
+    <strong>2, 4, 16, 256</strong> — information exploding as resolution improves.
+  </p>
+  <p class="takeaway">
+    Takeaway: σ-algebra = answerable questions. Bigger σ-algebra = more information.
+  </p>
+
+  <h2>Information as a partition: the atoms of ℱ<sub>t</sub></h2>
+  <p>
+    There is a second, more visual way to hold the same idea, and it is the one you should picture when you
+    read "conditional expectation" later. Instead of listing answerable questions, ask: <em>which outcomes
+    can I still not tell apart?</em>
+  </p>
+  <p>
+    At time 1, having seen H, you cannot distinguish <code>HHH</code> from <code>HHT</code> from
+    <code>HTH</code> from <code>HTT</code> — as far as your information goes, you are somewhere in that
+    block of four and cannot say where. Your information therefore chops Ω into <strong>cells</strong>
+    (formally: <em>atoms</em>) — groups of outcomes that are indistinguishable to you. A finite σ-algebra
+    and a partition of Ω into cells are two descriptions of the same thing: the answerable events are
+    exactly the unions of cells.
+  </p>
+  <p>
+    Time 0 is one cell of 8 (total blur). Time 1 is two cells of 4. Time 2 is four cells of 2. Time 3 is
+    eight cells of 1 — perfect resolution. Slide the control below and watch the blur resolve.
+  </p>
+
+  <div id="filtration"></div>
+  <p class="viz-cap">
+    The tree of <strong>paths</strong> (not prices — <code>HT</code> and <code>TH</code> stay separate
+    branches even though both reach 99). Solid dark edges are flips already observed at time <em>t</em>;
+    faint edges are still in the future. Each shaded band is one <strong>atom of ℱ<sub>t</sub></strong>: a
+    set of outcomes your time-<em>t</em> information cannot tell apart. At <code>t = 0</code> a single band
+    covers all 8 outcomes; each step halves the bands until, at <code>t = 3</code>, every outcome sits alone.
+    The readout also counts the answerable questions, <code>2</code> raised to the number of atoms.
+  </p>
+
+  <h2>The filtration: information that only grows</h2>
+  <p>
+    Line those σ-algebras up in time and you have the central object of continuous-time finance. A
+    <strong>filtration</strong> is a family <code>{ℱ_t}</code>, one σ-algebra per date, that is increasing:
+  </p>
+  <div class="formula">ℱ₀ ⊆ ℱ₁ ⊆ ℱ₂ ⊆ ℱ₃ &nbsp;&nbsp;(information accumulates; nothing is ever forgotten)</div>
+  <p>
+    The inclusion is the whole content: anything you could answer yesterday you can still answer today.
+    Modelling a market means fixing a filtration — the record of what an observer has seen — and then
+    insisting that every object in the model respect it.
+  </p>
+  <p>
+    That insistence has a name. A process <code>{X_t}</code> is <strong>adapted</strong> to the filtration
+    if, for every <em>t</em>, the value <code>X_t</code> is determined by time-<em>t</em> information — in
+    the language of the previous section, <code>X_t</code> is constant on each cell of ℱ<sub>t</sub>. We say
+    <code>X_t</code> is <strong>ℱ<sub>t</sub>-measurable</strong>, and it is worth translating that phrase
+    once and for all:
+  </p>
+  <div class="formula">"X is ℱ<sub>t</sub>-measurable" &nbsp;=&nbsp; "X's value is knowable at time t"</div>
+  <div class="callout">
+    <strong>The link back to Q1 — leakage is a measurability violation.</strong> A trading strategy is a
+    process <code>Δ_t</code>: how many shares you hold at time <em>t</em>. Requiring <code>Δ_t</code> to be
+    ℱ<sub>t</sub>-measurable is <em>exactly</em> the no-look-ahead rule you spent Q1 enforcing by hand.
+    Consider the leak from Lesson <a href="0009-regression-done-right.html">009</a>: standardising a signal
+    with the <em>full sample's</em> mean and volatility. In today's language, that standardised signal is
+    ℱ<sub>T</sub>-measurable (it depends on the end of the sample) while being <em>used</em> as if it were
+    ℱ<sub>t</sub>-measurable. It is not a modelling slip; it is a type error. From now on you have a one-line
+    test for the most expensive bug in quantitative research: <strong>is every quantity in my decision rule
+    measurable with respect to the information I actually had?</strong>
+  </div>
+  <p class="takeaway">
+    Takeaway: filtration = the growing record of what is known. Adapted = never peeks ahead.
+  </p>
+
+  <h2>P: why probability lives on sets, not on outcomes</h2>
+  <p>
+    The third object is the <strong>probability measure</strong> <code>P</code>. It is a function that eats
+    an <em>event</em> (a member of ℱ) and returns a number in [0, 1], subject to two requirements:
+    <code>P(Ω) = 1</code>, and <strong>countable additivity</strong> — if <code>A₁, A₂, …</code> are
+    disjoint events then <code>P(A₁ ∪ A₂ ∪ …) = P(A₁) + P(A₂) + …</code>. The triple
+    <code>(Ω, ℱ, P)</code> is called a <strong>probability space</strong>, and it is the complete
+    specification of a probabilistic model: the outcomes, the answerable questions, the weights.
+  </p>
+  <p>
+    On our tree, take each flip to be up with probability <code>p = ½</code>, independently. Then every one
+    of the 8 paths has probability <code>(½)³ = ⅛</code>, and the probability of any event is (number of
+    paths in it)/8. For example <code>P({H··}) = 4/8 = ½</code> and <code>P(V &gt; 0) = P({HHH, HHT, HTH,
+    THH}) = 4/8 = ½</code>: the call finishes in the money exactly half the time.
+  </p>
+  <h3>The part that motivates the whole framework</h3>
+  <p>
+    Why insist that P eats sets rather than outcomes? On a finite tree the distinction is invisible — you can
+    hand out ⅛ per path and rebuild everything. It becomes unavoidable the moment the space is continuous, so
+    let us take the smallest example. Let Ω = [0, 1] with the uniform distribution. What is the probability
+    of drawing exactly 0.5? It is <strong>0</strong>: if it were any positive number ε, then since there are
+    infinitely many points you could find <code>1/ε + 1</code> of them and their total probability would
+    exceed 1. Yet <code>P([0.4, 0.6]) = 0.2</code>, comfortably positive. So every single outcome has
+    probability zero, while sets of them have positive probability. Any theory that starts from "the
+    probability of each outcome" is dead on arrival here; a theory that starts from sets is fine.
+  </p>
+  <p>
+    This is precisely the situation in unit 012, where an outcome is a whole Brownian path. Each individual
+    path has probability zero. Only sets of paths ("the price stays above 90 all year") carry mass. Today's
+    tree is the finite rehearsal for that.
+  </p>
+  <p>
+    One vocabulary item follows immediately. An event of probability zero is not <em>impossible</em>, merely
+    negligible; so mathematicians say a statement holds <strong>almost surely</strong> (a.s.) when it holds
+    except on a set of probability zero. When Lesson 013 says "the quadratic variation of Brownian motion
+    equals <em>t</em> almost surely," it means: there are freak paths where it fails, they have total
+    probability 0, and no expectation, price, or hedge is affected by them. "Almost surely" is the polite way
+    of saying "we are allowed to ignore the pathological cases."
+  </p>
+  <p class="takeaway">
+    Takeaway: P assigns mass to events, not outcomes — which is the only thing that survives the jump to
+    continuous time. "Almost surely" = "except on a probability-zero set."
+  </p>
+
+  <h2>Random variables: numbers that may or may not be knowable yet</h2>
+  <p>
+    A <strong>random variable</strong> is a function from Ω to the real numbers: it reads an outcome and
+    returns a number. You have used this idea informally since Lesson 005; the only addition now is that we
+    care <em>which σ-algebra</em> a random variable is measurable with respect to, because that is what says
+    when its value becomes known.
+  </p>
+  <p>
+    Check the three cases on our tree, from the table above:
+  </p>
+  <ul>
+    <li><code>S₁</code> is <strong>ℱ₁-measurable</strong>: it equals 110 on the whole cell <code>{H··}</code>
+      and 90 on the whole cell <code>{T··}</code> — constant on every cell of ℱ₁, so time-1 information
+      pins it down.</li>
+    <li><code>S₂</code> is <strong>not</strong> ℱ₁-measurable: inside the cell <code>{H··}</code> it takes
+      the value 121 (on <code>HH·</code>) and 99 (on <code>HT·</code>). At time 1 you cannot yet say which,
+      so <code>S₂</code> is not knowable at time 1. It <em>is</em> ℱ₂-measurable.</li>
+    <li><code>V = (S₃ − 100)⁺</code> is <strong>ℱ₃-measurable and nothing smaller</strong>: it varies inside
+      every cell of ℱ₂ (e.g. cell <code>{HH·}</code> holds payoffs 33.1 and 8.9). The option's payoff is
+      not known until the end. That is the entire reason we need conditional expectation.</li>
+  </ul>
+  <h3>A subtlety worth ten minutes: knowing the price is not knowing the path</h3>
+  <p>
+    Return to the coincidence we flagged: <code>S₂ = 99</code> on both <code>HT·</code> and <code>TH·</code>.
+    Suppose your information were <em>only</em> the current price, not the sequence of moves. The events you
+    could resolve would be generated by the values of <code>S₂</code>, a σ-algebra written
+    <code>σ(S₂)</code>. Its cells are <code>{HH·}</code>, <code>{HT·, TH·}</code> (fused!), and
+    <code>{TT·}</code> — three cells, not four. So <code>σ(S₂) ⊂ ℱ₂</code>, strictly coarser: a price
+    watcher genuinely knows less than a tape watcher, and cannot answer "did the market go up first?"
+  </p>
+  <p>
+    This is not a curiosity. It is the mathematical statement of why microstructure exists as a field: order
+    flow carries information that the price level alone has thrown away (Year 2 Q3, units 061–067 — order-flow
+    imbalance is a signal precisely because <code>σ(price) ⊊ σ(order flow)</code>). And it explains why
+    "which σ-algebra?" is always a real question with real money attached, not bookkeeping.
+  </p>
+
+  <h2>Conditional expectation: your best guess, given what you know</h2>
+  <p>
+    Now the load-bearing concept of the entire quarter. Time 1 has arrived, the first move was up, and
+    somebody asks what the option is worth. You cannot say 33.1 or 0 — the last two flips are unwritten. But
+    you are not helpless either: you know you are in the top half of the tree, where payoffs are larger. The
+    honest answer is an <em>average over what remains uncertain, using only what you know</em>. That is
+    conditional expectation.
+  </p>
+  <p>
+    Before the machinery, commit to a prediction about what <em>kind of object</em> the answer is. This is
+    the single most common confusion in the subject, so it is worth being wrong here in private:
+  </p>
+  <div id="predict1"></div>
+
+  <h3>Layer 0 — recall plain expectation</h3>
+  <p>
+    From Lesson <a href="0005-probability-refresher.html">005</a>: for a random variable X on a finite
+    space, <code>E[X] = Σ_ω X(ω)·P(ω)</code> — value times probability, summed over outcomes. For our call,
+    with each path carrying ⅛:
+  </p>
+  <div class="formula">E[V] = (33.1 + 8.9 + 8.9 + 0 + 8.9 + 0 + 0 + 0)/8 = 59.8/8 = <strong>7.475</strong></div>
+  <p>
+    One number. It is the best guess <em>before anything has happened</em> — the view from time 0.
+  </p>
+
+  <h3>Layer 1 — conditioning on a single event</h3>
+  <p>
+    Suppose you learn only that the event <code>A = {H··}</code> occurred (the first move was up). The
+    recipe you already know: restrict attention to the outcomes in A, and renormalise so that the
+    probabilities inside A sum to 1.
+  </p>
+  <div class="formula">E[V | A] = E[V·1<sub>A</sub>] / P(A)</div>
+  <p>
+    Here <code>1_A</code> is the <strong>indicator</strong> of A — the random variable equal to 1 on A and 0
+    off it — so <code>V·1_A</code> is "V where A happened, zero elsewhere." Numerically, the four outcomes
+    in A have payoffs 33.1, 8.9, 8.9, 0, so <code>E[V·1_A] = 50.9/8 = 6.3625</code>, and
+    <code>P(A) = ½</code>:
+  </p>
+  <div class="formula">E[V | {H··}] = 6.3625 / 0.5 = <strong>12.725</strong></div>
+  <p>
+    Same computation for the other branch: payoffs 8.9, 0, 0, 0 give
+    <code>E[V | {T··}] = (8.9/8)/0.5 = 2.225</code>. Both are single numbers, each attached to one event.
+  </p>
+
+  <h3>Layer 2 — conditioning on a σ-algebra (the real definition)</h3>
+  <p>
+    You will rarely condition on one event. You condition on <strong>your whole information set</strong>,
+    which means doing Layer 1 <em>in every cell at once</em> and gluing the answers together into a single
+    object:
+  </p>
+  <div class="formula">
+    E[V | ℱ₁](ω) = 12.725 if ω ∈ {H··}, &nbsp; 2.225 if ω ∈ {T··}
+  </div>
+  <p>
+    Look carefully at what that is. It assigns a number to every outcome ω, so it is <strong>a random
+    variable, not a number</strong> — the answer to the prediction above. Two properties characterise it,
+    and both are visible in the display:
+  </p>
+  <ul>
+    <li>It is <strong>ℱ₁-measurable</strong>: constant on each cell of ℱ₁. It must be — it is an answer you
+      are able to state at time 1, so it cannot depend on flips you have not seen.</li>
+    <li>It <strong>preserves averages cell by cell</strong>: on <code>{H··}</code> it holds the value 12.725,
+      which is precisely the average of V over that cell. It coarsens V without moving any local mean.</li>
+  </ul>
+  <p>
+    Why does it have to be a random variable? Because at the moment you <em>write down</em> the formula you
+    do not know which cell you will land in. "Given what I will know at time 1, my estimate is 12.725 if the
+    first move is up and 2.225 if it is down" — that is one object, defined on all of Ω, whose value is
+    revealed when time 1 arrives. Conditional expectation is a <em>plan for guessing</em>, not a guess.
+  </p>
+  <p>
+    Repeat the exercise at time 2, where there are four cells of two outcomes each:
+    <code>E[V|ℱ₂] = 21.00</code> on <code>{HH·}</code> (average of 33.1 and 8.9), <code>4.45</code> on
+    <code>{HT·}</code> and also on <code>{TH·}</code>, and <code>0</code> on <code>{TT·}</code>. The finer
+    your information, the more values the conditional expectation can take, and the closer it hugs V. In the
+    limit <code>E[V|ℱ₃] = V</code>: with full information, guessing stops and you simply read off the answer.
+  </p>
+  <p>
+    Slide through the whole family below. Read it as <em>backward averaging</em>: each node is the average of
+    its two children, so moving left blurs the payoff step by step, and the numbers on the highlighted
+    column are the values of <code>E[V|ℱ_t]</code>.
+  </p>
+
+  <div id="condexp"></div>
+  <p class="viz-cap">
+    The same path tree, now labelled with <strong>E[V | ℱ<sub>level</sub>]</strong> for the call payoff
+    <code>V = (S₃ − 100)⁺</code>. The right-hand column (<code>t = 3</code>) is V itself: 33.1, 8.9, 8.9, 0,
+    8.9, 0, 0, 0. Slide <em>t</em> and the highlighted column is the random variable
+    <code>E[V|ℱ_t]</code> — four values at <code>t = 2</code> (21.00, 4.45, 4.45, 0.00), two at
+    <code>t = 1</code> (12.725, 2.225), and one at <code>t = 0</code> (7.475, the unconditional mean).
+    Every node equals the average of its two children, which is why re-averaging one column reproduces the
+    column to its left.
+  </p>
+  <div class="callout">
+    <strong>You just priced an option.</strong> That 7.475 at the root is not a toy number. With zero
+    interest rates, the arbitrage-free price of this call is <code>E[V]</code> computed under the
+    probability that makes the <em>stock</em> a fair game — and with <code>u = 1.1, d = 0.9</code> that
+    probability is exactly <code>p* = (1 − d)/(u − d) = 0.1/0.2 = ½</code>, the one we used. So the call is
+    worth <strong>7.475</strong> today. <em>Why</em> that particular probability and not the real-world one
+    is the content of unit 015 (Girsanov, risk-neutral pricing) — for now just register that pricing will
+    turn out to be a conditional expectation under a carefully chosen measure, and you already know how to
+    compute those.
+  </div>
+
+  <h2>The general definition — and why it looks so strange</h2>
+  <p>
+    Layer 2's recipe ("average within each cell") is perfect on a tree and useless in continuous time, where
+    the cells are single paths of probability zero and dividing by <code>P(cell)</code> divides by zero. So
+    the general definition is stated in a way that never divides. <code>Y = E[X | ℱ]</code> is <em>defined</em>
+    as the random variable satisfying:
+  </p>
+  <div class="formula">
+    (1) Y is ℱ-measurable &nbsp;&nbsp;and&nbsp;&nbsp; (2) E[Y·1<sub>A</sub>] = E[X·1<sub>A</sub>] for every A ∈ ℱ
+  </div>
+  <p>
+    Condition (1) is "the answer uses only what you know." Condition (2), called <strong>partial
+    averaging</strong>, is "on every question you can ask, Y and X have the same total mass." Notice what has
+    been avoided: no division, no probabilities of individual outcomes, so it survives the continuous case
+    unchanged. (One can prove such a Y always exists and is unique up to probability-zero sets — the
+    existence proof is Shreve's appendix and you may take it on trust.)
+  </p>
+  <p>
+    Let us verify (2) by hand on the tree so the abstract condition becomes a number, taking
+    <code>A = {H··} ∈ ℱ₁</code>:
+  </p>
+  <div class="step">
+    <strong>Left side.</strong> <code>Y = E[V|ℱ₁]</code> equals 12.725 throughout A, so
+    <code>E[Y·1_A] = 12.725 × P(A) = 12.725 × 0.5 = 6.3625</code>.
+  </div>
+  <div class="step">
+    <strong>Right side.</strong> <code>E[V·1_A]</code> sums V over the four outcomes of A, each of
+    probability ⅛: <code>(33.1 + 8.9 + 8.9 + 0)/8 = 50.9/8 = 6.3625</code>.
+  </div>
+  <div class="step">
+    <strong>They match exactly</strong> — and they match for <em>every</em> A in ℱ₁ (there are four:
+    ∅, <code>{H··}</code>, <code>{T··}</code>, Ω; check <code>{T··}</code>: <code>2.225 × 0.5 = 1.1125</code>
+    versus <code>8.9/8 = 1.1125</code>). So our cell-averaging answer is <em>the</em> conditional expectation
+    in the general sense, not merely something that resembles it.
+  </div>
+  <p class="takeaway">
+    Takeaway: same object, two descriptions. On a tree: average within each cell. In general: the
+    ℱ-measurable variable that reproduces X's mass on every event of ℱ.
+  </p>
+
+  <h2>Three rules you will use for the next two years</h2>
+  <p>
+    Almost every manipulation in Q2 is one of the following three moves. Learn them as reflexes, with the
+    tree numbers as your proof that they are not magic.
+  </p>
+  <h3>Rule 1 — the tower property (iterated conditioning)</h3>
+  <div class="formula">E[ E[X | ℱ_t] | ℱ_s ] = E[X | ℱ_s] &nbsp;&nbsp;for s ≤ t &nbsp;&nbsp;("the coarser one wins")</div>
+  <p>
+    In words: <em>a guess about a guess collapses to the coarser guess.</em> If today you forecast what you
+    will think tomorrow, your forecast must equal what you think today — otherwise you would already have
+    changed your mind. Check it: <code>E[V|ℱ₂]</code> takes values 21.00, 4.45, 4.45, 0. Average the first
+    two (the two ℱ₂-cells sitting inside <code>{H··}</code>, equally likely):
+    <code>(21.00 + 4.45)/2 = 12.725</code> — exactly <code>E[V|ℱ₁]</code> on <code>{H··}</code>. And the
+    other branch: <code>(4.45 + 0)/2 = 2.225</code>. ✓ Take <code>s = 0</code> and the tower gives the most
+    used special case of all:
+  </p>
+  <div class="formula">E[ E[X | ℱ_t] ] = E[X] &nbsp;&nbsp;— here (12.725 + 2.225)/2 = <strong>7.475</strong> ✓</div>
+  <p>
+    That is how you will compute nearly every price: condition on something convenient, then average out.
+  </p>
+  <h3>Rule 2 — taking out what is known</h3>
+  <div class="formula">E[ Y·X | ℱ ] = Y · E[ X | ℱ ] &nbsp;&nbsp;when Y is ℱ-measurable</div>
+  <p>
+    If a factor is already known, it is a constant as far as this conditioning is concerned, so it comes out
+    of the expectation. Example on the tree: <code>S₁</code> is ℱ₁-measurable, so
+    <code>E[S₁·V | ℱ₁] = S₁·E[V|ℱ₁]</code>, which equals <code>110 × 12.725 = 1399.75</code> on the up
+    branch and <code>90 × 2.225 = 200.25</code> on the down branch. Verify the up branch the long way:
+    average <code>S₁·V</code> over the cell <code>{H··}</code> where S₁ ≡ 110, giving
+    <code>110 × (33.1 + 8.9 + 8.9 + 0)/4 = 110 × 12.725</code>. ✓ This rule is what makes hedging algebra
+    tractable: your position <code>Δ_t</code> is known at <em>t</em>, so it slides out of every
+    time-<em>t</em> conditional expectation.
+  </p>
+  <h3>Rule 3 — independence kills conditioning</h3>
+  <div class="formula">E[ X | ℱ ] = E[ X ] &nbsp;&nbsp;when X is independent of ℱ</div>
+  <p>
+    Information about things unrelated to X does not change your best guess. On the tree, the third flip is
+    independent of ℱ₂, so <code>E[third flip is H | ℱ₂] = ½</code> everywhere. This is the rule that makes
+    Brownian increments so pleasant later: a future increment is independent of the past, so conditioning on
+    the past leaves only its (zero) mean.
+  </p>
+  <p>
+    Two more properties, stated for completeness because you will see them used: conditional expectation is
+    <strong>linear</strong> (<code>E[aX + bZ|ℱ] = aE[X|ℱ] + bE[Z|ℱ]</code>), and it satisfies
+    <strong>conditional Jensen</strong>: for a convex function φ, <code>E[φ(X)|ℱ] ≥ φ(E[X|ℱ])</code>.
+    Jensen's intuition, in one sentence you can reconstruct: averaging <em>inside</em> a convex function
+    loses the value of dispersion, so averaging first and then applying φ gives less. Concretely on our
+    tree with the convex payoff <code>φ(x) = (x − 100)⁺</code>: on the cell <code>{HH·}</code>,
+    <code>E[φ(S₃)|ℱ₂] = 21.00</code> while <code>φ(E[S₃|ℱ₂]) = φ(121) = 21.00</code> — equal here because
+    both branch values are above the strike so φ is linear there; but on <code>{HT·}</code>,
+    <code>E[φ(S₃)|ℱ₂] = 4.45</code> versus <code>φ(99) = 0</code>, a strict gap of 4.45. That gap is
+    <em>option value from uncertainty</em>, the first glimpse of why volatility is worth money (units 016–017).
+  </p>
+
+  <h2>Conditional expectation is a projection</h2>
+  <p>
+    Everything above is computational. This section is the idea that makes conditional expectation feel
+    <em>inevitable</em>, and it connects Q2 straight back to the linear algebra of Lesson
+    <a href="0008-linear-algebra-pca.html">008</a> and the regression of Lesson
+    <a href="0009-regression-done-right.html">009</a>.
+  </p>
+  <h3>Step 1 — random variables as vectors (re-warming Lesson 008)</h3>
+  <p>
+    Recall from Lesson 008 that a vector space needs only addition and scaling, and that a
+    <strong>dot product</strong> gives it geometry: lengths, angles, and the notion of two vectors being
+    perpendicular (dot product zero). Random variables on our tree add and scale like vectors — indeed a
+    random variable on 8 outcomes <em>is</em> a list of 8 numbers. Define the inner product and the length:
+  </p>
+  <div class="formula">⟨X, Z⟩ = E[X·Z] &nbsp;&nbsp;and&nbsp;&nbsp; ‖X‖ = √E[X²]</div>
+  <p>
+    Sanity check that this is the same dot product you know: with each outcome carrying probability ⅛,
+    <code>E[X·Z] = Σ_ω X(ω)Z(ω)/8</code> — the ordinary dot product of two 8-vectors, rescaled. Nothing new
+    has been invented; probability just supplies the weights. The space of random variables with finite
+    <code>E[X²]</code>, equipped with this inner product, is written <strong>L²</strong>, and "orthogonal"
+    (<code>E[XZ] = 0</code>) means, for mean-zero variables, exactly <em>uncorrelated</em>.
+  </p>
+  <h3>Step 2 — your information is a subspace</h3>
+  <p>
+    Which vectors in this space are guesses you are <em>allowed</em> to make at time 1? The ℱ₁-measurable
+    ones: constant on <code>{H··}</code>, constant on <code>{T··}</code>. Such a variable is pinned down by
+    two numbers (the value on each cell), so the allowed guesses form a <strong>2-dimensional subspace</strong>
+    of the 8-dimensional space. Information, geometrically, <em>is</em> a subspace — and a finer filtration is
+    a bigger subspace (ℱ₂-measurable variables form a 4-dimensional one, and ℱ₃ gives all 8 dimensions).
+  </p>
+  <h3>Step 3 — the claim, and the slow-lane proof</h3>
+  <p>
+    <strong>Claim.</strong> Among all guesses your information allows, <code>E[X|ℱ]</code> is the one closest
+    to X in the mean-squared sense:
+  </p>
+  <div class="formula">E[X|ℱ] = argmin<sub>Y is ℱ-measurable</sub> E[(X − Y)²]</div>
+  <p>
+    Here is the derivation with every step and its licence. Write <code>Ŷ = E[X|ℱ]</code> and let Y be any
+    ℱ-measurable candidate.
+  </p>
+  <div class="step">
+    <strong>Step A (algebra only).</strong> Add and subtract Ŷ:
+    <code>X − Y = (X − Ŷ) + (Ŷ − Y)</code>. Nothing has been assumed; we split the error into "the part
+    even the best guess cannot remove" plus "how far Y sits from the best guess."
+  </div>
+  <div class="step">
+    <strong>Step B (expand the square).</strong>
+    <code>(X − Y)² = (X − Ŷ)² + 2(X − Ŷ)(Ŷ − Y) + (Ŷ − Y)²</code>. This is just <code>(a+b)² =
+    a² + 2ab + b²</code>.
+  </div>
+  <div class="step">
+    <strong>Step C (take expectations).</strong> By <em>linearity</em> of expectation,
+    <code>E[(X−Y)²] = E[(X−Ŷ)²] + 2E[(X−Ŷ)(Ŷ−Y)] + E[(Ŷ−Y)²]</code>.
+  </div>
+  <div class="step">
+    <strong>Step D (the cross term dies — the only real work).</strong> Let
+    <code>Z = Ŷ − Y</code>. Z is ℱ-measurable, being the difference of two ℱ-measurable variables. Now:
+    <br><code>E[(X−Ŷ)·Z] = E[ E[(X−Ŷ)·Z | ℱ] ]</code> &nbsp;— licensed by the <strong>tower property</strong>
+    with s = 0 (Rule 1);
+    <br><code>&nbsp;&nbsp;= E[ Z · E[X−Ŷ | ℱ] ]</code> &nbsp;— licensed by <strong>taking out what is
+    known</strong> (Rule 2), legal precisely because Z is ℱ-measurable;
+    <br><code>&nbsp;&nbsp;= E[ Z · (E[X|ℱ] − Ŷ) ]</code> &nbsp;— licensed by <strong>linearity</strong> of
+    conditional expectation, plus the fact that Ŷ is ℱ-measurable so <code>E[Ŷ|ℱ] = Ŷ</code>;
+    <br><code>&nbsp;&nbsp;= E[ Z · 0 ] = 0</code> &nbsp;— because <code>Ŷ</code> <em>is</em>
+    <code>E[X|ℱ]</code>, by definition.
+  </div>
+  <div class="step">
+    <strong>Step E (conclude).</strong> The cross term is zero, so
+    <code>E[(X−Y)²] = E[(X−Ŷ)²] + E[(Ŷ−Y)²]</code>. The second term is a square, hence ≥ 0, and equals 0
+    only when <code>Y = Ŷ</code> (almost surely). Therefore no allowed guess beats <code>E[X|ℱ]</code>, and
+    only <code>E[X|ℱ]</code> attains the minimum. ∎
+  </div>
+  <p>
+    Step E is Pythagoras: total squared error = unavoidable error + squared distance from the projection. And
+    Step D is the geometric heart — <strong>the residual <code>X − E[X|ℱ]</code> is orthogonal to every
+    ℱ-measurable variable</strong>. If you have seen "residuals ⟂ regressors" in Lesson 009, this is the same
+    statement with "regressors" upgraded to "everything you know."
+  </p>
+  <p>
+    The widget makes the geometry and the arithmetic agree exactly. Using our tree with X = V and ℱ = ℱ₁,
+    the minimum mean squared error is <code>E[(V − E[V|ℱ₁])²] = 83.22</code>, so V sits a perpendicular
+    distance <code>√83.22 = 9.12</code> above the plane of allowed guesses. Step off the projection by
+    <em>s</em> units and Pythagoras says you pay exactly <code>s²</code> more:
+  </p>
+
+  <div id="projection"></div>
+  <p class="viz-cap">
+    A 2-D slice of the 8-dimensional space of random variables. The horizontal line is the subspace of
+    guesses your time-1 information allows, parameterised as <code>Y(s) = E[V|ℱ₁] + s·Z</code> for a fixed
+    ℱ₁-measurable direction Z with <code>E[Z²] = 1</code>. The dot above the line is the call payoff V,
+    which no time-1 guess can reach: its perpendicular distance <code>9.12</code> is the irreducible
+    uncertainty. The squared error reads <code>83.22 + s²</code> and bottoms out at <code>s = 0</code>, where
+    the error vector meets the subspace at 90° — the picture and the algebra of Step E are the same fact.
+  </p>
+  <h3>The bonus: variance decomposes</h3>
+  <p>
+    Pythagoras with <code>Y = E[X]</code> (the constant guess, which is certainly measurable) gives a
+    decomposition you will meet again in every risk model:
+  </p>
+  <div class="formula">Var(X) = E[ Var(X | ℱ) ] + Var( E[X | ℱ] )</div>
+  <p>
+    Read it as: <em>total uncertainty = what your information cannot explain + what it can</em>. On our tree
+    <code>Var(V) = 110.78</code>, the residual part is <code>83.22</code>, and the explained part is
+    <code>Var(E[V|ℱ₁]) = 27.56</code>; indeed <code>83.22 + 27.56 = 110.78</code>. ✓ The ratio
+    <code>27.56/110.78 = 24.9%</code> is the fraction of the payoff's variance that the first flip explains —
+    and if that phrasing sounds like R², it should: R² is this decomposition restricted to linear guesses.
+  </p>
+
+  <h2>What this buys you: alpha is a conditional expectation</h2>
+  <p>
+    Take a breath here, because the projection view silently reframes everything you did in Q1 and everything
+    you will do in Year 2.
+  </p>
+  <p>
+    A signal is a bet that tomorrow's return is predictable from what you know today. In this language, the
+    object you are trying to estimate is
+  </p>
+  <div class="formula">E[ r<sub>t+1</sub> | ℱ<sub>t</sub> ] &nbsp;&nbsp;— the best possible forecast from today's information</div>
+  <p>
+    and <strong>an edge exists exactly when this conditional expectation is not constant.</strong> The
+    efficient-market claim, stated precisely, is that this conditional expectation is (near) zero for tradable
+    information sets. Alpha is not "a number a model outputs"; alpha is the assertion that a particular
+    conditional expectation is non-zero and estimable after costs.
+  </p>
+  <p>
+    Three consequences that should reorganise how you read your own Q1 work:
+  </p>
+  <ul>
+    <li><strong>Regression was a restricted projection.</strong> Lesson 009's OLS found the best guess of
+      <code>r_{t+1}</code> among <em>linear</em> functions of one signal. Conditional expectation is the best
+      guess among <em>all</em> functions of everything you know. So OLS is the projection onto a small
+      subspace of the one that matters — which is exactly why non-linear models (trees, nets: Year 1 Q4,
+      Year 2) can add value, and equally why they overfit: the bigger subspace fits noise as happily as
+      signal.</li>
+    <li><strong>The residual is the unpredictable part, by construction.</strong> Step D said
+      <code>r_{t+1} − E[r_{t+1}|ℱ_t]</code> is orthogonal to everything in ℱ_t. So after you have extracted
+      the conditional expectation, no further function of today's information can help. That is what "no
+      remaining edge" means mathematically.</li>
+    <li><strong>Leakage is conditioning on the wrong σ-algebra.</strong> Every leak in Q1 amounts to
+      computing <code>E[r_{t+1} | 𝒢]</code> for some 𝒢 strictly bigger than ℱ_t and reporting it as if it
+      were <code>E[r_{t+1} | ℱ_t]</code>. Because a bigger subspace always fits better (Step E: more
+      dimensions, smaller residual), the leak <em>always</em> flatters the backtest. Purged cross-validation
+      (Year 2 Q2) is nothing but machinery for keeping 𝒢 inside ℱ_t.</li>
+  </ul>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>Martingales: the fair game</h2>
+  <p>
+    One definition remains, and it is the one that turns all this into pricing. An adapted process
+    <code>{M_t}</code> (with <code>E|M_t| &lt; ∞</code>) is a <strong>martingale</strong> if
+  </p>
+  <div class="formula">E[ M<sub>t</sub> | ℱ<sub>s</sub> ] = M<sub>s</sub> &nbsp;&nbsp;for all s ≤ t</div>
+  <p>
+    In words: <em>your best guess of any future value is today's value.</em> No drift, no trend, no
+    exploitable tilt — a fair game. (The two cousins: a <strong>supermartingale</strong> has
+    <code>E[M_t|ℱ_s] ≤ M_s</code>, drifting down, which is what an unfair casino game or a strategy paying
+    costs looks like; a <strong>submartingale</strong> has ≥.)
+  </p>
+  <p>
+    Test our stock. With <code>p = ½</code>, one step from any node with price <code>S</code>:
+  </p>
+  <div class="formula">E[S<sub>t+1</sub> | ℱ<sub>t</sub>] = ½(1.1·S) + ½(0.9·S) = S·(1.1 + 0.9)/2 = S·1 = S<sub>t</sub></div>
+  <p>
+    So <code>S_t</code> is a martingale under this measure — and the tower property extends the one-step
+    result to any horizon: <code>E[S₃|ℱ₁] = E[E[S₃|ℱ₂]|ℱ₁] = E[S₂|ℱ₁] = S₁</code>. Set the second widget's
+    payoff to the price and you would see every node equal its own price; the smoke test for this lesson
+    asserts precisely that. Note how fragile the property is: with <code>p = 0.6</code> the one-step
+    expectation becomes <code>S·(0.6·1.1 + 0.4·0.9) = 1.02·S</code>, a 2% upward drift per period, and the
+    martingale property fails. <strong>Being a martingale is a joint statement about a process, a
+    filtration, and a measure</strong> — change any one of the three and the answer changes.
+  </p>
+  <p>
+    That fragility is the opportunity, and it is where Q2 is headed. The value <code>p* = (1−d)/(u−d)</code>
+    that makes the discounted stock a martingale is the <strong>risk-neutral probability</strong>; under it,
+    the discounted value of <em>any</em> derivative is also a martingale, so its price today is a conditional
+    expectation of its future payoff — the 7.475 you computed. Units 015–016 build that claim properly
+    (Girsanov for the measure change, Feynman–Kac for the PDE version). Today you have the machine; soon you
+    get the licence to use it.
+  </p>
+
+  <div class="trap">
+    <strong>Trap — the six ways this material is misused.</strong>
+    <strong>(1) Treating E[X|ℱ_t] as a number.</strong> It is a random variable, ℱ_t-measurable, constant on
+    cells. Every downstream error in Q2 traces back to this one; if a manipulation only makes sense for a
+    constant, you have made it.
+    <strong>(2) Confusing conditioning on an event with conditioning on a σ-algebra.</strong>
+    <code>E[V|{H··}] = 12.725</code> is a number attached to one event; <code>E[V|ℱ₁]</code> is the whole
+    plan (12.725 <em>or</em> 2.225). The first is Layer 1, the second is what the notation in every textbook
+    means.
+    <strong>(3) Believing bigger information is automatically better research.</strong> A finer σ-algebra
+    always lowers the mean squared error <em>in sample</em> (Step E). That is exactly why leakage looks like
+    skill, and why "my model improved" is meaningless until you prove the extra information was genuinely
+    available at decision time.
+    <strong>(4) Assuming knowing the price means knowing the path.</strong> <code>σ(S₂) ⊊ ℱ₂</code>: the
+    price fuses <code>HT</code> and <code>TH</code>. Conditioning on the wrong (coarser) σ-algebra silently
+    changes the answer — and conditioning on a <em>finer</em> one than you really have is leakage.
+    <strong>(5) Reading "probability zero" as "impossible."</strong> In continuous models every individual
+    path has probability zero, yet one of them happens. "Almost surely" is a statement about measure, not
+    about possibility.
+    <strong>(6) Calling a process a martingale without naming the measure.</strong> Our stock is a martingale
+    under <code>p = ½</code> and a submartingale under <code>p = 0.6</code>. "Prices are martingales" is
+    meaningless until you say <em>under which measure and which filtration</em> — the sloppiness that makes
+    people think risk-neutral pricing predicts real-world returns.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+  <div id="quiz5"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“I've computed conditional expectations since undergrad. What did σ-algebras actually add?”</dt>
+    <dd>
+      Undergraduate conditioning is always on an <em>event</em> or on <em>the value of another random
+      variable</em> — one number out, computed by dividing. Conditioning on a σ-algebra gives you a random
+      variable instead, and that is what lets you write objects like <code>E[V|ℱ_t]</code> that evolve in
+      time and can themselves be processes, hedged, and differentiated. Without it you cannot state the
+      martingale property, the tower property across dates, or "the hedge is adapted." The payoff is not
+      rigour for its own sake; it is that the new object composes. Everything in units 012–020 is built by
+      composing conditional expectations across time.
+    </dd>
+    <dt>“Is measure theory used in the actual job, or is it interview theater?”</dt>
+    <dd>
+      Both, honestly, and the split is worth knowing. You will rarely write "ℱ_t" in production research
+      code — but you will use the <em>discipline</em> daily: every question of the form "was this quantity
+      knowable at decision time?" is a measurability question, and it is the single most expensive class of
+      bug in the field. The formal machinery is genuinely load-bearing when you price or hedge anything
+      (change of measure, martingale representation), and it is examined in interviews for derivatives-adjacent
+      QR roles. For a pure statistical-arbitrage seat, the conditional-expectation-as-projection view is the
+      part you will use every week; the σ-algebra formalism is the part that makes you precise about leakage.
+    </dd>
+    <dt>“Why define conditional expectation by that awkward partial-averaging condition instead of a formula?”</dt>
+    <dd>
+      Because the formula (average within a cell, divide by the cell's probability) breaks the moment cells
+      have probability zero, which is every continuous-time model you will ever build. The partial-averaging
+      condition never divides, so it survives intact — and on a tree it provably picks out the same object,
+      as the 6.3625 = 6.3625 check showed. This is a recurring pattern in measure theory: the general
+      definition looks indirect because it is engineered to avoid the one operation that fails in the limit.
+    </dd>
+    <dt>“If sets of probability zero can be ignored, why mention them at all?”</dt>
+    <dd>
+      Because "ignore" has a precise scope: expectations, prices and hedges are unaffected, but statements
+      about individual paths are not. Two random variables equal almost surely have identical expectations,
+      so conditional expectation is only ever unique "up to a null set" — which is why theorems say
+      <em>almost surely</em>. Practically, it also warns you off a class of nonsense: any strategy whose
+      profit relies on what happens on a measure-zero set of paths (say, the price hitting a level exactly)
+      is not a strategy, it is an artifact.
+    </dd>
+    <dt>“Our tree is finite. Doesn't everything change when time is continuous?”</dt>
+    <dd>
+      The <em>objects</em> do not change at all — Ω, ℱ_t, P, <code>E[·|ℱ_t]</code>, martingale — and neither
+      do the three rules or the projection theorem. What changes is that you can no longer enumerate cells,
+      so you compute with distributions and stochastic integrals instead of sums. That is exactly what units
+      012–014 build. This is why Shreve's Chapter 2 spends its time on the finite case: the intuitions
+      transfer perfectly and the formalism is the same. If a continuous-time manipulation confuses you later,
+      redraw it as a three-step tree — that habit will serve you for two years.
+    </dd>
+    <dt>“Why is the risk-neutral probability ½ here rather than the real-world probability?”</dt>
+    <dd>
+      Because with <code>u = 1.1, d = 0.9</code> and zero rates, ½ is the unique weighting under which the
+      <em>stock</em> is a fair game, and pricing by replication turns out to be equivalent to taking an
+      expectation under precisely that weighting. It is not a claim about how often the market really goes
+      up. This lesson deliberately stops at "register the fact"; the derivation (why replication forces that
+      measure, and what changes when rates are non-zero) is unit 015. If you want the intuition now: the
+      hedge, not the forecast, sets the price — so the price cannot depend on your view of the real
+      probability.
+    </dd>
+  </dl>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    <strong>Shreve, <em>Stochastic Calculus for Finance II: Continuous-Time Models</em>, Chapters 1–2</strong>
+    (see <a href="../RESOURCES.md">RESOURCES.md</a>) — the canonical bridge for exactly your background.
+    Read §1.1–1.2 for the probability space and the measure (skim the Lebesgue-integral construction in
+    §1.3–1.4 on a first pass), then §2.1–2.3 carefully: <em>information and σ-algebras</em>,
+    <em>independence</em>, and <em>conditional expectation</em>. §2.4 is martingales. Shreve's own worked
+    example is a three-period binomial tree very close to ours, so read it with today's numbers beside you.
+  </p>
+  <p>
+    If Volume II opens too abruptly, Shreve <em>Volume I: The Binomial Asset Pricing Model</em> Ch. 2 does
+    the same content in pure discrete time and is the gentler entrance; Baxter &amp; Rennie,
+    <em>Financial Calculus</em> §3.1–3.3 is the intuition-first companion. All three are in
+    <a href="../RESOURCES.md">RESOURCES.md</a>.
+  </p>
+  <p>
+    <strong>Reference sheet (keep this one):</strong>
+    <a href="../reference/conditional-expectation.html">Filtrations, conditional expectation &amp; martingales
+    — the working rules</a>. Printable, and it is the page you will reach for in units 012–020 rather than
+    re-reading this lesson.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0011-conditional-expectation-tree.ipynb"><code>labs/0011-conditional-expectation-tree.ipynb</code></a>
+    — build the filtration of the tree in code (atoms, measurability), compute <code>E[X|ℱ_t]</code>, and then
+    <em>verify the theory numerically</em>: partial averaging on every event, the tower property, conditional
+    expectation as the least-squares minimiser, orthogonality of the residual, and the value of
+    <code>p</code> that makes the price a martingale. A unit is done only when its lab runs.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) Explain what a σ-algebra is in one
+    sentence without using the word "measurable." (2) What kind of object is <code>E[X|ℱ₁]</code>, and how
+    many distinct values can it take on our tree? (3) State the tower property and say why it is intuitive.
+    (4) Why is the residual <code>X − E[X|ℱ]</code> orthogonal to every ℱ-measurable variable — which two
+    rules does that argument use? (5) The call payoff has <code>E[V|ℱ₂] = 4.45</code> on the cell
+    <code>{HT·}</code> but <code>φ(E[S₃|ℱ₂]) = 0</code> there; what is that gap called and where does it come
+    from? (6) Write the definition of leakage as a statement about σ-algebras. Re-read anything shaky before
+    the lab.
+  </div>
+
+  <div class="ask-teacher">
+    Stuck on the partial-averaging definition, want the tower property drilled on a fresh tree, or curious
+    how any of this becomes Itô's lemma? Ask your teacher. Paste your teach-back for grading — and if you can
+    define these terms cold, they go into <a href="../GLOSSARY.md">GLOSSARY.md</a>.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Sample space Ω</strong> — the set of all complete futures; one element ω is an entire
+      history, not a state at a moment.</li>
+    <li><strong>σ-algebra ℱ</strong> — the collection of events whose "did it happen?" your information can
+      settle; equivalently, a partition of Ω into indistinguishable cells (its <em>atoms</em>).</li>
+    <li><strong>Probability measure P</strong> — assigns mass to <em>events</em>, countably additively;
+      <code>(Ω, ℱ, P)</code> is a probability space. Single outcomes may carry zero mass.</li>
+    <li><strong>Almost surely</strong> — true except on a set of probability zero (so it can be ignored by
+      any expectation, price, or hedge).</li>
+    <li><strong>Filtration {ℱ_t}</strong> — an increasing family of σ-algebras: the growing record of what is
+      known.</li>
+    <li><strong>ℱ_t-measurable / adapted</strong> — knowable at time <em>t</em> (constant on ℱ_t's cells).
+      A strategy must be adapted; violating this <em>is</em> leakage.</li>
+    <li><strong>Conditional expectation E[X|ℱ]</strong> — the ℱ-measurable random variable that averages X
+      within each cell; equivalently, the one reproducing X's mass on every event of ℱ; equivalently, the
+      least-squares projection of X onto the ℱ-measurable subspace.</li>
+    <li><strong>Tower property</strong> — <code>E[E[X|ℱ_t]|ℱ_s] = E[X|ℱ_s]</code> for <code>s ≤ t</code>: a
+      guess about a guess collapses to the coarser guess.</li>
+    <li><strong>Taking out what is known</strong> — <code>E[YX|ℱ] = Y·E[X|ℱ]</code> when Y is
+      ℱ-measurable.</li>
+    <li><strong>Martingale</strong> — an adapted, integrable process with
+      <code>E[M_t|ℱ_s] = M_s</code>: the best forecast of the future is the present value. Always name the
+      measure.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    Quarter 1 taught you to distrust a number; Quarter 2 teaches you to build one. Today laid the
+    foundation slab for the next nine units: <strong>Ω, ℱ, P, conditional expectation, martingale</strong>.
+    Unit 012 takes the coin-flip tree to its continuous limit and constructs <strong>Brownian motion</strong>,
+    where "each path has probability zero" stops being a curiosity and becomes the setting; the filtration
+    you met today is what makes its increments "independent of the past." Unit 013 builds the Itô integral —
+    which is <em>defined</em> so that the integrand must be adapted (no peeking) and the result is a
+    martingale. Unit 015 changes the measure and explains why <code>p* = ½</code> was the right weighting;
+    unit 016 turns the conditional expectation into the Black–Scholes PDE via Feynman–Kac. By unit 020 you
+    price and hedge a European option three independent ways.
+  </p>
+  <p>
+    And the Q1 thread never drops: the same conditional expectation you averaged on a tree today is the
+    object every signal in Year 2 estimates, the residual orthogonality you proved is why "no remaining
+    edge" has a precise meaning, and measurability is now your formal name for leakage. Next stop: unit 012,
+    Brownian motion. Run the lab first.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0010-q1-checkpoint.html">← Lesson 010 (Q1 checkpoint)</a></li>
+      <li><a href="../reference/conditional-expectation.html">Reference: conditional expectation &amp; martingales</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 012 — Random walks → Brownian motion →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/tree-viz.js"></script>
+<script src="../assets/projection-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 11, count: 4 });
+
+  Tree.mount(document.getElementById("filtration"), { mode: "filtration", t: 1 });
+  Tree.mount(document.getElementById("condexp"), { mode: "condexp", payoff: "call", K: 100, t: 2 });
+  Projection.mount(document.getElementById("projection"), { mseMin: 83.217, s: 7, xName: "V", yName: "E[V|\u2131\u2081]" });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "It is time 1 on the tree (one flip seen). What kind of object is E[V | \u21311], the best guess of the call payoff given time-1 information?",
+    options: [
+      { label: "A single number, computed from the tree", value: "number" },
+      { label: "A random variable, known at time 1", value: "rv" },
+      { label: "A probability that V ends up positive", value: "prob" },
+      { label: "A function of the final payoff V itself", value: "func" }
+    ],
+    correct: "rv",
+    reveal: "A random variable. It equals 12.725 if the first move was up and 2.225 if it was down \u2014 you don't yet know which, so the answer must be defined on all of \u03a9. It is \u21311-measurable (constant on each cell of \u21311), which is exactly what makes it an answer you are able to state at time 1. Only at t = 3 does conditioning return a plain number-per-outcome equal to V."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: what is E[X | \u2131] \u2014 and why is it the same thing as a projection? Then say what that has to do with leakage in a backtest.",
+    points: [
+      "\u2131 = the information you have; its atoms are outcomes you can't tell apart",
+      "E[X|\u2131] is a RANDOM VARIABLE, \u2131-measurable, constant on each atom",
+      "On a tree: average X within each cell (Layer 2); in general: partial averaging",
+      "It minimises E[(X\u2212Y)\u00b2] over all \u2131-measurable Y \u2014 the L\u00b2 projection",
+      "Residual X \u2212 E[X|\u2131] is orthogonal to everything in \u2131 (uses tower + taking out what is known)",
+      "A finer \u2131 is a bigger subspace, so it always fits better in sample",
+      "Leakage = conditioning on a \u2131 bigger than what you actually knew, so it always flatters the backtest",
+      "Adapted / \u2131_t-measurable is the formal no-look-ahead rule for a strategy"
+    ],
+    model: "E[X|\u2131] is my best guess of X given the information \u2131. The information is a partition of the possible futures into cells I cannot see inside, and the guess has to be constant on each cell \u2014 that is what \u2131-measurable means, and it is why the answer is a random variable rather than a number: I don't yet know which cell I'll be in, so I write down a value for each. Concretely on a tree I average X over the outcomes inside each cell; in general the defining property never divides by a cell's probability, it just requires that my guess reproduce X's total mass on every event I can ask about (partial averaging), which is what keeps the definition alive in continuous time where each path has probability zero. The projection view says the same thing geometrically: random variables are vectors with inner product E[XZ], the \u2131-measurable ones form a subspace, and E[X|\u2131] is the point of that subspace closest to X in mean square. The proof is Pythagoras: split X\u2212Y into (X\u2212E[X|\u2131]) + (E[X|\u2131]\u2212Y), and the cross term vanishes because the residual is orthogonal to every \u2131-measurable variable \u2014 which I get from the tower property plus taking out what is known. So the residual is exactly the part of X my information cannot explain, and no further function of what I know can improve on it. That is the link to leakage: a finer information set is a bigger subspace, and a bigger subspace always reduces the in-sample error, so if I accidentally condition on something I did not actually know at decision time \u2014 a full-sample mean, a future label, a forward-filled price \u2014 my backtest necessarily looks better. Leakage isn't a coding slip, it's conditioning on the wrong \u03c3-algebra, and requiring every quantity in the strategy to be \u2131_t-measurable is the formal version of the no-look-ahead rule I was enforcing by hand all through Q1."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "E[X | \u2131_t] is best described as:",
+    options: [
+      { label: "A random variable constant on \u2131_t's cells", value: "a" },
+      { label: "A single number computed from the tree", value: "b" },
+      { label: "A conditional probability of the event X", value: "c" },
+      { label: "A function of the future value of X only", value: "d" }
+    ],
+    correct: "a",
+    explain: "It assigns one value per atom of \u2131_t, so it is an \u2131_t-measurable random variable \u2014 a plan for guessing, revealed when time t arrives. A number is only the special case \u2131_0."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "On the tree, E[ E[V | \u21312] | \u21311 ] equals:",
+    options: [
+      { label: "E[V | \u21311] \u2014 the coarser conditioning wins", value: "a" },
+      { label: "E[V | \u21312] \u2014 the finer conditioning wins", value: "b" },
+      { label: "V itself, because the averages cancel out", value: "c" },
+      { label: "Var(V), by the variance decomposition rule", value: "d" }
+    ],
+    correct: "a",
+    explain: "The tower property: a guess about a guess collapses to the coarser guess. Numerically (21.00 + 4.45)/2 = 12.725 = E[V|\u21311] on {H\u00b7\u00b7}."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Standardising a signal with the FULL sample's mean and volatility is, in this language:",
+    options: [
+      { label: "Using \u2131_T information inside an \u2131_t rule", value: "a" },
+      { label: "A harmless rescaling of the same signal", value: "b" },
+      { label: "Conditioning on a coarser \u03c3-algebra than \u2131_t", value: "c" },
+      { label: "An application of the tower property to \u2131_t", value: "d" }
+    ],
+    correct: "a",
+    explain: "The standardised signal is \u2131_T-measurable but gets used as if it were \u2131_t-measurable \u2014 leakage is a measurability violation, and a bigger information set always flatters the fit."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "Among all guesses your information allows, E[X|\u2131] is the unique one that:",
+    options: [
+      { label: "Minimises the mean squared error E[(X\u2212Y)\u00b2]", value: "a" },
+      { label: "Maximises the correlation between X and Y", value: "b" },
+      { label: "Matches the variance of the target X exactly", value: "c" },
+      { label: "Makes the residual as large as it can be", value: "d" }
+    ],
+    correct: "a",
+    explain: "Conditional expectation is the L\u00b2 projection onto the \u2131-measurable subspace: Pythagoras gives E[(X\u2212Y)\u00b2] = E[(X\u2212E[X|\u2131])\u00b2] + E[(E[X|\u2131]\u2212Y)\u00b2] \u2265 the first term, with equality only at Y = E[X|\u2131]."
+  });
+
+  Quiz.mount(document.getElementById("quiz5"), {
+    question: "With u = 1.1, d = 0.9, the price S_t is a martingale under p = \u00bd because:",
+    options: [
+      { label: "The expected one-step gross return is 1", value: "a" },
+      { label: "Up and down moves are equally probable", value: "b" },
+      { label: "The tree recombines, so HT equals TH", value: "c" },
+      { label: "The payoff (S\u2083\u2212100)\u207a is convex in price", value: "d" }
+    ],
+    correct: "a",
+    explain: "E[S_{t+1}|\u2131_t] = S_t\u00b7(\u00bd\u00b71.1 + \u00bd\u00b70.9) = S_t\u00b71. Equal probabilities alone are not enough \u2014 it is the combination with u, d that makes the drift vanish; at p = 0.6 the same tree drifts up 2% per step."
+  });
+</script>
+</body>
+</html>

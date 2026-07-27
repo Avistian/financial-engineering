@@ -55,6 +55,8 @@ const files = [
   "assets/hsk-viz.js",
   "assets/hac-viz.js",
   "assets/autopsy-viz.js",
+  "assets/tree-viz.js",
+  "assets/projection-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -131,6 +133,116 @@ trap("Autopsy.mount + slide", () => {
   window.Autopsy.mount(el, { t0: 6.2, infl: 2.7, m: 50 });
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "50"; i.dispatch("input"); i.value = "100"; i.dispatch("input"); });
+});
+
+// ---- geometry harness: record canvas draw calls and assert they stay in bounds ----
+// The stub above makes every canvas method a no-op, which catches crashes but not layout
+// bugs (labels running off the edge, bands wider than the canvas). This records the
+// coordinates instead and checks them, since we cannot open a browser here.
+function withRecordedCanvas(fn) {
+  const canvases = [];
+  const realCreate = global.document.createElement;
+  global.document.createElement = function (tag) {
+    const el = realCreate(tag);
+    if (tag === "canvas") {
+      const calls = [];
+      const store = {};
+      el.getContext = () => new Proxy({}, {
+        get(t, k) {
+          if (k in store) return store[k];
+          return function () { calls.push({ op: k, args: Array.from(arguments) }); };
+        },
+        set(t, k, v) { store[k] = v; return true; }
+      });
+      el._calls = calls;
+      canvases.push(el);
+    }
+    return el;
+  };
+  try { fn(); } finally { global.document.createElement = realCreate; }
+  return canvases;
+}
+
+function assertInBounds(canvas, label) {
+  const W = canvas.width, H = canvas.height, m = 2;
+  const pts = [];
+  canvas._calls.forEach(c => {
+    const a = c.args;
+    switch (c.op) {
+      case "moveTo": case "lineTo": pts.push([a[0], a[1], c.op]); break;
+      case "arc": pts.push([a[0], a[1], "arc"]); break;
+      case "fillText": pts.push([a[1], a[2], "text:" + a[0]]); break;
+      case "fillRect": case "strokeRect": case "rect": case "roundRect":
+        pts.push([a[0], a[1], c.op]); pts.push([a[0] + a[2], a[1] + a[3], c.op]); break;
+      default: break;
+    }
+  });
+  if (!pts.length) throw new Error(label + ": nothing was drawn");
+  pts.forEach(([x, y, op]) => {
+    if (!(x >= -m && x <= W + m && y >= -m && y <= H + m)) {
+      throw new Error(label + ": " + op + " draws outside the " + W + "x" + H +
+        " canvas at (" + Math.round(x) + ", " + Math.round(y) + ")");
+    }
+  });
+  return pts.length;
+}
+
+trap("Tree geometry stays inside the canvas (both modes, every t)", () => {
+  ["filtration", "condexp"].forEach(mode => {
+    for (let t = 0; t <= 3; t++) {
+      const canvases = withRecordedCanvas(() => {
+        window.Tree.mount(makeEl("div"), { mode: mode, payoff: "call", K: 100, t: t });
+      });
+      assertInBounds(canvases[0], "Tree[" + mode + ", t=" + t + "]");
+    }
+  });
+});
+
+trap("Projection geometry stays inside the canvas (s = -12..12)", () => {
+  for (let s = -12; s <= 12; s += 4) {
+    const canvases = withRecordedCanvas(() => {
+      window.Projection.mount(makeEl("div"), { mseMin: 83.217, s: s });
+    });
+    assertInBounds(canvases[0], "Projection[s=" + s + "]");
+  }
+});
+
+trap("Tree.mount (filtration) + slide", () => {
+  const el = makeEl("div");
+  window.Tree.mount(el, { mode: "filtration", t: 1 });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "2"; i.dispatch("input"); i.value = "3"; i.dispatch("input"); });
+});
+
+trap("Tree.mount (condexp, call payoff) + backward averaging values", () => {
+  const el = makeEl("div");
+  const w = window.Tree.mount(el, { mode: "condexp", payoff: "call", K: 100, t: 2 });
+  const near = (a, b) => Math.abs(a - b) < 1e-9;
+  if (!near(w.V[3][0], 33.100000000000009) && !near(w.V[3][0], 33.1)) throw new Error("leaf HHH payoff wrong: " + w.V[3][0]);
+  if (!near(Math.round(w.V[2][0] * 1e6) / 1e6, 21)) throw new Error("E[V|F2] at HH should be 21, got " + w.V[2][0]);
+  if (!near(Math.round(w.V[1][0] * 1e6) / 1e6, 12.725)) throw new Error("E[V|F1] at H should be 12.725, got " + w.V[1][0]);
+  if (!near(Math.round(w.V[0][0] * 1e6) / 1e6, 7.475)) throw new Error("E[V] should be 7.475, got " + w.V[0][0]);
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "3"; i.dispatch("input"); });
+});
+
+trap("Tree.mount (condexp, price payoff) is a martingale under p = 0.5", () => {
+  const el = makeEl("div");
+  const w = window.Tree.mount(el, { mode: "condexp", payoff: "price", t: 1 });
+  for (let level = 0; level <= 3; level++) {
+    for (let i = 0; i < (1 << level); i++) {
+      if (Math.abs(w.V[level][i] - w.S[level][i]) > 1e-9) {
+        throw new Error("E[S3|Ft] != St at level " + level + " idx " + i);
+      }
+    }
+  }
+});
+
+trap("Projection.mount + slide", () => {
+  const el = makeEl("div");
+  window.Projection.mount(el, { mseMin: 83.217, s: 7 });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "-12"; i.dispatch("input"); i.value = "12"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

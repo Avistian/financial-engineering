@@ -21,6 +21,22 @@ the lesson HTML.
 **No prefilled answers:** TODO cells use `____` only. Teacher copies with filled answers live in
 [`../solutions/`](../solutions/) (gitignored).
 
+### The exception: worked walkthroughs
+
+One lab breaks this convention on purpose — `0010-2-q1-synthesis-walkthrough.ipynb`. It is a
+**reference case study**, not an exercise, so it has no blanks and ships with its outputs committed.
+Its tags read:
+
+| Cell tag | Meaning |
+|----------|---------|
+| **SETUP** | Imports, constants, the simulated market. Just run it. |
+| **WORKED** | Fully written. Read the code, run it, then read the output — the code *is* the explanation. |
+| **CHECK** | Assertions proving the claim the section just made. A failure means the narrative is wrong. |
+| **MEMO** | The research note the whole notebook exists to produce. |
+
+Use it after finishing the Q1 labs, to see the tools working together on one problem rather than
+one at a time.
+
 ## Stack
 
 Python-first: `numpy`, `pandas`, `scipy`, `scikit-learn`, `statsmodels`, and later `matplotlib`,
@@ -68,6 +84,20 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
   that "discovered" a signal with a gaudy t-statistic: run White (HC), Newey–West (HAC), the
   effective sample size, the best-of-*M* selection haircut, and a Monte-Carlo empirical null, then
   deliver a kill/confirm verdict on a *planted spurious* signal (Lesson 010).
+- `0010-2-q1-synthesis-walkthrough.ipynb` — **Q1 synthesis, fully worked.** Not an exercise: every
+  cell is written and every output is committed, so it reads end-to-end without being run. One
+  research case — 12 names, 10 years, 12 candidate signals of which exactly *one* is real — carried
+  from mandate to memo, using every tool in Units 001–009 in the order a desk would use them.
+  A naïve pooled screen crowns five "winners"; the Q1 toolkit strips it to the one genuine edge
+  without destroying it, then prices its capacity. Includes the traps the other labs only warn
+  about: neutralizing β breaks dollar-neutrality (fix both at once), Bonferroni and
+  Benjamini–Hochberg *disagree* on a decoy at t = 2.77, and a 10-year sample cannot even measure
+  the equity premium. 22 `CHECK` cells assert every claim the narrative makes (Lesson 010).
+- `0011-conditional-expectation-tree.ipynb` — build a filtration in code (atoms, measurability) on a
+  three-period binomial tree, compute `E[X|ℱ_t]`, then *verify the theory numerically*: partial
+  averaging on every event of ℱ_t, the tower property, conditional expectation as the least-squares
+  projection with an orthogonal residual, the variance decomposition, the `p` that makes the price a
+  martingale, and leakage exhibited as a measurability violation (Lesson 011).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 

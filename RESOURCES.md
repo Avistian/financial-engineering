@@ -20,8 +20,9 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 ### Stochastic calculus & pricing
 - ★ **Shreve — *Stochastic Calculus for Finance II: Continuous-Time Models*** (Springer, 2004).
   The standard bridge for a strong-math student new to SDEs. Use for: Brownian motion, Itô, Girsanov, BS PDE, Feynman-Kac (Year 1 Q2).
-- ◆ **Shreve — *Volume I: The Binomial Asset Pricing Model***. Discrete warm-up; read first if Vol II feels abrupt.
-- ◆ **Baxter & Rennie — *Financial Calculus***. Gentler, intuition-first companion to Shreve.
+- ◆ **Shreve — *Volume I: The Binomial Asset Pricing Model***. Discrete warm-up; read first if Vol II feels abrupt. Ch. 2 covers information, conditional expectation and martingales in pure discrete time — the gentler entrance to unit 011.
+- ◆ **Baxter & Rennie — *Financial Calculus***. Gentler, intuition-first companion to Shreve. §3.1–3.3 for filtrations/measure change with minimal formalism.
+- ◆ **Williams — *Probability with Martingales*** (CUP, 1991). The compact, rigorous treatment of measure-theoretic probability built around martingales: σ-algebras, conditional expectation as an L² projection, and the convergence theorems. Reach for it when you want a *proof* rather than Shreve's finance-first exposition (units 011–012).
 - ★ **Hull — *Options, Futures, and Other Derivatives***. The market-mechanics + Greeks reference. Use for: instruments, hedging, risk (Y1 Q1, Q2).
 - ◆ **Glasserman — *Monte Carlo Methods in Financial Engineering***. Use for: variance reduction, MC pricing (unit 019).
 - ◆ **Cont & Tankov — *Financial Modelling with Jump Processes***. Advanced jumps (unit 018).

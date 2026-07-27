@@ -486,6 +486,68 @@
       ],
       correct: "a",
       explain: "The value is negative knowledge \u2014 not staking capital on noise. A killed bad backtest saves real out-of-sample money; that is the checkpoint's ethos."
+    },
+
+    // ---- L011: information, filtrations, conditional expectation ----
+    {
+      id: "l011-condexp-type", lesson: 11, quarter: "Q2", concept: "cond-exp", misconception: true,
+      question: "E[X | \u2131\u209c] \u2014 the best guess of X given time-t information \u2014 is:",
+      options: [
+        { label: "A random variable, constant on cells", value: "a" },
+        { label: "A single number, fixed at time zero", value: "b" },
+        { label: "A probability that the event X holds", value: "c" },
+        { label: "A function of X's own future value", value: "d" }
+      ],
+      correct: "a",
+      explain: "It gives one value per atom of \u2131\u209c, so it is an \u2131\u209c-measurable random variable \u2014 a plan for guessing, revealed when time t arrives."
+    },
+    {
+      id: "l011-measurable-leak", lesson: 11, quarter: "Q2", concept: "measurability", misconception: true,
+      question: "Standardising a signal with the full sample's mean and volatility is, formally:",
+      options: [
+        { label: "Conditioning on a too-large \u03c3-algebra", value: "a" },
+        { label: "Conditioning on a coarser \u03c3-algebra", value: "b" },
+        { label: "A rescaling that changes no inference", value: "c" },
+        { label: "An instance of the tower property", value: "d" }
+      ],
+      correct: "a",
+      explain: "The signal becomes \u2131_T-measurable while being used as if \u2131\u209c-measurable. Leakage IS a measurability violation, and a bigger \u03c3-algebra always flatters the fit."
+    },
+    {
+      id: "l011-tower", lesson: 11, quarter: "Q2", concept: "tower",
+      question: "By the tower property, E[ E[X | \u2131\u2082] | \u2131\u2081 ] equals:",
+      options: [
+        { label: "E[X | \u2131\u2081] \u2014 the coarser conditioning", value: "a" },
+        { label: "E[X | \u2131\u2082] \u2014 the finer conditioning", value: "b" },
+        { label: "X itself, as the averages cancel out", value: "c" },
+        { label: "Var(X), by the variance decomposition", value: "d" }
+      ],
+      correct: "a",
+      explain: "A guess about a guess collapses to the coarser guess. On the standard tree: (21.00 + 4.45)/2 = 12.725 = E[V|\u2131\u2081] on the up branch."
+    },
+    {
+      id: "l011-projection", lesson: 11, quarter: "Q2", concept: "projection",
+      question: "Among all guesses your information allows, E[X|\u2131] is the unique one that:",
+      options: [
+        { label: "Minimises the squared error E[(X\u2212Y)\u00b2]", value: "a" },
+        { label: "Maximises the correlation of X and Y", value: "b" },
+        { label: "Matches the variance of the target X", value: "c" },
+        { label: "Leaves the largest possible residual", value: "d" }
+      ],
+      correct: "a",
+      explain: "It is the L\u00b2 projection onto the \u2131-measurable subspace, so the residual X \u2212 E[X|\u2131] is orthogonal to everything you know \u2014 the general form of \"residuals \u22a5 regressors\"."
+    },
+    {
+      id: "l011-martingale", lesson: 11, quarter: "Q2", concept: "martingale", misconception: true,
+      question: "Saying \"this price process is a martingale\" is incomplete unless you also state:",
+      options: [
+        { label: "The measure and filtration it is under", value: "a" },
+        { label: "The volatility of the price increments", value: "b" },
+        { label: "That the tree recombines at each node", value: "c" },
+        { label: "The strike of the option being priced", value: "d" }
+      ],
+      correct: "a",
+      explain: "E[M\u209c|\u2131\u209b] = M\u209b is a joint claim about process, filtration and measure: the same tree is a martingale at p = \u00bd and drifts up 2%/step at p = 0.6."
     }
   ];
 })(window);

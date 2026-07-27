@@ -80,3 +80,10 @@
 ## Open questions / parking lot
 - Secure real LOB data (LOBSTER / Databento / FI-2010) before Year 2 Q3.
 - Decide on a compute setup for PyTorch labs (units 073–080) — local GPU vs Colab/cloud.
+- **Ask after Lesson 011:** was the ~70 KB, four-layer build the right size, or too much for one
+  sitting? First lesson written fully under the "depth over length" decision — calibrate units 012–020
+  on the answer rather than assuming longer is better.
+- **Glossary drill owed:** rows for 006–011 are all still blank (24 terms). Do one cold-definition pass
+  and fill only what the learner defines unaided.
+- Lesson 010 was **self-reported** as passed (no EXIT TICKET graded here) — offer a fresh checkpoint
+  scenario at the next natural break.

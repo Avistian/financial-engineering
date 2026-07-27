@@ -617,6 +617,38 @@ dl.objections dd {
 }
 .autopsy-slider { flex: 1; }
 
+/* ---- Lesson 011 visualizations (path tree / filtration, L2 projection) ---- */
+
+.tree-viz, .proj-viz { margin: 1.25rem 0; }
+.tree-canvas, .proj-canvas {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fffdf8;
+}
+.tree-readout, .proj-readout {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  min-height: 3.4rem;
+}
+.tree-readout strong, .proj-readout strong { color: var(--ink); }
+.tree-note { color: var(--accent); font-weight: 600; }
+.proj-min { color: var(--correct); font-weight: 700; }
+.proj-off { color: var(--gold); font-weight: 600; }
+.tree-controls, .proj-controls {
+  display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;
+}
+.tree-slider-label, .proj-slider-label {
+  font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted);
+  white-space: nowrap; min-width: 11.5rem;
+}
+.tree-slider, .proj-slider { flex: 1; }
+
+/* Small tables of tree outcomes: keep them readable on a phone */
+table.tight { font-size: 0.8rem; }
+table.tight td, table.tight th { padding: 0.3rem 0.4rem; }
+
 /* ---- Checkpoint exit-criteria checklist ---- */
 ul.checklist { list-style: none; padding: 0; margin: 1rem 0; }
 ul.checklist li {
