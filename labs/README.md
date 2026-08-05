@@ -98,6 +98,11 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
   averaging on every event of ℱ_t, the tower property, conditional expectation as the least-squares
   projection with an orthogonal residual, the variance decomposition, the `p` that makes the price a
   martingale, and leakage exhibited as a measurability violation (Lesson 011).
+- `0012-brownian-motion.ipynb` — simulate the √n-scaled random walk and confirm `Var(W_t)=t` at every
+  step count; simulate Brownian motion directly and check its increments are i.i.d. `N(0, dt)`; verify
+  the martingale property (and `E[W_T²]=T`); then measure the quadratic variation — `[W]_t → t` for
+  Brownian motion versus `→ 0` for a smooth curve — and watch the first-order path length explode, the
+  numerical face of "continuous but nowhere differentiable" (Lesson 012).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 

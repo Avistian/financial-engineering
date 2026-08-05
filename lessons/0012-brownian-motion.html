@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 012 — Random Walks &amp; Brownian Motion</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+    .step { margin: 0.9rem 0 0.9rem 0; padding-left: 0.9rem; border-left: 3px solid var(--border); }
+    .step strong { color: var(--accent); }
+    .takeaway { font-family: var(--font-sans); font-size: 0.85rem; color: var(--accent);
+                font-weight: 600; margin: 0.6rem 0 1.1rem; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q2</p>
+  <h1>Random Walks &amp; Brownian Motion</h1>
+  <p class="subtitle">Lesson 012 · Constructing the continuous-time price model · ~60 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <p>
+    Last lesson you priced an option by doing arithmetic on a tree with eight outcomes. That tree had
+    three time-steps. Real prices do not move three times; they move all day, at every instant. The job
+    of this lesson is to take the coin-flip tree and let the number of steps go to infinity — and to
+    discover that the object you get in the limit, <strong>Brownian motion</strong>, has one bizarre
+    property that ordinary calculus cannot handle. That property is the reason the next three lessons
+    exist.
+  </p>
+  <p>
+    Here is the honest map. First we scale a coin-flip walk correctly (the whole trick is a single
+    <code>√n</code>). Then we write down the four rules that define Brownian motion, in plain words.
+    Then we meet the strangeness: a Brownian path is <em>continuous</em> — you can draw it without
+    lifting the pen — yet it is <em>nowhere smooth</em>, so jagged that it has no slope anywhere. And
+    the numerical fingerprint of that jaggedness, its <strong>quadratic variation</strong>, is not zero
+    (as it would be for any smooth curve) but exactly the elapsed time <code>t</code>. That one fact,
+    written <code>(dW)² = dt</code>, is the seed of Itô's calculus in Lesson 013.
+  </p>
+  <div class="callout">
+    <strong>The promise, made concrete.</strong> By the end you will have watched a jagged
+    <code>±1</code> coin-flip walk turn into a smooth-looking Brownian path as the steps shrink, and you
+    will have added up the squared wiggles of that path and watched the total lock onto
+    <code>t = 1</code> while the same sum for a straight line collapses to <code>0</code>. Nothing here
+    needs measure theory you do not already have from Lesson
+    <a href="0011-filtrations-conditional-expectation.html">011</a>.
+  </div>
+
+  <h2>Re-warm: the coin-flip walk you already own</h2>
+  <p>
+    In Lesson 011 each period the stock was <em>multiplied</em> by <code>u = 1.1</code> (up) or
+    <code>d = 0.9</code> (down). To build Brownian motion we use the same coin flips but <em>add</em>
+    instead of multiply, and we make the two moves symmetric: <code>+1</code> on heads, <code>−1</code>
+    on tails. That additive version is called a <strong>random walk</strong> — literally, a running
+    total of independent <code>±1</code> steps, the mathematical picture of a drunkard taking one pace
+    left or right at each tick.
+  </p>
+  <p>
+    Write the individual steps <code>X₁, X₂, …</code>, each equal to <code>+1</code> or <code>−1</code>
+    with probability <code>½</code>, independently. The position after <code>n</code> steps is their sum:
+  </p>
+  <div class="formula">M<sub>n</sub> = X₁ + X₂ + ⋯ + X<sub>n</sub></div>
+  <p>
+    Two numbers describe where this walk tends to be, and both come straight from Lesson
+    <a href="0005-probability-refresher.html">005</a> — recalled here so nothing is assumed. The
+    <strong>mean</strong> (the average, the centre of the spread) of one step is
+    <code>E[Xᵢ] = ½(+1) + ½(−1) = 0</code>, so by linearity <code>E[M<sub>n</sub>] = 0</code>: the walk
+    drifts nowhere on average. The <strong>variance</strong> (the average squared distance from the
+    mean — a measure of how spread out the possibilities are) of one step is
+    <code>Var(Xᵢ) = E[Xᵢ²] − 0² = 1</code>, because <code>Xᵢ² = 1</code> always. And because the steps
+    are independent, variances <em>add</em>:
+  </p>
+  <div class="formula">Var(M<sub>n</sub>) = Var(X₁) + ⋯ + Var(X<sub>n</sub>) = n</div>
+  <p>
+    That last equation is the hinge of the whole lesson, so hold it: <strong>after
+    <code>n</code> steps the walk is spread out with variance <code>n</code></strong>, which means its
+    typical distance from the start — the <strong>standard deviation</strong>, the square root of the
+    variance — is <code>√n</code>. The walk wanders, but only about as far as <code>√n</code>, not
+    <code>n</code>. Cross <code>100</code> steps and you are typically about <code>10</code> away, not
+    <code>100</code>. Remember that √ and everything follows.
+  </p>
+  <p class="takeaway">
+    Takeaway: a symmetric random walk has mean 0 and variance <em>n</em>, so it spreads like √<em>n</em>.
+  </p>
+
+  <h2>The one trick: scale space by √time</h2>
+  <p>
+    We want a limit as the number of steps <code>n → ∞</code>, packed into a fixed clock — say the
+    interval of real time from <code>0</code> to <code>1</code>. Naively you might just plot
+    <code>M<sub>n</sub></code> and take <code>n</code> huge. That fails twice over: the walk's spread
+    <code>√n</code> runs off to infinity (the picture explodes vertically), and each step still has the
+    fixed jump size <code>1</code> (the picture never gets smoother). We need to shrink both, and there
+    is exactly one shrink rate that works.
+  </p>
+  <p>
+    Put <code>n</code> steps into the time interval <code>[0, 1]</code>, so each step takes
+    <code>Δt = 1/n</code> of clock time. To reach clock time <code>t</code> you have taken
+    <code>nt</code> steps. Define the <strong>scaled walk</strong> by dividing the position by
+    <code>√n</code>:
+  </p>
+  <div class="formula">W<sup>(n)</sup><sub>t</sub> = M<sub>nt</sub> / √n</div>
+  <p>
+    Why divide by <code>√n</code> and not by <code>n</code>? Because variance is the quantity we must
+    keep alive, and dividing a random variable by a constant <code>c</code> divides its variance by
+    <code>c²</code> (variance is in squared units — that is the <em>whole</em> reason the scaling is a
+    square root). Watch it work at clock time <code>t</code>, where the number of steps is
+    <code>nt</code> and so the raw variance is <code>nt</code>:
+  </p>
+  <div class="formula">Var(W<sup>(n)</sup><sub>t</sub>) = Var(M<sub>nt</sub>) / (√n)² = nt / n = <strong>t</strong></div>
+  <p>
+    The <code>n</code> cancels exactly. No matter how finely you chop time, the scaled walk at clock
+    time <code>t</code> has variance <code>t</code> — finite, non-zero, and independent of the chopping.
+    Divide by <code>n</code> instead and the variance would be <code>t/n → 0</code> (the walk collapses
+    to the flat line <code>0</code>); divide by <code>1</code> and it blows up. <strong>The square-root
+    scaling is the unique rate that keeps the spread finite as time is made continuous.</strong> This is
+    the single most important idea in the lesson, and it is just "variance lives in squared units."
+  </p>
+  <p>
+    One more gift comes for free. The <strong>Central Limit Theorem</strong> (Lesson
+    <a href="0005-probability-refresher.html">005</a>: the sum of many small independent shocks, once
+    standardised, is approximately <em>normal</em> — the bell curve) tells us the shape of
+    <code>W<sup>(n)</sup><sub>t</sub></code> in the limit. A sum of <code>nt</code> independent
+    <code>±1</code> steps, divided by <code>√n</code>, is a standardised sum, so as <code>n → ∞</code> it
+    stops being a lumpy discrete thing and becomes a smooth bell curve: a <strong>normal (Gaussian)
+    distribution with mean 0 and variance <code>t</code></strong>, written <code>N(0, t)</code>. We did
+    not choose the bell curve; the arithmetic of adding many small independent shocks forced it.
+  </p>
+  <p>
+    Slide the control below from few steps to many and watch the two failures get repaired at once: the
+    jagged walk stays inside a fixed vertical band (variance held at <code>t</code>) while filling in
+    into a continuous-looking path.
+  </p>
+
+  <div id="rwbm"></div>
+  <p class="viz-cap">
+    The scaled random walk <code>W<sup>(n)</sup><sub>t</sub> = M<sub>nt</sub>/√n</code> over clock time
+    <code>[0, 1]</code>, driven by the same kind of up/down coin flips as Lesson 011's tree — now
+    <em>added</em> and rescaled instead of multiplied. Slide <em>n</em> (the number of steps) from
+    <code>2</code> to <code>512</code>. The pale line is the fixed fine-resolution limit; the dark line
+    is the current walk. As <em>n</em> grows the dark walk fills in toward the pale one — the same path
+    seen at finer and finer resolution. Crucially the vertical spread never explodes or collapses:
+    <code>Var(W<sub>t</sub>) = t</code> at every <em>n</em>. Its endpoint here is
+    <code>W₁ = −0.71</code>, roughly the <code>±1</code> spread a variance of <code>1</code> predicts.
+  </p>
+  <p class="takeaway">
+    Takeaway: divide by √<em>n</em> and the walk keeps variance <em>t</em> and turns Gaussian — that is
+    Brownian motion being born.
+  </p>
+
+  <h2>Brownian motion, defined in four plain sentences</h2>
+  <p>
+    The limit of that scaled walk has a name — <strong>Brownian motion</strong> (also the
+    <strong>Wiener process</strong>, after the mathematician who built it rigorously), written
+    <code>{W<sub>t</sub>}</code> for <code>t ≥ 0</code>. Rather than reconstruct the limit every time,
+    mathematicians pin it down by four properties. Each is a plain statement; the symbols come after the
+    words.
+  </p>
+  <div class="step">
+    <strong>(1) It starts at zero.</strong> <code>W₀ = 0</code>. The walk begins at the origin, by
+    convention. (To model a price you will later add a starting level and a growth rate on top.)
+  </div>
+  <div class="step">
+    <strong>(2) The future move is fresh — it does not remember the past.</strong> Take any two times
+    <code>s &lt; t</code>. The change over that stretch, <code>W<sub>t</sub> − W<sub>s</sub></code> (called
+    an <strong>increment</strong> — just "how much it moved between <code>s</code> and <code>t</code>"),
+    is <em>independent</em> of everything that happened up to time <code>s</code>. In the language of
+    Lesson 011, the increment is independent of the filtration <code>ℱ<sub>s</sub></code> — the record of
+    what is known by time <code>s</code>. The coin about to be flipped does not care how the earlier
+    flips landed.
+  </div>
+  <div class="step">
+    <strong>(3) Each move is a bell curve whose spread is the elapsed time.</strong> That increment is
+    normally distributed with mean <code>0</code> and variance equal to the length of the time interval:
+    <code>W<sub>t</sub> − W<sub>s</sub> ~ N(0, t − s)</code>. So a move over <code>0.25</code> of time has
+    variance <code>0.25</code> and typical size <code>√0.25 = 0.5</code>. Longer waits mean bigger typical
+    moves — but only as the <em>square root</em> of the wait, the <code>√n</code> law from the previous
+    section carried into continuous time.
+  </div>
+  <div class="step">
+    <strong>(4) The path is continuous.</strong> <code>t ↦ W<sub>t</sub></code> has no jumps — you can
+    draw the whole graph without lifting the pen. (This rules out sudden gaps; those come back
+    deliberately in Lesson 018, jump-diffusion, when we model crashes.)
+  </div>
+  <p>
+    That is the entire definition. Properties (2) and (3) together are often stated as one phrase,
+    <strong>independent, stationary, Gaussian increments</strong>: independent (rule 2), Gaussian (the
+    bell curve in rule 3), and <em>stationary</em> meaning the distribution of a move depends only on how
+    <em>long</em> the interval is (<code>t − s</code>), not on <em>when</em> it happens. A move of length
+    <code>0.1</code> looks the same at the start of the day as at the end.
+  </p>
+  <div class="callout">
+    <strong>Why finance cares.</strong> Brownian motion is the raw material of the continuous-time price
+    model. In Lesson 014 the price itself will be built as <code>S<sub>t</sub> = S₀ · exp(drift + σW<sub>t</sub>)</code>
+    — a starting level <code>S₀</code>, a steady growth term, and a random term that is a Brownian motion
+    scaled by the volatility <code>σ</code>. Everything you price or hedge in Q2 is a function of this one
+    object. Get <code>W<sub>t</sub></code> right and the rest is bookkeeping.
+  </div>
+
+  <h2>What one value of W looks like: a worked bell curve</h2>
+  <p>
+    Because <code>W<sub>t</sub> = W<sub>t</sub> − W₀ ~ N(0, t)</code>, a single snapshot of Brownian
+    motion is an ordinary normal random variable, and you can compute with it using only Lesson 005. Take
+    <code>t = 4</code>. Then <code>W₄ ~ N(0, 4)</code>: mean <code>0</code>, variance <code>4</code>,
+    standard deviation <code>√4 = 2</code>. So:
+  </p>
+  <ul>
+    <li>The typical size of <code>W₄</code> is about <code>2</code> (one standard deviation).</li>
+    <li><code>P(W₄ &gt; 0) = ½</code> exactly — the bell curve is symmetric about its mean <code>0</code>.</li>
+    <li><code>P(−2 &lt; W₄ &lt; 2) ≈ 68%</code>, the "within one standard deviation" rule; within
+      <code>±4</code> (two standard deviations) is about <code>95%</code>.</li>
+  </ul>
+  <p>
+    Now the <strong>scaling (self-similarity) property</strong>, which is the continuous-time echo of
+    <code>√n</code> and worth seeing once. If you speed up the clock by a factor <code>c</code> and shrink
+    space by <code>√c</code>, Brownian motion looks statistically identical:
+  </p>
+  <div class="formula">W<sub>ct</sub> has the same distribution as √c · W<sub>t</sub></div>
+  <p>
+    Read it with numbers: <code>W₄</code> (spread <code>2</code>) is distributed like <code>√4 · W₁ =
+    2·W₁</code>, and <code>W₁</code> has spread <code>1</code> — consistent. Zoom into a Brownian path and
+    it looks like another Brownian path; there is no scale at which it becomes smooth. That refusal to
+    smooth out, no matter how far you zoom, is exactly the property we are about to weaponise.
+  </p>
+
+  <h2>Brownian motion is a martingale (a slow-lane proof)</h2>
+  <p>
+    Recall the load-bearing word from Lesson 011: a <strong>martingale</strong> is a process whose best
+    forecast of any future value, given everything known so far, is simply its present value —
+    <code>E[M<sub>t</sub> | ℱ<sub>s</sub>] = M<sub>s</sub></code>, a "fair game" with no built-in drift.
+    Brownian motion is the archetype. Let us prove <code>E[W<sub>t</sub> | ℱ<sub>s</sub>] = W<sub>s</sub></code>
+    for <code>s ≤ t</code> with every step licensed, in the slow lane.
+  </p>
+  <div class="step">
+    <strong>Step A (split into known + increment).</strong> Write
+    <code>W<sub>t</sub> = W<sub>s</sub> + (W<sub>t</sub> − W<sub>s</sub>)</code>. This is just adding and
+    subtracting <code>W<sub>s</sub></code>; it separates the part you already know at time <code>s</code>
+    from the fresh move.
+  </div>
+  <div class="step">
+    <strong>Step B (linearity).</strong> Conditional expectation is linear (Lesson 011), so
+    <code>E[W<sub>t</sub>|ℱ<sub>s</sub>] = E[W<sub>s</sub>|ℱ<sub>s</sub>] + E[W<sub>t</sub> − W<sub>s</sub>|ℱ<sub>s</sub>]</code>.
+  </div>
+  <div class="step">
+    <strong>Step C (take out what is known).</strong> <code>W<sub>s</sub></code> is
+    <code>ℱ<sub>s</sub></code>-measurable — its value <em>is</em> known at time <code>s</code> — so it comes
+    straight out of the conditioning: <code>E[W<sub>s</sub>|ℱ<sub>s</sub>] = W<sub>s</sub></code> (Rule 2,
+    "taking out what is known").
+  </div>
+  <div class="step">
+    <strong>Step D (independence kills the increment's conditioning).</strong> By defining property (2),
+    the increment <code>W<sub>t</sub> − W<sub>s</sub></code> is independent of <code>ℱ<sub>s</sub></code>, so
+    conditioning on the past does nothing (Rule 3): <code>E[W<sub>t</sub> − W<sub>s</sub>|ℱ<sub>s</sub>] =
+    E[W<sub>t</sub> − W<sub>s</sub>] = 0</code>, the last equality by property (3) (the increment has mean
+    <code>0</code>).
+  </div>
+  <div class="step">
+    <strong>Step E (conclude).</strong> Add Steps C and D:
+    <code>E[W<sub>t</sub>|ℱ<sub>s</sub>] = W<sub>s</sub> + 0 = W<sub>s</sub></code>. ∎ Brownian motion is a
+    martingale.
+  </div>
+  <p>
+    Notice this used <em>only</em> the two conditional-expectation rules you drilled last lesson, applied
+    to the two defining properties (independent increments, zero mean). That is the pattern for all of Q2:
+    the hard object is new, but the moves on it are the ones you already own.
+  </p>
+  <h3>A second-order fact you will need: W² − t is also a martingale</h3>
+  <p>
+    Here is a consequence that looks like a curiosity now and turns out to be central. The process
+    <code>W<sub>t</sub>² − t</code> is <em>also</em> a martingale. The proof reuses the same split; the one
+    new ingredient is that the increment's <em>squared</em> size is its variance.
+  </p>
+  <div class="formula">
+    E[W<sub>t</sub>² | ℱ<sub>s</sub>] = E[(W<sub>s</sub> + ΔW)² | ℱ<sub>s</sub>], &nbsp; ΔW = W<sub>t</sub> − W<sub>s</sub>
+  </div>
+  <div class="step">
+    Expand the square: <code>(W<sub>s</sub> + ΔW)² = W<sub>s</sub>² + 2W<sub>s</sub>·ΔW + ΔW²</code>. Take
+    <code>E[·|ℱ<sub>s</sub>]</code> of each piece. First, <code>W<sub>s</sub>²</code> is known at
+    <code>s</code>, so it stays as is. Second, <code>2W<sub>s</sub>·E[ΔW|ℱ<sub>s</sub>] = 2W<sub>s</sub>·0
+    = 0</code> (take out the known <code>W<sub>s</sub></code>; the increment averages to zero). Third,
+    <code>E[ΔW²|ℱ<sub>s</sub>] = E[ΔW²] = Var(ΔW) = t − s</code> — the mean squared move is the variance,
+    which property (3) fixes at <code>t − s</code>.
+  </div>
+  <p>
+    So <code>E[W<sub>t</sub>²|ℱ<sub>s</sub>] = W<sub>s</sub>² + (t − s)</code>, which rearranges to
+    <code>E[W<sub>t</sub>² − t | ℱ<sub>s</sub>] = W<sub>s</sub>² − s</code>: exactly the martingale
+    property for <code>W<sub>t</sub>² − t</code>. Keep the punchline in view — <strong>to make
+    <code>W<sub>t</sub>²</code> a fair game you must subtract <code>t</code></strong>, because the squared
+    wiggles pile up at rate <code>1</code> per unit time. That leftover <code>t</code> is the quadratic
+    variation we meet next, and it is the whole reason Itô calculus differs from ordinary calculus.
+  </p>
+
+  <h2>The paradox: continuous everywhere, smooth nowhere</h2>
+  <p>
+    Property (4) says the path never jumps. You might expect a jump-free curve to be smooth — to have a
+    well-defined slope (a velocity) at each point, the way a car's position does. Brownian motion
+    <em>violates</em> that expectation spectacularly: it is continuous but <strong>nowhere
+    differentiable</strong> — there is no instant at which it has a slope. Let us see why with the
+    <code>√t</code> law, no heavy machinery.
+  </p>
+  <p>
+    A slope is a "rise over run": how far the path moved, divided by how long that took. Over a tiny time
+    <code>Δt</code>, the move <code>ΔW</code> is <code>N(0, Δt)</code>, so its typical size is
+    <code>√Δt</code>. The difference quotient — the approximate slope — is therefore of size:
+  </p>
+  <div class="formula">|ΔW| / Δt ≈ √Δt / Δt = 1/√Δt</div>
+  <p>
+    As <code>Δt → 0</code> this <em>blows up</em>: <code>1/√Δt → ∞</code>. The path moves by
+    <code>√Δt</code>, which shrinks to zero (so the path is continuous — small time, small move), but it
+    moves <em>far too much relative to the time taken</em> for a finite slope to exist (so it is not
+    differentiable — the slope explodes). Continuous because <code>√Δt → 0</code>; not smooth because
+    <code>√Δt / Δt → ∞</code>. Both facts are the same <code>√</code> reading two different ways.
+  </p>
+  <div class="callout">
+    <strong>Why this is not a technicality.</strong> Ordinary calculus is built on the assumption that
+    over a tiny step, the squared move <code>(Δx)²</code> is negligible compared to the step
+    <code>Δx</code> itself — that is what lets you drop second-order terms in a Taylor expansion. For a
+    smooth curve <code>Δx ≈ (slope)·Δt</code>, so <code>(Δx)² ≈ (slope)²·(Δt)²</code>, which is tiny next
+    to <code>Δt</code>. For Brownian motion <code>(ΔW)² ≈ Δt</code> — the <em>same order</em> as the time
+    step, not negligible at all. You cannot drop it. Refuse to drop it and you are forced into a new
+    calculus. That is Lesson 013.
+  </div>
+
+  <h2>Quadratic variation: add up the squared wiggles</h2>
+  <p>
+    Now the load-bearing new concept of the lesson. Chop the interval <code>[0, t]</code> into
+    <code>m</code> small pieces and add up the <em>squares</em> of the moves across each piece. That total
+    is the <strong>quadratic variation</strong>, written <code>[W]<sub>t</sub></code> — literally "the sum
+    of squared increments, as the pieces get small":
+  </p>
+  <div class="formula">[W]<sub>t</sub> = lim (as pieces → 0) &nbsp; Σ<sub>i</sub> (W<sub>t<sub>i+1</sub></sub> − W<sub>t<sub>i</sub></sub>)²</div>
+  <p>
+    Before the reveal, commit to a guess. For a smooth curve this sum goes to zero (we will confirm it).
+    Squares of tiny numbers are super-tiny, so intuition screams "zero." What does the Brownian path do?
+  </p>
+  <div id="predict1"></div>
+
+  <h3>Why the smooth curve gives zero</h3>
+  <p>
+    Take the straight line <code>f(t) = t</code> on <code>[0, 1]</code>, cut into <code>m</code> equal
+    pieces. Each move is <code>Δf = 1/m</code>, each squared move is <code>(1/m)² = 1/m²</code>, and there
+    are <code>m</code> of them, so the sum is <code>m · 1/m² = 1/m</code>. As <code>m → ∞</code> that goes
+    to <code>0</code>. This is completely general: for any curve with a finite slope, <code>Δf ≈
+    (slope)·Δt</code>, so <code>Σ(Δf)² ≈ Σ(slope)²(Δt)² ≈ (Δt) · Σ(slope)²Δt → 0</code> because one factor
+    of <code>Δt</code> is left over and drives the whole thing to zero. <strong>Smooth curves have zero
+    quadratic variation.</strong> This is the fact ordinary calculus quietly relies on.
+  </p>
+
+  <h3>Why Brownian motion gives t — the slow-lane derivation</h3>
+  <p>
+    Cut <code>[0, t]</code> into <code>m</code> equal pieces of width <code>Δt = t/m</code>. Each increment
+    <code>ΔW<sub>i</sub> ~ N(0, Δt)</code>, independent of the others. Look at the sum of their squares,
+    <code>Q = Σ<sub>i</sub> (ΔW<sub>i</sub>)²</code>, and ask two questions: what is it on average, and how
+    much does it wobble around that average?
+  </p>
+  <div class="step">
+    <strong>The average is exactly <code>t</code>, at every <code>m</code>.</strong> The mean squared move
+    is the variance: <code>E[(ΔW<sub>i</sub>)²] = Var(ΔW<sub>i</sub>) = Δt</code> (mean is zero, so
+    "mean of the square" equals "variance"). There are <code>m</code> pieces, so by linearity
+    <code>E[Q] = m · Δt = m · (t/m) = t</code>. The <code>m</code> cancels — the same cancellation as the
+    <code>√n</code> scaling, wearing a different hat.
+  </div>
+  <div class="step">
+    <strong>The wobble around <code>t</code> shrinks to zero.</strong> The pieces are independent, so their
+    variances add: <code>Var(Q) = Σ Var((ΔW<sub>i</sub>)²)</code>. For a normal variable of variance
+    <code>Δt</code>, the square has variance <code>2(Δt)²</code> (a standard Gaussian fact). Summing
+    <code>m</code> of them: <code>Var(Q) = m · 2(Δt)² = m · 2(t/m)² = 2t²/m → 0</code> as
+    <code>m → ∞</code>. So <code>Q</code> piles up ever more tightly onto its mean.
+  </div>
+  <p>
+    Put the two together: <code>Q</code> has mean <code>t</code> and a spread that vanishes, so in the
+    limit it is not random at all — it equals <code>t</code> with certainty (almost surely, in the Lesson
+    011 sense). This is the headline result:
+  </p>
+  <div class="formula">[W]<sub>t</sub> = t &nbsp;&nbsp;— the quadratic variation of Brownian motion equals the elapsed time</div>
+  <p>
+    Read what just happened. The squared wiggles of a continuous path do <em>not</em> vanish; they
+    accumulate at a steady rate of exactly <code>1</code> per unit time. The randomness in the path is
+    infinite in the first power (the path length <code>Σ|ΔW| ≈ Σ√Δt → ∞</code>, so a Brownian path is
+    infinitely long) yet perfectly deterministic in the second power (<code>Σ(ΔW)² → t</code>). Slide the
+    control below and watch both facts on one screen.
+  </p>
+
+  <div id="qvar"></div>
+  <p class="viz-cap">
+    The same fixed Brownian path, cut into <code>m</code> equal pieces (slide <em>m</em> from
+    <code>2</code> to <code>512</code>). The readout reports two running totals of <em>squared</em>
+    increments. For the Brownian path, <code>Σ(ΔW)²</code> hovers around <code>1 = t</code> and stops
+    wobbling as the mesh refines (locking to exactly <code>1.00</code> at the finest cut); for the smooth
+    line <code>f(t) = t</code>, <code>Σ(Δf)² = 1/m</code> marches straight to <code>0</code>
+    (<code>0.50, 0.25, 0.125, …</code>). One picture, the whole contrast: squared wiggles matter for
+    Brownian motion and vanish for anything smooth.
+  </p>
+  <div class="callout">
+    <strong>The heuristic you will actually compute with: <code>(dW)² = dt</code>.</strong>
+    "<code>[W]<sub>t</sub> = t</code>" is the honest statement; "<code>(dW)² = dt</code>" is its
+    shorthand for a single infinitesimal step, and it is the rule that will run every Itô calculation. It
+    says: when you expand something in small steps and hit a term with <code>(dW)²</code> in it, do not
+    throw it away as second-order junk — replace it by <code>dt</code>, because that is what the squared
+    wiggles sum to. (And <code>dW·dt</code> and <code>(dt)²</code> <em>are</em> negligible and get dropped,
+    since <code>Δt·√Δt</code> and <code>(Δt)²</code> shrink faster than <code>Δt</code>.) This one
+    substitution is the entire difference between ordinary and stochastic calculus.
+  </div>
+  <p class="takeaway">
+    Takeaway: <code>[W]<sub>t</sub> = t</code>, i.e. <code>(dW)² = dt</code>. Squared Brownian increments
+    do not vanish — they accumulate at rate 1. Everything in Lesson 013 is built on this.
+  </p>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>What this buys you — and where Brownian motion lies</h2>
+  <p>
+    Three payoffs, and one honest warning, before the checks.
+  </p>
+  <ul>
+    <li><strong>Itô's calculus (Lesson 013) is now inevitable.</strong> Because <code>(dW)² = dt</code> is
+      not negligible, the ordinary chain rule is wrong for functions of <code>W<sub>t</sub></code>. The
+      correction — an extra <code>½ · (second derivative) · dt</code> term — is exactly the quadratic
+      variation showing up in a Taylor expansion. You already computed its seed: the leftover <code>t</code>
+      in "<code>W<sub>t</sub>² − t</code> is a martingale."</li>
+    <li><strong>Quadratic variation is measurable in real data.</strong> Summing squared price moves over a
+      day is called <em>realized variance</em>, and it is how volatility is actually estimated from
+      high-frequency data (Year 1 Q3, Lessons 021–026). <code>[W]<sub>t</sub> = t</code> is the idealised
+      version of that estimator; the messy real version, with jumps and noise, is a whole research area.</li>
+    <li><strong>Pricing becomes a computation.</strong> Once the price is <code>S₀·exp(drift + σW<sub>t</sub>)</code>
+      (Lesson 014) and Brownian motion is a martingale, the risk-neutral price of an option is an expectation
+      you can evaluate — the continuous-time version of the <code>7.475</code> you got on the tree.</li>
+  </ul>
+  <div class="callout">
+    <strong>The warning (failure mode first, as always).</strong> Brownian motion is the <em>first</em>
+    model of a log-price, not a faithful one. Its increments are Gaussian (thin-tailed) and have constant
+    variance — which directly contradicts two of the stylized facts you measured in Lesson
+    <a href="0004-returns-stylized-facts.html">004</a>: real returns have <strong>fat tails</strong>
+    (crashes far larger than a bell curve allows) and <strong>volatility clustering</strong> (calm and
+    stormy periods, not a constant spread). So Brownian motion is the tractable skeleton every later model
+    fixes: jumps for the fat tails (Lesson 018), stochastic and clustered volatility (Year 1 Q3). Learn it
+    as the baseline you will spend years improving on — never as the truth.
+  </div>
+
+  <div class="trap">
+    <strong>Trap — the six ways this material is misused.</strong>
+    <strong>(1) Thinking continuous implies smooth.</strong> Brownian paths are continuous and nowhere
+    differentiable; "<code>dW/dt</code>" does not exist, which is precisely why we write
+    <code>dW</code> and never <code>W′(t)</code>.
+    <strong>(2) Dropping <code>(dW)²</code>.</strong> In ordinary calculus <code>(Δx)²</code> is
+    negligible; for Brownian motion <code>(ΔW)² ≈ Δt</code> is first-order. Throw it away and every Itô
+    result comes out wrong.
+    <strong>(3) Scaling space linearly with time.</strong> Moves grow like <code>√t</code>, not
+    <code>t</code>. A move over four times the horizon is twice as big, not four times. Dividing the walk
+    by <code>n</code> instead of <code>√n</code> collapses it to a flat line.
+    <strong>(4) Confusing the two "variances."</strong> <code>Var(W<sub>t</sub>) = t</code> is a statement
+    about the <em>distribution</em> of one snapshot; <code>[W]<sub>t</sub> = t</code> is a statement about a
+    single <em>path's</em> squared wiggles. They happen to share the value <code>t</code>; they are not the
+    same fact (one is random-then-averaged, the other is per-path and non-random in the limit).
+    <strong>(5) Reading Gaussian increments as realistic.</strong> They rule out the fat tails and
+    volatility clustering of Lesson 004. Brownian motion under-prices disaster.
+    <strong>(6) Forgetting the increment is independent of the past.</strong> That independence is what
+    makes <code>W<sub>t</sub></code> a martingale; a model with correlated increments (momentum,
+    mean-reversion) is a different animal and needs a drift term.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+  <div id="quiz5"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“If a Brownian path has no slope anywhere, how can I simulate one on a computer?”</dt>
+    <dd>
+      You never simulate the true continuous object — you simulate it on a grid, exactly the scaled random
+      walk from this lesson. Pick a time step <code>Δt</code>, draw independent <code>N(0, Δt)</code>
+      increments, and add them up: <code>W<sub>t+Δt</sub> = W<sub>t</sub> + √Δt · Z</code> with
+      <code>Z ~ N(0, 1)</code>. That is a valid sample of Brownian motion <em>at those grid points</em>,
+      and it is what the lab does. The nowhere-differentiability lives in the <em>limit</em> of ever-finer
+      grids; on any fixed grid the path is a polyline with perfectly ordinary slopes. This is also why
+      "realized variance" from finite data only approximates <code>[W]<sub>t</sub> = t</code>.
+    </dd>
+    <dt>“Variance <code>t</code> and quadratic variation <code>t</code> — isn't that the same statement twice?”</dt>
+    <dd>
+      No, and conflating them is Trap 4. <code>Var(W<sub>t</sub>) = t</code> is about <em>many parallel
+      universes</em>: run Brownian motion a thousand times, look at the value at time <code>t</code>, and
+      the spread of those thousand numbers is <code>t</code>. <code>[W]<sub>t</sub> = t</code> is about
+      <em>one</em> universe: take a single path, add up its squared wiggles along the way, and you get
+      <code>t</code> — with no averaging over universes, and essentially no randomness left. It is a happy
+      coincidence of Gaussian increments that both equal <code>t</code>; for other processes the two
+      numbers differ.
+    </dd>
+    <dt>“Why Gaussian? Couldn't the limit have been some other bell-ish shape?”</dt>
+    <dd>
+      No — the Gaussian is forced, not chosen. The Central Limit Theorem says that a sum of many small
+      independent shocks, once standardised by its own standard deviation, converges to the normal
+      distribution regardless of the shape of the individual shocks (here <code>±1</code> coins). Any
+      construction with independent, finite-variance increments and the <code>√n</code> scaling lands on
+      the same Gaussian limit. That universality is why Brownian motion is <em>the</em> continuous-time
+      random walk, not just <em>a</em> one.
+    </dd>
+    <dt>“Is measure theory or this <code>[W]<sub>t</sub></code> stuff used on the job, or is it exam theater?”</dt>
+    <dd>
+      The formal apparatus you will rarely type; the <em>fact</em> <code>[W]<sub>t</sub> = t</code> you
+      will use constantly, in three disguises. As a <strong>modeller</strong>: it is why option prices
+      depend on <code>σ²t</code> (variance), not <code>σt</code>. As a <strong>data scientist</strong>:
+      realized variance (summed squared returns) is a workhorse volatility estimator, and its bias from
+      microstructure noise is a live problem. As an <strong>interviewee</strong> for any
+      derivatives-adjacent seat: "what is the quadratic variation of Brownian motion, and why does it
+      force the extra term in Itô's lemma?" is a standard question. The intuition is the asset; the
+      formalism is the receipt.
+    </dd>
+    <dt>“The path length is infinite? That can't be physical.”</dt>
+    <dd>
+      It is a feature of the idealisation, not of any real price. Because each move is <code>√Δt</code> and
+      there are <code>1/Δt</code> of them per unit time, the total distance travelled is
+      <code>√Δt · (1/Δt) = 1/√Δt → ∞</code> as the grid refines. Real prices move on a finite tick grid, so
+      their path length is large but finite. The infinite length is the same phenomenon as
+      nowhere-differentiability — a warning that Brownian motion is a mathematical limit that captures the
+      <em>statistics</em> of price wiggles beautifully while taking the "infinitely fine" story too
+      literally. You use the limit because it makes the algebra clean, and you remember it is a limit.
+    </dd>
+  </dl>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    <strong>Shreve, <em>Stochastic Calculus for Finance II</em>, Chapter 3</strong> (see
+    <a href="../RESOURCES.md">RESOURCES.md</a>) — "Brownian Motion." Read §3.2 (the scaled random walk and
+    its limit — the construction you just did), §3.3 (the definition and the martingale property), and
+    §3.4 (quadratic variation, where he proves <code>[W]<sub>t</sub> = t</code> with the same mean-and-
+    variance argument used here). §3.4's "first-order variation is infinite, quadratic variation is
+    <code>t</code>" is the section to read twice.
+  </p>
+  <p>
+    If Shreve's construction feels terse, Mörters &amp; Peres, <em>Brownian Motion</em> (Ch. 1) is the
+    rigorous-but-readable modern reference, and Shreve <em>Volume I</em> Ch. 3 revisits the random-walk
+    limit in the friendlier discrete setting. Both are in <a href="../RESOURCES.md">RESOURCES.md</a>.
+  </p>
+  <p>
+    <strong>Reference sheet (keep this one):</strong>
+    <a href="../reference/brownian-motion.html">Random walks, Brownian motion &amp; quadratic variation —
+    the working rules</a>. Printable, and the page Lessons 013–020 will link to instead of re-reading this.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0012-brownian-motion.ipynb"><code>labs/0012-brownian-motion.ipynb</code></a> — simulate
+    the scaled random walk and watch it converge; simulate Brownian motion directly; and <em>verify the
+    theory numerically</em>: <code>Var(W<sub>t</sub>) = t</code>, the martingale property, the vanishing
+    quadratic variation of a smooth curve versus <code>[W]<sub>t</sub> → t</code> for Brownian motion, and
+    the exploding first-order path length. A unit is done only when its lab runs.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) Why do we divide the random walk by
+    <code>√n</code> and not by <code>n</code>? (2) State the four defining properties of Brownian motion in
+    plain words. (3) Give the two-line reason a Brownian path is continuous but has no slope. (4) What is
+    <code>[W]<sub>t</sub></code>, what does it equal, and what does the smooth-curve version equal? (5)
+    Write the heuristic <code>(dW)² = ?</code> and say why <code>(dt)²</code> and <code>dW·dt</code> are
+    dropped but <code>(dW)²</code> is not. (6) Name two stylized facts from Lesson 004 that Brownian motion
+    gets wrong. Re-read anything shaky before the lab.
+  </div>
+
+  <div class="ask-teacher">
+    Stuck on the <code>√n</code> scaling, want the quadratic-variation argument drilled on a fresh example,
+    or curious how <code>(dW)² = dt</code> becomes Itô's lemma? Ask your teacher. Paste your teach-back for
+    grading — and if you can define these terms cold, they go into <a href="../GLOSSARY.md">GLOSSARY.md</a>.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Random walk</strong> — a running total of independent <code>±1</code> steps; mean 0,
+      variance <em>n</em> after <em>n</em> steps, so it spreads like <code>√n</code>.</li>
+    <li><strong>Scaled random walk</strong> — <code>M<sub>nt</sub>/√n</code>; the <code>√n</code> keeps its
+      variance at <em>t</em> as the steps shrink, and its limit is Brownian motion.</li>
+    <li><strong>Brownian motion / Wiener process <code>W<sub>t</sub></code></strong> — the continuous-time
+      limit: starts at 0, has independent Gaussian increments <code>W<sub>t</sub> − W<sub>s</sub> ~ N(0, t−s)</code>,
+      and continuous paths.</li>
+    <li><strong>Increment</strong> — a change <code>W<sub>t</sub> − W<sub>s</sub></code> over a time
+      interval; for Brownian motion it is independent of the past and depends only on the interval
+      length.</li>
+    <li><strong>Self-similarity (Brownian scaling)</strong> — <code>W<sub>ct</sub></code> is distributed
+      like <code>√c·W<sub>t</sub></code>; zoom in and it looks like Brownian motion at every scale.</li>
+    <li><strong>Quadratic variation <code>[W]<sub>t</sub></code></strong> — the limit of the sum of squared
+      increments; equals <code>t</code> for Brownian motion and <code>0</code> for any smooth curve.</li>
+    <li><strong><code>(dW)² = dt</code></strong> — the working shorthand for <code>[W]<sub>t</sub> = t</code>:
+      keep <code>(dW)²</code> and replace it by <code>dt</code>; drop <code>dW·dt</code> and
+      <code>(dt)²</code>.</li>
+    <li><strong>Nowhere differentiable</strong> — no slope exists anywhere, because the difference quotient
+      <code>|ΔW|/Δt ≈ 1/√Δt → ∞</code>.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    Lesson 011 gave you the language of information and fair games; today you built the object that
+    language was invented for. <strong>Brownian motion</strong> is the continuous-time random walk: mean
+    zero, variance <code>t</code>, independent Gaussian increments, continuous but nowhere smooth. Its
+    defining strangeness — <code>[W]<sub>t</sub> = t</code>, i.e. <code>(dW)² = dt</code> — is the fact
+    that ordinary calculus cannot absorb, and it is not a blemish but the engine of everything ahead.
+  </p>
+  <p>
+    Next, Lesson 013 turns <code>(dW)² = dt</code> into <strong>Itô's lemma</strong>, the chain rule for
+    random functions, whose extra second-order term <em>is</em> the quadratic variation you just measured.
+    Lesson 014 wraps Brownian motion into a price via <code>dS = μS·dt + σS·dW</code> (geometric Brownian
+    motion) and the Ornstein–Uhlenbeck process. Lesson 015 changes the measure (Girsanov) and finally
+    explains why the tree's <code>p* = ½</code> was legitimate; Lesson 016 turns the pricing expectation
+    into the Black–Scholes PDE. By Lesson 020 you price and hedge a European option three independent ways.
+    Run the lab first — simulate the walk, watch it converge, and add up the squared wiggles yourself.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0011-filtrations-conditional-expectation.html">← Lesson 011 (Filtrations &amp; conditional expectation)</a></li>
+      <li><a href="../reference/brownian-motion.html">Reference: random walks, Brownian motion &amp; quadratic variation</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 013 — The Itô integral &amp; Itô's lemma →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/bm-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 12, count: 4 });
+
+  BM.mountPaths(document.getElementById("rwbm"), { k: 3 });
+  BM.mountQVar(document.getElementById("qvar"), { k: 3 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "Add up the SQUARES of the little moves of a path over [0, 1], then let the pieces shrink. For a smooth curve this sum \u2192 0. For a Brownian path, what does \u03a3(\u0394W)\u00b2 do?",
+    options: [
+      { label: "It also shrinks to 0, just more slowly", value: "zero" },
+      { label: "It settles down to t (here, 1)", value: "t" },
+      { label: "It blows up to infinity, no limit", value: "inf" },
+      { label: "It stays random forever, no limit", value: "rand" }
+    ],
+    correct: "t",
+    reveal: "It settles to t. The mean of the sum is m\u00b7\u0394t = t at every mesh, and its wobble is 2t\u00b2/m \u2192 0, so in the limit it is the non-random value t. The SMOOTH curve gives 0 because there each squared move is (slope\u00b7\u0394t)\u00b2, leaving an extra factor of \u0394t. And the FIRST power \u03a3|\u0394W| \u2248 \u03a3\u221a\u0394t does blow up to infinity \u2014 so 'infinity' is the right answer for path length, but the squared sum locks onto t. That is [W]\u209c = t, i.e. (dW)\u00b2 = dt."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: what is the quadratic variation of Brownian motion, why does it equal t (not 0), and why does that force a new calculus?",
+    points: [
+      "Quadratic variation = limit of \u03a3(\u0394W)\u00b2 over a shrinking partition",
+      "For a SMOOTH curve it is 0: each (\u0394f)\u00b2 \u2248 (slope\u00b7\u0394t)\u00b2 leaves a spare \u0394t",
+      "For BM the MEAN is m\u00b7\u0394t = t at every mesh (mean square move = variance = \u0394t)",
+      "The WOBBLE 2t\u00b2/m \u2192 0, so the sum is non-random in the limit: [W]\u209c = t",
+      "So (\u0394W)\u00b2 \u2248 \u0394t is FIRST-order, not negligible like (\u0394x)\u00b2 in ordinary calculus",
+      "Heuristic (dW)\u00b2 = dt; drop dW\u00b7dt and (dt)\u00b2, keep (dW)\u00b2",
+      "That surviving second-order term is the extra piece in It\u00f4's lemma (Lesson 013)"
+    ],
+    model: "Quadratic variation is what you get by chopping [0, t] into little pieces, squaring the move across each piece, adding them up, and letting the pieces shrink. For a smooth curve the answer is 0: a smooth move over \u0394t is about slope\u00b7\u0394t, so its square is (slope)\u00b2(\u0394t)\u00b2, and summing m \u2248 1/\u0394t of those leaves a spare factor of \u0394t that drives everything to zero \u2014 which is exactly the assumption ordinary calculus rests on. Brownian motion breaks that. Each increment \u0394W is N(0, \u0394t), so its mean squared size is its variance, \u0394t; there are m = t/\u0394t pieces, so the sum has mean m\u00b7\u0394t = t no matter how fine the mesh. And because the pieces are independent, the wobble of that sum is 2t\u00b2/m, which vanishes as the mesh refines. Mean t, vanishing spread: in the limit the sum is not random \u2014 it is exactly t. So [W]\u209c = t. The consequence is that (\u0394W)\u00b2 is the same order as \u0394t, not negligible like (\u0394x)\u00b2 for a smooth path, so when you Taylor-expand a function of W\u209c you cannot drop the second-order term \u2014 it contributes \u00bd\u00b7f''\u00b7(dW)\u00b2 = \u00bd\u00b7f''\u00b7dt. That surviving term is precisely the correction in It\u00f4's lemma, and it is why stochastic calculus is not just ordinary calculus with new notation."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "We divide the random walk M_{nt} by \u221an (not by n) so that:",
+    options: [
+      { label: "Var(W_t) stays equal to t as n grows", value: "a" },
+      { label: "each individual step keeps size one", value: "b" },
+      { label: "the path becomes perfectly smooth", value: "c" },
+      { label: "the mean of W_t grows in step with t", value: "d" }
+    ],
+    correct: "a",
+    explain: "Dividing by a constant c divides variance by c\u00b2, so \u221an turns the raw variance nt into nt/n = t \u2014 finite and non-zero. Dividing by n would give t/n \u2192 0 (a flat line)."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "For Brownian motion, the increment W_t \u2212 W_s is distributed as:",
+    options: [
+      { label: "Normal, mean 0, variance t \u2212 s", value: "a" },
+      { label: "Normal, mean t \u2212 s, variance one", value: "b" },
+      { label: "Uniform across the interval s to t", value: "c" },
+      { label: "the same value as W_s plus a drift", value: "d" }
+    ],
+    correct: "a",
+    explain: "Defining property (3): increments are Gaussian with mean 0 and variance equal to the elapsed time t \u2212 s \u2014 and, by property (2), independent of everything up to time s."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Brownian motion is a martingale (E[W_t|\u2131_s] = W_s) because its increments are:",
+    options: [
+      { label: "mean zero and independent of the past", value: "a" },
+      { label: "always positive over any interval", value: "b" },
+      { label: "correlated with the earlier moves", value: "c" },
+      { label: "small enough that they can be ignored", value: "d" }
+    ],
+    correct: "a",
+    explain: "Split W_t = W_s + (W_t \u2212 W_s): take out the known W_s, and the increment is independent of \u2131_s with mean 0, so it conditions to 0. Best forecast of the future = present value."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "The quadratic variation of Brownian motion over [0, t], \u03a3(\u0394W)\u00b2, converges to:",
+    options: [
+      { label: "t \u2014 it does not vanish here", value: "a" },
+      { label: "zero, like any smooth curve", value: "b" },
+      { label: "infinity, with no real limit", value: "c" },
+      { label: "just the final step variance", value: "d" }
+    ],
+    correct: "a",
+    explain: "Mean m\u00b7\u0394t = t at every mesh; wobble 2t\u00b2/m \u2192 0. So the sum is the non-random value t. (The FIRST-power sum \u03a3|\u0394W| is what blows up to infinity.)"
+  });
+
+  Quiz.mount(document.getElementById("quiz5"), {
+    question: "A Brownian path is continuous everywhere, and at the same time it is:",
+    options: [
+      { label: "nowhere smooth \u2014 its slopes blow up", value: "a" },
+      { label: "differentiable at all but a point", value: "b" },
+      { label: "smooth once the time step is small", value: "c" },
+      { label: "flat, since its mean stays at zero", value: "d" }
+    ],
+    correct: "a",
+    explain: "The move over \u0394t is \u221a\u0394t, so the slope |\u0394W|/\u0394t \u2248 1/\u221a\u0394t \u2192 \u221e. Continuous because \u221a\u0394t \u2192 0; not smooth because the slope explodes."
+  });
+</script>
+</body>
+</html>

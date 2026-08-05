@@ -45,3 +45,11 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Taking out what is known | — | — | 011 |
 | L² projection (of a forecast) | — | — | 011 |
 | Martingale | — | — | 011 |
+| Random walk (symmetric) | — | — | 012 |
+| Scaled random walk (√n) | — | — | 012 |
+| Brownian motion / Wiener process | — | — | 012 |
+| Increment (of a process) | — | — | 012 |
+| Self-similarity (Brownian scaling) | — | — | 012 |
+| Quadratic variation ([W]_t = t) | — | — | 012 |
+| (dW)² = dt heuristic | — | — | 012 |
+| Nowhere differentiable | — | — | 012 |

@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "lessons": [
     {
       "id": 1,
@@ -116,6 +116,16 @@
       "checkpoint": false,
       "labPath": "labs/0011-conditional-expectation-tree.ipynb",
       "title": "Information, Filtrations & Conditional Expectation",
+      "published": true
+    },
+    {
+      "id": 12,
+      "slug": "0012-brownian-motion",
+      "year": 1,
+      "quarter": 2,
+      "checkpoint": false,
+      "labPath": "labs/0012-brownian-motion.ipynb",
+      "title": "Random Walks & Brownian Motion",
       "published": true
     }
   ]

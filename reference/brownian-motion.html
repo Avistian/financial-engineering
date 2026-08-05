@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — Random Walks, Brownian Motion &amp; Quadratic Variation</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    code { font-size: 0.85em; }
+  </style>
+</head>
+<body>
+<article>
+  <h1>Random Walks, Brownian Motion &amp; Quadratic Variation</h1>
+  <p class="subtitle">Reference · print-friendly cheat sheet · Units 012–020 (Year 1 Q2)</p>
+
+  <p>
+    The working facts about the continuous-time random walk that every later Q2 unit is built on. Taught
+    in <a href="../lessons/0012-brownian-motion.html">Lesson 012</a>; source Shreve II Ch. 3.
+  </p>
+
+  <h2>From random walk to Brownian motion</h2>
+  <table>
+    <thead><tr><th>Object</th><th>Is</th><th>Key numbers</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Random walk</strong> <code>M<sub>n</sub></code></td><td>sum of <em>n</em> independent <code>±1</code> steps</td><td><code>E[M<sub>n</sub>]=0</code>, <code>Var(M<sub>n</sub>)=n</code>, spread <code>√n</code></td></tr>
+      <tr><td><strong>Scaled walk</strong> <code>W<sup>(n)</sup><sub>t</sub></code></td><td><code>M<sub>nt</sub>/√n</code></td><td><code>Var = nt/n = t</code> at every <em>n</em> (that is why we divide by <code>√n</code>)</td></tr>
+      <tr><td><strong>Brownian motion</strong> <code>W<sub>t</sub></code></td><td>the limit as <em>n</em>→∞ (Wiener process)</td><td><code>W<sub>t</sub> ~ N(0, t)</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Definition — four properties</h2>
+  <table>
+    <thead><tr><th>#</th><th>Property</th><th>In words</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>W₀ = 0</code></td><td>starts at the origin</td></tr>
+      <tr><td>2</td><td><code>W<sub>t</sub> − W<sub>s</sub></code> ⫫ <code>ℱ<sub>s</sub></code></td><td>the next move does not remember the past (independent increments)</td></tr>
+      <tr><td>3</td><td><code>W<sub>t</sub> − W<sub>s</sub> ~ N(0, t − s)</code></td><td>each move is a bell curve; typical size <code>√(t−s)</code> (stationary Gaussian increments)</td></tr>
+      <tr><td>4</td><td><code>t ↦ W<sub>t</sub></code> continuous</td><td>no jumps — draw it without lifting the pen</td></tr>
+    </tbody>
+  </table>
+  <div class="formula">Self-similarity: &nbsp; W<sub>ct</sub> &nbsp;is distributed like&nbsp; √c · W<sub>t</sub> &nbsp;&nbsp;(zoom in, still Brownian)</div>
+
+  <h2>Martingale facts</h2>
+  <table>
+    <thead><tr><th>Statement</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><code>E[W<sub>t</sub> | ℱ<sub>s</sub>] = W<sub>s</sub></code></td><td>take out the known <code>W<sub>s</sub></code>; the increment is independent of the past with mean 0</td></tr>
+      <tr><td><code>E[W<sub>t</sub>² | ℱ<sub>s</sub>] = W<sub>s</sub>² + (t − s)</code></td><td>expand <code>(W<sub>s</sub>+ΔW)²</code>; the cross term vanishes, <code>E[ΔW²]=Var=t−s</code></td></tr>
+      <tr><td><code>W<sub>t</sub>² − t</code> is a martingale</td><td>the leftover <code>t</code> is the quadratic variation (the compensator)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Quadratic variation — the headline</h2>
+  <div class="formula">[W]<sub>t</sub> = lim<sub>mesh→0</sub> Σ (W<sub>t<sub>i+1</sub></sub> − W<sub>t<sub>i</sub></sub>)² = <strong>t</strong></div>
+  <p>
+    Slow-lane reason: with <em>m</em> pieces of width <code>Δt = t/m</code>, the sum <code>Q = Σ(ΔW)²</code>
+    has <strong>mean</strong> <code>m·Δt = t</code> (mean square move = variance = Δt) and
+    <strong>variance</strong> <code>m·2(Δt)² = 2t²/m → 0</code>. Mean <code>t</code>, vanishing wobble ⇒
+    <code>Q → t</code> with certainty.
+  </p>
+  <table>
+    <thead><tr><th>Curve</th><th>Σ(Δ·)² (squared)</th><th>Σ|Δ·| (first-order)</th></tr></thead>
+    <tbody>
+      <tr><td>smooth <code>f</code> (finite slope)</td><td><code>→ 0</code> (a straight line's is <code>1/m</code>)</td><td>finite (its length)</td></tr>
+      <tr><td>Brownian motion</td><td><code>→ t</code> (does <em>not</em> vanish)</td><td><code>→ ∞</code> (path length is infinite)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>The rule you compute with: <code>(dW)² = dt</code>.</strong> Keep any <code>(dW)²</code> term
+    and replace it by <code>dt</code>; drop <code>dW·dt</code> and <code>(dt)²</code> (they shrink faster
+    than <code>dt</code>). This single non-vanishing second-order term is the whole difference between
+    ordinary and Itô calculus (Lesson 013).
+  </div>
+
+  <h2>Continuous but nowhere differentiable</h2>
+  <div class="formula">slope over Δt &nbsp;≈&nbsp; |ΔW| / Δt &nbsp;≈&nbsp; √Δt / Δt &nbsp;=&nbsp; 1/√Δt &nbsp;→&nbsp; ∞</div>
+  <p>
+    Continuous because the move <code>√Δt → 0</code>; not differentiable because the slope
+    <code>1/√Δt → ∞</code>. This is why we write <code>dW</code>, never <code>W′(t)</code>.
+  </p>
+
+  <h2>Simulate it (what the lab does)</h2>
+  <div class="formula">W<sub>t+Δt</sub> = W<sub>t</sub> + √Δt · Z, &nbsp;&nbsp; Z ~ N(0, 1) i.i.d.</div>
+  <p>
+    Valid Brownian samples <em>at the grid points</em>. <em>Realized variance</em> — the summed squared
+    returns — is the data version of <code>[W]<sub>t</sub></code>, the workhorse volatility estimator
+    (Year 1 Q3).
+  </p>
+
+  <div class="trap">
+    <strong>Traps.</strong> (1) Thinking continuous ⇒ smooth (it is nowhere differentiable).
+    (2) Dropping <code>(dW)²</code> — it is first-order, <code>≈ dt</code>. (3) Scaling space like
+    <em>t</em> instead of <code>√t</code> (dividing by <em>n</em> not <code>√n</code> collapses the walk).
+    (4) Confusing <code>Var(W<sub>t</sub>)=t</code> (across many paths) with <code>[W]<sub>t</sub>=t</code>
+    (one path's squared wiggles). (5) Treating Gaussian increments as realistic — they miss the fat tails
+    and volatility clustering of Lesson 004. (6) Forgetting increments are independent of the past — that
+    independence is what makes <code>W<sub>t</sub></code> a martingale.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="../lessons/0012-brownian-motion.html">Lesson 012</a></li>
+      <li><a href="../labs/0012-brownian-motion.ipynb">Lab 012</a></li>
+      <li><a href="conditional-expectation.html">Reference: conditional expectation &amp; martingales</a></li>
+      <li><a href="curriculum.html">Curriculum</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

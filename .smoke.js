@@ -57,6 +57,7 @@ const files = [
   "assets/autopsy-viz.js",
   "assets/tree-viz.js",
   "assets/projection-viz.js",
+  "assets/bm-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -243,6 +244,51 @@ trap("Projection.mount + slide", () => {
   window.Projection.mount(el, { mseMin: 83.217, s: 7 });
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "-12"; i.dispatch("input"); i.value = "12"; i.dispatch("input"); });
+});
+
+trap("BM paths geometry stays inside the canvas (every n)", () => {
+  for (let k = 1; k <= 9; k++) {
+    const canvases = withRecordedCanvas(() => {
+      window.BM.mountPaths(makeEl("div"), { k: k });
+    });
+    assertInBounds(canvases[0], "BMpaths[k=" + k + "]");
+  }
+});
+
+trap("BM qvar geometry stays inside the canvas (every m)", () => {
+  for (let k = 1; k <= 9; k++) {
+    const canvases = withRecordedCanvas(() => {
+      window.BM.mountQVar(makeEl("div"), { k: k });
+    });
+    assertInBounds(canvases[0], "BMqvar[k=" + k + "]");
+  }
+});
+
+trap("BM quadratic variation numbers (smooth -> 0, BM -> t)", () => {
+  const el = makeEl("div");
+  const w = window.BM.mountQVar(el, { k: 3 });
+  const near = (a, b, tol) => Math.abs(a - b) < (tol || 1e-9);
+  if (!near(w.qvSmooth(4), 0.25)) throw new Error("qvSmooth(4) should be 0.25, got " + w.qvSmooth(4));
+  if (!near(w.qvSmooth(512), 1 / 512)) throw new Error("qvSmooth(512) wrong: " + w.qvSmooth(512));
+  if (!near(w.qvBM(512), 1.0)) throw new Error("qvBM(512) should be exactly 1, got " + w.qvBM(512));
+  if (!near(w.wFine[w.wFine.length - 1], -0.70710678, 1e-4)) throw new Error("W_1 endpoint drift: " + w.wFine[w.wFine.length - 1]);
+  if (!(w.maxAbs > 1.2 && w.maxAbs < 1.35)) throw new Error("maxAbs drift: " + w.maxAbs);
+  // BM's squared-increment sum stays O(1) at every mesh (never collapses toward 0 like the smooth curve)
+  for (let k = 2; k <= 9; k++) {
+    const q = w.qvBM(2 ** k);
+    if (!(q > 0.6 && q < 1.7)) throw new Error("qvBM(" + (2 ** k) + ")=" + q + " out of the O(1) band");
+    if (!(w.qvSmooth(2 ** k) < q)) throw new Error("smooth sum should stay below the BM sum at m=" + (2 ** k));
+  }
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "1"; i.dispatch("input"); i.value = "9"; i.dispatch("input"); });
+});
+
+trap("BM.mountPaths + slide", () => {
+  const el = makeEl("div");
+  const w = window.BM.mountPaths(el, { k: 3 });
+  if (!(w.wFine.length === 513 && w.wFine[0] === 0)) throw new Error("fine path should have 513 points starting at 0");
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "1"; i.dispatch("input"); i.value = "9"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

@@ -548,6 +548,68 @@
       ],
       correct: "a",
       explain: "E[M\u209c|\u2131\u209b] = M\u209b is a joint claim about process, filtration and measure: the same tree is a martingale at p = \u00bd and drifts up 2%/step at p = 0.6."
+    },
+
+    // ---- L012: random walks & Brownian motion ----
+    {
+      id: "l012-scaling", lesson: 12, quarter: "Q2", concept: "bm-scaling",
+      question: "The random walk M_{nt} is divided by \u221an (not n) so that:",
+      options: [
+        { label: "Var(W_t) stays equal to t at all n", value: "a" },
+        { label: "each step keeps a fixed size of one", value: "b" },
+        { label: "the path becomes smooth in the limit", value: "c" },
+        { label: "the mean of W_t grows in step with t", value: "d" }
+      ],
+      correct: "a",
+      explain: "Dividing by a constant c divides variance by c\u00b2, so \u221an turns raw variance nt into t \u2014 finite and non-zero. Dividing by n sends it to 0 (a flat line)."
+    },
+    {
+      id: "l012-bm-def", lesson: 12, quarter: "Q2", concept: "bm-def",
+      question: "For Brownian motion, the increment W_t \u2212 W_s is distributed as:",
+      options: [
+        { label: "Normal, mean 0, variance t \u2212 s", value: "a" },
+        { label: "Normal, mean t \u2212 s, variance one", value: "b" },
+        { label: "Uniform on the interval s to t", value: "c" },
+        { label: "Poisson with the rate set to t", value: "d" }
+      ],
+      correct: "a",
+      explain: "Gaussian increments with mean 0 and variance equal to the elapsed time t \u2212 s, and independent of everything up to time s."
+    },
+    {
+      id: "l012-qvar", lesson: 12, quarter: "Q2", concept: "quadratic-variation",
+      question: "The quadratic variation of Brownian motion, \u03a3(\u0394W)\u00b2 over [0,t], converges to:",
+      options: [
+        { label: "t \u2014 it does not vanish here", value: "a" },
+        { label: "zero, like any smooth line", value: "b" },
+        { label: "infinity, with no real limit", value: "c" },
+        { label: "just the last step variance", value: "d" }
+      ],
+      correct: "a",
+      explain: "Mean m\u00b7\u0394t = t at every mesh; wobble 2t\u00b2/m \u2192 0, so the sum is the non-random value t. (The FIRST-power sum \u03a3|\u0394W| is the one that blows up.)"
+    },
+    {
+      id: "l012-nowhere-diff", lesson: 12, quarter: "Q2", concept: "bm-roughness", misconception: true,
+      question: "A Brownian path is continuous everywhere, and at the same time:",
+      options: [
+        { label: "nowhere smooth \u2014 slopes blow up", value: "a" },
+        { label: "differentiable at all but a point", value: "b" },
+        { label: "smooth once its steps get small", value: "c" },
+        { label: "flat, as its mean stays at zero", value: "d" }
+      ],
+      correct: "a",
+      explain: "The move over \u0394t is \u221a\u0394t, so the slope |\u0394W|/\u0394t \u2248 1/\u221a\u0394t \u2192 \u221e. Continuous because \u221a\u0394t \u2192 0; not smooth because the slope explodes."
+    },
+    {
+      id: "l012-dw2dt", lesson: 12, quarter: "Q2", concept: "dw-squared", misconception: true,
+      question: "In stochastic calculus the term (dW)\u00b2 is replaced by:",
+      options: [
+        { label: "dt \u2014 it is first-order, not junk", value: "a" },
+        { label: "0, being second-order and tiny", value: "b" },
+        { label: "dW, since squaring changes little", value: "c" },
+        { label: "(dt)\u00b2, a negligible correction", value: "d" }
+      ],
+      correct: "a",
+      explain: "Since [W]_t = t, the squared increment (dW)\u00b2 accumulates at rate 1: (dW)\u00b2 = dt. Only dW\u00b7dt and (dt)\u00b2 are dropped. This surviving term is the extra piece in It\u00f4's lemma."
     }
   ];
 })(window);
