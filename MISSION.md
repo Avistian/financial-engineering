@@ -13,7 +13,7 @@ exactly what you are standing on.
 - Derive and price a European option **three independent ways** (closed form, Monte Carlo, PDE) and explain Girsanov / Feynman-Kac without hand-waving.
 - Build the full **López de Prado pipeline** end to end: information-driven bars → fractional differentiation → triple-barrier + meta-labeling → sample-weighted, leakage-free model.
 - Reproduce a **microstructure result** (OFI→impact, a Hawkes intensity, a DeepLOB-style predictor) with correct temporal splits and honest limitations.
-- Construct a **denoised, cost-aware portfolio** (RMT / Ledoit-Wolf) from multiple signals and report net Sharpe and capacity.
+- Construct a **denoised, cost-aware portfolio** (RMT / Ledoit-Wolf) from multiple signals and report net Sharpe and capacity; stress joint losses with **copulas**, not just linear correlation.
 - **Pass the interview gauntlet**: mental math, probability/market-making games, stochastic-calculus derivations, and LeetCode-style DP/graphs under pressure.
 - Ship a **capstone**: an end-to-end research project presented as if defending it to a portfolio manager.
 
