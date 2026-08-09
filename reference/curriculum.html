@@ -97,7 +97,7 @@
       <tr><td class="u">026</td><td>Jumps &amp; the leverage effect: bipower variation, jump detection</td><td class="src">BN-Shephard 2004</td></tr>
       <tr><td class="u">027</td><td>Cointegration &amp; pairs; spurious regression</td><td class="src">Engle-Granger 1987</td></tr>
       <tr><td class="u">028</td><td>Statistical arbitrage: OU signals, half-life, trade lifecycle</td><td class="src">Avellaneda-Lee 2010</td></tr>
-      <tr><td class="u">029</td><td>Multivariate volatility &amp; covariance (DCC, EWMA)</td><td class="src">Tsay 10</td></tr>
+      <tr><td class="u">029</td><td>Multivariate volatility &amp; covariance (DCC, EWMA; preview: dependence beyond ρ → Y3 copulas)</td><td class="src">Tsay 10</td></tr>
       <tr class="chk"><td class="u">030</td><td><strong>Q3 checkpoint</strong> — validate a HAR-RV forecaster vs GARCH out-of-sample</td><td class="src">Corsi 2009</td></tr>
     </table>
 
@@ -186,15 +186,15 @@
     <div class="q-title">Q1 · Portfolio construction &amp; risk</div>
     <table>
       <tr><td class="u">081</td><td>Mean-variance optimization &amp; its instability</td><td class="src">Markowitz 1952</td></tr>
-      <tr><td class="u">082</td><td>Random Matrix Theory: Marčenko-Pastur, eigenvalue cleaning</td><td class="src">Laloux 1999</td></tr>
-      <tr><td class="u">083</td><td>Ledoit-Wolf covariance shrinkage &amp; denoising</td><td class="src">Ledoit-Wolf 2004</td></tr>
-      <tr><td class="u">084</td><td>Factor models &amp; risk decomposition</td><td class="src">Grinold-Kahn 3</td></tr>
-      <tr><td class="u">085</td><td>The Fundamental Law of Active Management: IC, breadth</td><td class="src">Grinold-Kahn 6</td></tr>
-      <tr><td class="u">086</td><td>Signal combination &amp; alpha blending</td><td class="src">Grinold-Kahn 11–14</td></tr>
+      <tr><td class="u">082</td><td>Covariance cleaning: RMT (Marčenko-Pastur) + Ledoit-Wolf shrinkage</td><td class="src">Laloux 1999; Ledoit-Wolf 2004</td></tr>
+      <tr><td class="u">083</td><td>Factor models &amp; risk decomposition</td><td class="src">Grinold-Kahn 3</td></tr>
+      <tr><td class="u">084</td><td>The Fundamental Law &amp; signal combination: IC, breadth, alpha blending</td><td class="src">Grinold-Kahn 6, 11–14</td></tr>
+      <tr><td class="u">085</td><td>Copulas I — dependence beyond correlation: Sklar, margins vs copula, Gaussian &amp; t, rank correlations</td><td class="src">McNeil et al.; EMS 2002</td></tr>
+      <tr><td class="u">086</td><td>Copulas II — tails, Archimedean families, simulation; why the Gaussian copula fails in crashes</td><td class="src">McNeil et al.; Li 2000</td></tr>
       <tr><td class="u">087</td><td>Hierarchical Risk Parity (HRP)</td><td class="src">LdP 2016</td></tr>
       <tr><td class="u">088</td><td>Transaction costs &amp; capacity: turnover, slippage, alpha decay</td><td class="src">Grinold-Kahn</td></tr>
-      <tr><td class="u">089</td><td>Risk management &amp; drawdown: VaR/ES caveats, regime-aware sizing</td><td class="src">McNeil et al.</td></tr>
-      <tr class="chk"><td class="u">090</td><td><strong>Q1 checkpoint</strong> — denoised, cost-aware portfolio from multiple signals; net Sharpe &amp; capacity</td><td class="src">Grinold-Kahn</td></tr>
+      <tr><td class="u">089</td><td>Risk management &amp; drawdown: VaR/ES, copula-aware aggregation, regime-aware sizing</td><td class="src">McNeil et al.</td></tr>
+      <tr class="chk"><td class="u">090</td><td><strong>Q1 checkpoint</strong> — denoised, cost-aware portfolio from multiple signals; net Sharpe, capacity, and a copula stress of joint losses</td><td class="src">Grinold-Kahn; MFE</td></tr>
     </table>
 
     <div class="q-title">Q2 · Optimal execution, market making &amp; RL</div>

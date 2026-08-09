@@ -8187,7 +8187,7 @@ $$\Sigma = \frac{1}{n-1}\,\tilde X^{\top}\tilde X.$$</p>
 <li><strong>Raw vs standardized.</strong> Redo PCA on the <em>raw</em> covariance (<code>np.cov(R, rowvar=False)</code>) without scaling. Multiply one asset's returns by 100 first and watch PC1 lurch toward that asset — the scale trap, made real.</li>
 <li><strong>Reconstruction error.</strong> Rebuild the panel from the first <code>k</code> PCs (<code>Xs @ evecs[:, :k] @ evecs[:, :k].T</code>) and plot reconstruction error vs <code>k</code>; confirm the Eckart–Young 'best rank-k' drop matches the discarded eigenvalues' sum.</li>
 <li><strong>Rolling PC1 share.</strong> Estimate <code>C</code> on a rolling 126-day window and plot PC1's variance share over time; spikes flag correlation regimes (crises), the empirical <code>rho -&gt; 1</code> effect.</li>
-<li><strong>RMT noise band (preview, units 082–083).</strong> Simulate a pure-noise panel with the same <code>n_days, d</code>; the Marchenko–Pastur upper edge <code>(1 + sqrt(d/n))**2</code> marks where real eigenvalues end and noise begins.</li>
+<li><strong>RMT noise band (preview, unit 082).</strong> Simulate a pure-noise panel with the same <code>n_days, d</code>; the Marchenko–Pastur upper edge <code>(1 + sqrt(d/n))**2</code> marks where real eigenvalues end and noise begins.</li>
 </ul>
 </div>
 </div>
