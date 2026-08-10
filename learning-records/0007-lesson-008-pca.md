@@ -21,7 +21,7 @@ best-rank-k **reconstruction** (Eckart–Young); SVD↔PCA equivalence.
 
 Failure-mode trap (4 ways PCA lies): (1) **scale** — decompose the correlation matrix / standardize;
 (2) **non-stationarity** — Σ drifts, crises spike ρ; (3) **noise eigenvalues** — most small λ are
-estimation noise (Marchenko–Pastur / Ledoit–Wolf preview, units 082–083); (4) **leakage** — fitting
+estimation noise (Marchenko–Pastur / Ledoit–Wolf preview, unit 082); (4) **leakage** — fitting
 PCA on the full sample is look-ahead in a backtest.
 
 Pedagogy widgets: spaced-retrieval warm-up (`upTo: 8`); a predict-before-reveal on PC1's variance

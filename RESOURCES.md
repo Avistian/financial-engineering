@@ -44,7 +44,8 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 ### Portfolio construction & risk
 - ★ **Grinold & Kahn — *Active Portfolio Management*** (2nd ed.). The Fundamental Law, IC/breadth, factor risk, alpha combination. Year 3 Q1.
 - ◆ **Bouchaud & Potters — *Theory of Financial Risk and Derivative Pricing***. RMT for covariance cleaning.
-- ◆ **McNeil, Frey & Embrechts — *Quantitative Risk Management***. VaR/ES done rigorously.
+- ★ **McNeil, Frey & Embrechts — *Quantitative Risk Management*** (Princeton). Copulas (Ch.5–7), VaR/ES, risk aggregation. Core for units 085–086 and 089.
+- ◆ **Nelsen — *An Introduction to Copulas*** (Springer). Gentler mathematical companion to MFE when Sklar/margins need a slower pass.
 
 ### Execution, market making & RL
 - ★ **Cartea, Jaimungal & Penalva — *Algorithmic and High-Frequency Trading*** (CUP). Execution, impact, market making, the math of Year 3 Q2.
@@ -103,9 +104,11 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 
 ### Portfolio / risk
 - ★ Markowitz (1952), *Portfolio Selection.* — unit 081.
-- ★ Ledoit & Wolf (2004), *A well-conditioned estimator for large-dimensional covariance matrices.* — unit 083.
 - ★ Laloux, Cizeau, Bouchaud & Potters (1999), *Noise Dressing of the Financial Correlation Matrix* (RMT). — unit 082.
+- ★ Ledoit & Wolf (2004), *A well-conditioned estimator for large-dimensional covariance matrices.* — unit 082.
+- ★ Embrechts, McNeil & Straumann (2002), *Correlation and Dependence in Risk Management: Properties and Pitfalls.* — why linear correlation is not enough (unit 085).
 - ★ López de Prado (2016), *Building Diversified Portfolios that Outperform Out of Sample* (HRP). — unit 087.
+- ◆ Li (2000), *On Default Correlation: A Copula Function Approach.* — the Gaussian-copula CDO formula; taught as a **failure-mode case study**, not a method to copy (unit 086).
 
 ### Execution & RL
 - ★ Almgren & Chriss (2000), *Optimal Execution of Portfolio Transactions.* — unit 092.

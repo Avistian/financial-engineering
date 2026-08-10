@@ -105,7 +105,7 @@ prove you did not just overfit.
 | 026 | Jumps & the leverage effect: bipower variation, jump detection, asymmetric vol | Barndorff-Nielsen-Shephard 2004 | Detect jumps; split RV = C + J |
 | 027 | Cointegration & pairs: Engle-Granger, Johansen, spurious regression | Tsay Ch.8; Engle-Granger 1987 ★ | Find & test a cointegrated pair |
 | 028 | Statistical arbitrage: mean reversion, OU signals, half-life, trade lifecycle | Avellaneda-Lee 2010 ★ | Build a pairs signal w/ entry/exit |
-| 029 | Multivariate volatility & covariance: DCC, EWMA, the dimensionality curse (preview RMT) | Tsay Ch.10 | EWMA cov of a small panel |
+| 029 | Multivariate volatility & covariance: DCC, EWMA, the dimensionality curse (preview RMT; dependence beyond ρ → Y3 copulas) | Tsay Ch.10 | EWMA cov of a small panel |
 | 030 | **Q3 checkpoint** — HAR-RV vs GARCH | Corsi 2009 | Validate a vol forecaster out-of-sample; honest error metrics |
 
 ### Q4 · Financial ML foundations I — data & labeling (Units 031–040) — AFML core
@@ -212,15 +212,15 @@ defended capstone.
 | # | Unit topic | Primary source | Lab / deliverable |
 |---|-----------|----------------|-------------------|
 | 081 | Mean-variance optimization & its instability | Markowitz 1952; Grinold-Kahn Ch.2 ★ | MVO and its blow-ups |
-| 082 | Random Matrix Theory: the Marčenko-Pastur law, eigenvalue cleaning | Laloux et al. 1999; Bouchaud-Potters ★ | MP fit; separate signal eigenvalues |
-| 083 | Ledoit-Wolf covariance shrinkage & denoising | Ledoit-Wolf 2004 ★; *ML for Asset Managers* Ch.2 | **Lab:** shrink & denoise a cov matrix |
-| 084 | Factor models & risk decomposition: Barra-style, PCA factors, idiosyncratic risk | Grinold-Kahn Ch.3 ★ | Decompose portfolio risk |
-| 085 | The Fundamental Law of Active Management: IC, breadth, transfer coefficient | Grinold-Kahn Ch.6 ★ | Compute IC & IR of a signal |
-| 086 | Signal combination & alpha blending: ensembling signals vs models | Grinold-Kahn Ch.11–14 | Combine 3 signals; measure lift |
+| 082 | Covariance cleaning: RMT (Marčenko-Pastur) + Ledoit-Wolf shrinkage & denoising | Laloux et al. 1999; Ledoit-Wolf 2004 ★; *ML for Asset Managers* Ch.2 | **Lab:** MP fit + shrink & denoise a cov matrix |
+| 083 | Factor models & risk decomposition: Barra-style, PCA factors, idiosyncratic risk | Grinold-Kahn Ch.3 ★ | Decompose portfolio risk |
+| 084 | The Fundamental Law & signal combination: IC, breadth, transfer coefficient, alpha blending | Grinold-Kahn Ch.6, 11–14 ★ | Compute IC/IR; combine 3 signals; measure lift |
+| 085 | Copulas I — dependence beyond correlation: Sklar's theorem, margins vs copula, Gaussian & Student-t, Spearman/Kendall | McNeil-Frey-Embrechts Ch.5–7 ★; Embrechts-McNeil-Straumann 2002 ★ | Fit Gaussian & t-copulas to a returns pair; compare to linear ρ |
+| 086 | Copulas II — tails, families & risk: tail dependence, Archimedean (Clayton/Gumbel/Frank), simulation; why the Gaussian copula fails in crashes | McNeil-Frey-Embrechts ★; Li 2000 (cautionary) | **Lab:** simulate joint losses via copula; compare VaR/ES vs Gaussian; document the failure mode |
 | 087 | Hierarchical Risk Parity (HRP) & robust allocation | López de Prado 2016 ★ | HRP vs MVO out-of-sample |
 | 088 | Transaction costs & capacity: turnover, slippage, alpha decay, strategy capacity | Grinold-Kahn; Kyle/impact | Net-of-cost Sharpe & capacity curve |
-| 089 | Risk management & drawdown: VaR/ES caveats, stress, regime-aware sizing | Hull Risk Mgmt; McNeil-Frey-Embrechts | Backtest a drawdown-control overlay |
-| 090 | **Q1 checkpoint** — build a portfolio | Grinold-Kahn; LdP | Denoised, cost-aware portfolio from multiple signals; report net Sharpe & capacity |
+| 089 | Risk management & drawdown: VaR/ES caveats, copula-aware aggregation, stress, regime-aware sizing | Hull Risk Mgmt; McNeil-Frey-Embrechts ★ | Backtest a drawdown-control overlay; stress with fitted copula |
+| 090 | **Q1 checkpoint** — build a portfolio | Grinold-Kahn; LdP; MFE | Denoised, cost-aware portfolio from multiple signals; report net Sharpe, capacity, and a copula-based stress of joint losses |
 
 ### Q2 · Optimal execution, market making & RL (Units 091–100)
 | # | Unit topic | Primary source | Lab / deliverable |
@@ -265,7 +265,8 @@ defended capstone.
 | 120 | **Q4 / Year-3 exit — Capstone** | everything | **End-to-end research project**: data → signal → CPCV-validated backtest → cost/capacity-aware sizing → write-up, presented as if defending it to a PM |
 
 **Year 3 exit criterion (the mission):** you can stand in front of a skeptical PM and defend an
-original, leakage-free, capacity-aware strategy — and you can pass the mental-math, probability,
+original, leakage-free, capacity-aware strategy — including an honest account of joint-loss
+dependence (copulas, not just correlation) — and you can pass the mental-math, probability,
 derivation, and coding gauntlet that gets the offer.
 
 **◆ Optional (Year 3):** Narang *Inside the Black Box* · Chan *Quantitative Trading* / *Algorithmic
