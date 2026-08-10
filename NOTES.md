@@ -108,14 +108,16 @@
 ## Open questions / parking lot
 - Secure real LOB data (LOBSTER / Databento / FI-2010) before Year 2 Q3.
 - Decide on a compute setup for PyTorch labs (units 073–080) — local GPU vs Colab/cloud.
-- **Length A/B — ask the learner directly.** Lesson 011 was ~70 KB (four-layer build); Lesson 012 was
-  deliberately leaner at ~49 KB / 15 `<h2>` (one idea per beat, no repeated scaffold). Ask which felt
-  better in one sitting and record it — this is the real datapoint to calibrate units 013–020 on, not my
+- **Length A/B — ask the learner directly (now a 3-point series).** Lesson 011 ~70 KB (four-layer build);
+  Lesson 012 ~49 KB; Lesson 013 ~47 KB (both leaner, one idea per beat). Ask which felt best in one
+  sitting and record it — the real datapoint to calibrate units 014–020 on, not my "leaner is better"
   assumption. (Depth-over-length still stands; the question is only how much per lesson.)
-- **`(dW)² = dt` must be automatic before Lesson 013.** Itô's lemma is just this substitution inside a
-  Taylor expansion. Grade the 012 teach-back for *why* `(dW)²` survives while `dW·dt` and `(dt)²` are
-  dropped. Also watch for the two-variances confusion (`Var(W_t)=t` across paths vs `[W]_t=t` per path).
-- **Glossary drill owed:** rows for 006–012 are all still blank (32 terms). Do one cold-definition pass
+- **The `−½σ²` sign must be automatic before Lessons 014/016.** SDE solutions and the Black–Scholes PDE
+  both carry the Itô correction. Grade the 013 teach-back for the `d(log S)` derivation cold (every `S`
+  cancellation) and for *why* `∫…dW` is a martingale (left-endpoint sizing). Watch the sign-of-curvature
+  rule: `log S` drags down (`−½σ²`), `S²`/`e^W` push up (`+`). If the learner can derive `μ−½σ²` unaided,
+  it goes into "Derivations I own" below.
+- **Glossary drill owed:** rows for 006–013 are all still blank (39 terms). Do one cold-definition pass
   and fill only what the learner defines unaided.
 - Lesson 010 was **self-reported** as passed (no EXIT TICKET graded here) — offer a fresh checkpoint
   scenario at the next natural break.

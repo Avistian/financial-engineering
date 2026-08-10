@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 013 — The Itô Integral &amp; Itô's Lemma</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+    .step { margin: 0.9rem 0 0.9rem 0; padding-left: 0.9rem; border-left: 3px solid var(--border); }
+    .step strong { color: var(--accent); }
+    .takeaway { font-family: var(--font-sans); font-size: 0.85rem; color: var(--accent);
+                font-weight: 600; margin: 0.6rem 0 1.1rem; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q2</p>
+  <h1>The Itô Integral &amp; Itô's Lemma</h1>
+  <p class="subtitle">Lesson 013 · The chain rule for random functions · ~60 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <p>
+    Last lesson ended on one strange fact: the squared wiggles of a Brownian path do not vanish, they
+    pile up at rate one — <code>(dW)² = dt</code>. That looked like a curiosity. Today it becomes a
+    <em>tool</em>. Almost everything you will price or hedge is some <strong>function of a random
+    quantity</strong>: an option's value is a function of the stock price, the stock price is a function
+    of a Brownian motion. To do anything with those functions you need a rule for "if the input wiggles a
+    little, how does the output move?" In ordinary calculus that rule is the <strong>chain rule</strong>.
+    For random inputs the ordinary chain rule is <em>wrong</em>, and the fix — one extra term — is
+    <strong>Itô's lemma</strong>, the single most-used formula in all of derivatives pricing.
+  </p>
+  <p>
+    Here is the honest map. First we re-warm the ordinary chain rule as a two-term Taylor expansion, so
+    you can see exactly which term ordinary calculus throws away. Then we meet the <strong>Itô
+    integral</strong> — what "<code>∫ … dW</code>" even means — and the one design choice (evaluate at the
+    <em>left</em> edge of each step) that makes it a fair game with no built-in drift. Then we keep the
+    term ordinary calculus drops, substitute <code>(dW)² = dt</code>, and out falls Itô's lemma. We drive
+    it home on two examples: <code>d(W²)</code>, which re-derives last lesson's <code>W² − t</code>
+    martingale, and <code>d(log S)</code> for a stock, which produces the famous <code>−½σ²</code> drift
+    correction — the reason a volatile stock's <em>typical</em> path grows slower than its average.
+  </p>
+  <div class="callout">
+    <strong>The promise, made concrete.</strong> By the end you will be able to take any smooth function
+    of a price, write down how it moves in one line, and say <em>why</em> it carries an extra drift term
+    that a first-year calculus student would miss. You will have watched that extra term appear on screen
+    as a visible upward drift, and watched it drag a volatile stock's median path below its mean. Nothing
+    here needs machinery beyond the <code>(dW)² = dt</code> you proved in Lesson
+    <a href="0012-brownian-motion.html">012</a>.
+  </div>
+
+  <h2>Re-warm: the ordinary chain rule is a two-term Taylor expansion</h2>
+  <p>
+    Before we can see what breaks, recall what works. Take a smooth function <code>f</code> — "smooth"
+    meaning it has no kinks, so you can zoom in and it looks like a straight line. If its input
+    <code>x</code> nudges by a tiny amount <code>Δx</code>, the output changes by an amount you can
+    expand as a sum of ever-smaller pieces (this is the <strong>Taylor expansion</strong> — approximating
+    a curve near a point by its slope, then its curvature, then finer corrections):
+  </p>
+  <div class="formula">Δf = f′(x)·Δx + ½ f″(x)·(Δx)² + (even smaller terms)</div>
+  <p>
+    In words: the first piece <code>f′(x)·Δx</code> is "slope times step" — how far a straight line of
+    the right tilt would take you. Here <code>f′</code> (read "f-prime") is the <strong>first
+    derivative</strong>, the slope. The second piece uses <code>f″</code> ("f-double-prime"), the
+    <strong>second derivative</strong>, which measures <em>curvature</em> — how fast the slope itself is
+    changing. It multiplies <code>(Δx)²</code>, the <em>square</em> of the step.
+  </p>
+  <p>
+    Now the crucial move that ordinary calculus makes. For an ordinary smooth path, a step over a tiny
+    time <code>Δt</code> has size <code>Δx ≈ (speed)·Δt</code>, so its square is
+    <code>(Δx)² ≈ (speed)²·(Δt)²</code> — proportional to <code>(Δt)²</code>, which is
+    <em>vanishingly</em> small next to <code>Δt</code> itself. So the second term is thrown away, and only
+    the first survives:
+  </p>
+  <div class="formula">df = f′(x)·dx &nbsp;&nbsp;— the ordinary chain rule</div>
+  <p class="takeaway">
+    Takeaway: the ordinary chain rule keeps only "slope × step" because the squared step
+    <code>(Δx)²</code> is negligible for a smooth path. That last assumption is exactly what Brownian
+    motion breaks.
+  </p>
+
+  <h2>Re-warm: for Brownian motion the squared step is <em>not</em> negligible</h2>
+  <p>
+    Recall the headline of Lesson <a href="0012-brownian-motion.html">012</a>. A Brownian step over a
+    tiny time <code>Δt</code> is <code>ΔW ~ N(0, Δt)</code> — a bell-curve draw with typical size
+    <code>√Δt</code>. Square it and you get something of size <code>Δt</code>, and summed up these squares
+    lock onto the elapsed time. We wrote that as the working rule
+  </p>
+  <div class="formula">(dW)² = dt &nbsp;&nbsp;(the squared Brownian step behaves like <code>dt</code>, not like <code>0</code>)</div>
+  <p>
+    So the exact term ordinary calculus discards — the one with <code>(step)²</code> in it — is, for
+    Brownian motion, <em>the same size as the terms it keeps</em>. Refuse to discard it and you are forced
+    into a new calculus. Two smaller cousins <em>do</em> still vanish and will be dropped throughout:
+    <code>dW·dt</code> (size <code>√Δt · Δt</code>) and <code>(dt)²</code> both shrink faster than
+    <code>dt</code>. The whole of Itô calculus is the bookkeeping rule below.
+  </p>
+  <table>
+    <thead><tr><th>Product of small steps</th><th>Its size</th><th>Keep or drop?</th></tr></thead>
+    <tbody>
+      <tr><td><code>(dW)²</code></td><td><code>Δt</code></td><td><strong>keep</strong> → replace by <code>dt</code></td></tr>
+      <tr><td><code>dW·dt</code></td><td><code>Δt·√Δt = Δt<sup>1.5</sup></code></td><td>drop (→ 0)</td></tr>
+      <tr><td><code>(dt)²</code></td><td><code>Δt²</code></td><td>drop (→ 0)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>What "<code>∫ … dW</code>" means: the Itô integral</h2>
+  <p>
+    Itô's lemma will be written with a <code>dW</code> in it, so first we must say what it means to "add
+    up" against Brownian increments. Suppose you hold a position of size <code>H</code> in something whose
+    random shock over a step is <code>ΔW</code>, and <code>H</code> can change over time. Your total
+    random gain over <code>[0, t]</code> is the running sum of "position now × shock now." Chop the
+    interval into small pieces <code>t₀ &lt; t₁ &lt; … </code> and add:
+  </p>
+  <div class="formula">∫₀ᵗ H<sub>s</sub> dW<sub>s</sub> &nbsp;=&nbsp; lim &nbsp; Σ<sub>i</sub> H<sub>t<sub>i-1</sub></sub> · (W<sub>t<sub>i</sub></sub> − W<sub>t<sub>i-1</sub></sub>)</div>
+  <p>
+    Read it slowly. <code>W<sub>t<sub>i</sub></sub> − W<sub>t<sub>i-1</sub></sub></code> is the Brownian
+    shock over one little step (the "coin flip"). <code>H<sub>t<sub>i-1</sub></sub></code> is your position
+    — and here is the one choice that defines the <strong>Itô integral</strong>: the position is taken at
+    <code>t<sub>i-1</sub></code>, the <em>start</em> (left edge) of the step, <em>before</em> the shock is
+    revealed. That is not a technicality; it is the whole meaning. It says <strong>you must place your bet
+    before the coin is flipped</strong> — you cannot use tomorrow's move to size today's position. In the
+    language of Lesson <a href="0011-filtrations-conditional-expectation.html">011</a>, <code>H</code> is
+    <em>adapted</em>: it depends only on information available now.
+  </p>
+  <div class="callout">
+    <strong>Why the left edge makes it a fair game (a martingale).</strong> Look at one term,
+    <code>H<sub>t<sub>i-1</sub></sub> · ΔW<sub>i</sub></code>. The position <code>H<sub>t<sub>i-1</sub></sub></code>
+    is <em>known</em> by time <code>t<sub>i-1</sub></code>; the shock <code>ΔW<sub>i</sub></code> is fresh,
+    independent of the past, with mean <code>0</code> (Lesson 012's defining properties). So its expected
+    contribution, given everything so far, is <code>H<sub>t<sub>i-1</sub></sub> · E[ΔW<sub>i</sub>] =
+    H·0 = 0</code> — exactly the "take out what is known, then the increment averages to zero" move you
+    drilled in Lesson 011. Every term has conditional mean zero, so the whole Itô integral is a
+    <strong>martingale</strong>: it has <em>no drift</em>, its best forecast is its current value. Hold on
+    to this: <em>anything of the form <code>∫ … dW</code> contributes no average trend.</em> All the drift
+    in Itô's lemma will come from the other, non-random term.
+  </p>
+  <p class="takeaway">
+    Takeaway: <code>∫ H dW</code> means "position (set at the start of each step) times the next shock,
+    summed." Left-edge sizing ⇒ each term averages to zero ⇒ the integral is a martingale (zero drift).
+  </p>
+
+  <h2>Itô's lemma for a function of Brownian motion</h2>
+  <p>
+    Now put a smooth function on top of a Brownian motion: let <code>Y<sub>t</sub> = f(W<sub>t</sub>)</code>.
+    How does <code>Y</code> move over a tiny step? Write the same Taylor expansion as before, but with
+    input <code>W</code> instead of a smooth <code>x</code>:
+  </p>
+  <div class="formula">df = f′(W)·dW + ½ f″(W)·(dW)² + (smaller terms)</div>
+  <div class="step">
+    <strong>Step A (keep the second-order term).</strong> In ordinary calculus we would drop
+    <code>(dW)²</code>. We cannot: for Brownian motion it is first-order.
+  </div>
+  <div class="step">
+    <strong>Step B (substitute the working rule).</strong> Replace <code>(dW)²</code> by <code>dt</code>
+    (Lesson 012). The "smaller terms" involve <code>dW·dt</code> and <code>(dt)²</code>, which we drop.
+  </div>
+  <div class="step">
+    <strong>Step C (read off the result).</strong> What remains is Itô's lemma for a function of Brownian
+    motion:
+  </div>
+  <div class="formula"><strong>df = f′(W)·dW + ½ f″(W)·dt</strong></div>
+  <p>
+    Two pieces, each with a plain meaning. <code>f′(W)·dW</code> is the <strong>random part</strong> (its
+    proper name is the <em>diffusion</em> term): a position <code>f′(W)</code> riding the next Brownian
+    shock — and, by the previous section, a martingale that averages to zero. <code>½ f″(W)·dt</code> is
+    the <strong>new term</strong> ordinary calculus misses: a steady, non-random drift, present only when
+    the function is <em>curved</em> (<code>f″ ≠ 0</code>). Curvature plus wiggle manufactures drift out of
+    nothing. That sentence is the whole lesson.
+  </p>
+  <div class="callout">
+    <strong>Why curvature makes drift, intuitively.</strong> If <code>f</code> curves upward
+    (<code>f″ &gt; 0</code>, like a valley), then a wiggle up helps you <em>more</em> than the equal wiggle
+    down hurts you — the two do not cancel, and the leftover is a small <em>gain</em> each step. Averaged
+    over the ceaseless wiggling, that leftover becomes a genuine upward drift of size
+    <code>½ f″</code> per unit time. A straight line (<code>f″ = 0</code>) is symmetric — up and down
+    cancel exactly — so it gets no correction, and Itô's lemma collapses back to the ordinary chain rule.
+    (This is the continuous-time cousin of <strong>Jensen's inequality</strong> from Lesson 011:
+    the average of a curved function sits above the function of the average.)
+  </p>
+
+  <h2>Worked example 1: <code>d(W²)</code>, and last lesson's martingale falls out</h2>
+  <p>
+    Take the simplest curved function, <code>f(x) = x²</code>. Its slope is <code>f′(x) = 2x</code> and its
+    curvature is <code>f″(x) = 2</code> (constant). Drop these into Itô's lemma with input <code>W</code>:
+  </p>
+  <div class="formula">d(W²) = f′(W)·dW + ½ f″(W)·dt = 2W·dW + ½·2·dt = <strong>2W·dW + dt</strong></div>
+  <p>
+    Compare the naive answer. A first-year student applies the ordinary chain rule and writes
+    <code>d(W²) = 2W·dW</code>, full stop. They are missing the <code>+ dt</code> — a steady drift of
+    exactly <code>1</code> per unit time. Where does it come from? Nowhere but the squared wiggle:
+    <code>½·f″·(dW)² = ½·2·dt = dt</code>. Now "integrate" (add up the steps from <code>0</code> to
+    <code>t</code>):
+  </p>
+  <div class="formula">W<sub>t</sub>² = ∫₀ᵗ 2W<sub>s</sub> dW<sub>s</sub> + ∫₀ᵗ dt = (a martingale) + t</div>
+  <p>
+    The first piece is an Itô integral, so it is a martingale with mean <code>0</code>; the second piece is
+    just <code>t</code>. Taking expectations, <code>E[W<sub>t</sub>²] = 0 + t = t</code>, and rearranging,
+    <code>W<sub>t</sub>² − t</code> is a martingale. That is <em>exactly</em> the fact you proved by hand
+    at the end of Lesson 012 — but now it is not a special trick, it is a one-line consequence of Itô's
+    lemma. The leftover <code>t</code> that made <code>W²</code> a "fair game only after subtracting
+    <code>t</code>" <em>is</em> the quadratic variation, showing up as the <code>½ f″ dt</code> term.
+  </p>
+  <p>
+    You can watch this on screen. Below, we simulate many Brownian paths, square each one, and average.
+    The ordinary chain rule says <code>d(W²) = 2W dW</code> is a pure martingale, so the average should
+    stay flat at <code>0</code>. Instead it climbs — and it climbs along the line <code>y = t</code>,
+    which is exactly the accumulated <code>½ f″ dt = dt</code> correction. Slide the control to average
+    more paths and watch the empirical mean lock onto the drift line while the martingale part stays flat.
+  </p>
+
+  <div id="drift"></div>
+  <p class="viz-cap">
+    <strong>The correction term is a visible drift.</strong> For <code>f(W) = W²</code> we split each path
+    exactly into <code>W<sub>t</sub>² = (∫2W dW) + Σ(ΔW)²</code>. The
+    <span style="color:#9a6b1f;font-weight:600">Itô integral <code>∫2W dW</code></span> (what the naive
+    chain rule keeps) averages to <strong>0</strong> — a flat martingale. The
+    <span style="color:#0d5c4b;font-weight:600">mean of <code>W<sub>t</sub>²</code></span> climbs the
+    dashed line <code>y = t</code>. The entire rise is the second piece, the <code>(dW)² = dt</code> term
+    — i.e. <code>½ f″·t = t</code>. Slide <em>N</em> (number of paths averaged) from <code>2</code> to
+    <code>256</code>: more paths, tighter lock onto the theory.
+  </p>
+  <p class="takeaway">
+    Takeaway: <code>d(W²) = 2W dW + dt</code>. The <code>+ dt</code> is the Itô correction; it is why
+    <code>W² − t</code> (not <code>W²</code>) is the martingale.
+  </p>
+
+  <h2>Predict before you read on</h2>
+  <p>
+    Here is where it starts to pay rent. A stock price <code>S</code> is usually modelled so that its
+    <em>percentage</em> moves are Brownian: <code>dS = μS·dt + σS·dW</code>, where <code>μ</code> ("mu")
+    is the average growth rate and <code>σ</code> ("sigma") is the volatility (the size of the random
+    wiggle). Suppose you want the growth rate of the <strong>log price</strong> <code>log S</code> — the
+    thing that actually adds up over time. A naive chain rule gives <code>μ</code>. What does Itô's lemma
+    give?
+  </p>
+  <div id="predict1"></div>
+
+  <h2>The general Itô process, and the full lemma</h2>
+  <p>
+    To handle a stock we need a step up from bare Brownian motion. A real quantity has its own trend and
+    its own wiggle size, so we write a general <strong>Itô process</strong>:
+  </p>
+  <div class="formula">dX = a·dt + b·dW</div>
+  <p>
+    In words: over a tiny step, <code>X</code> drifts by <code>a·dt</code> (a steady pull; <code>a</code> is
+    the <strong>drift</strong>, the average trend per unit time) plus a random shock <code>b·dW</code>
+    (<code>b</code> is the <strong>diffusion</strong> or volatility, how big the wiggle is). Both
+    <code>a</code> and <code>b</code> may themselves depend on time and on <code>X</code>. Bare Brownian
+    motion is the special case <code>a = 0, b = 1</code>.
+  </p>
+  <p>
+    First we need this process's squared step, because that is what feeds the correction. Square
+    <code>dX</code> and apply the keep/drop table:
+  </p>
+  <div class="formula">(dX)² = (a·dt + b·dW)² = a²(dt)² + 2ab·dt·dW + b²(dW)² = <strong>b²·dt</strong></div>
+  <p>
+    (The first two terms are dropped; only <code>b²(dW)² = b²dt</code> survives.) Now Taylor-expand a
+    smooth function <code>f(t, X)</code> — of both time and the process — keeping first derivatives in
+    each and the one second-order term in <code>X</code> that will not vanish. Here <code>f<sub>t</sub></code>
+    means "how <code>f</code> changes with time directly," <code>f<sub>x</sub></code> "how it changes as
+    <code>X</code> changes," and <code>f<sub>xx</sub></code> its curvature in <code>X</code>:
+  </p>
+  <div class="step">
+    <strong>Expand:</strong> <code>df = f<sub>t</sub>·dt + f<sub>x</sub>·dX + ½ f<sub>xx</sub>·(dX)²</code>
+    &nbsp;(the <code>dt·dX</code> and <code>(dt)²</code> pieces are negligible).
+  </div>
+  <div class="step">
+    <strong>Substitute</strong> <code>dX = a·dt + b·dW</code> and <code>(dX)² = b²·dt</code>:
+    <code>df = f<sub>t</sub>·dt + f<sub>x</sub>(a·dt + b·dW) + ½ f<sub>xx</sub>·b²·dt</code>.
+  </div>
+  <div class="step">
+    <strong>Collect</strong> the <code>dt</code> terms and the <code>dW</code> term:
+  </div>
+  <div class="formula">
+    <strong>df = ( f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub> ) dt &nbsp;+&nbsp; b·f<sub>x</sub>·dW</strong>
+  </div>
+  <p>
+    This is Itô's lemma in full. Read the two brackets. The <code>dW</code> part,
+    <code>b·f<sub>x</sub>·dW</code>, is the random part (a martingale, zero average). The <code>dt</code>
+    bracket is the <strong>drift of <code>f</code></strong>, and it has three sources:
+    <code>f<sub>t</sub></code> (the function changing with time on its own),
+    <code>a·f<sub>x</sub></code> (the process's own drift carried through the slope), and the star of the
+    show, <code>½ b²·f<sub>xx</sub></code> — the <strong>Itô correction</strong>, curvature times squared
+    volatility. Set <code>a = 0, b = 1, f(t,X) = f(W)</code> and it collapses to the simpler
+    <code>df = f′ dW + ½ f″ dt</code> from before.
+  </p>
+
+  <h2>Worked example 2: <code>d(log S)</code> and the <code>−½σ²</code> drag</h2>
+  <p>
+    Now the example that runs through the rest of Q2. Model the stock as
+    <strong>geometric Brownian motion</strong> (GBM) — "geometric" because it is the <em>percentage</em>
+    moves that are Brownian, so the price stays positive:
+  </p>
+  <div class="formula">dS = μS·dt + σS·dW &nbsp;&nbsp;(so the drift is <code>a = μS</code>, the diffusion is <code>b = σS</code>)</div>
+  <p>
+    We want <code>f(S) = log S</code>, the log price — the quantity whose changes add up cleanly over
+    time. Re-warm the calculus we need: the derivative of <code>log S</code> is <code>1/S</code>, and the
+    derivative of <code>1/S</code> is <code>−1/S²</code>. So <code>f<sub>t</sub> = 0</code> (no direct time
+    dependence), <code>f<sub>x</sub> = 1/S</code>, and <code>f<sub>xx</sub> = −1/S²</code>. Feed these,
+    with <code>a = μS</code> and <code>b = σS</code>, into the drift bracket and the <code>dW</code> term,
+    in the slow lane:
+  </p>
+  <div class="step">
+    <strong>Drift.</strong> <code>f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub>
+    = 0 + μS·(1/S) + ½·(σS)²·(−1/S²)</code>. The stock price <code>S</code> cancels in each term:
+    <code>μS/S = μ</code> and <code>½·σ²S²·(−1/S²) = −½σ²</code>. Drift <code>= μ − ½σ²</code>.
+  </div>
+  <div class="step">
+    <strong>Random part.</strong> <code>b·f<sub>x</sub> = σS·(1/S) = σ</code>. So the <code>dW</code> term
+    is simply <code>σ·dW</code>.
+  </div>
+  <div class="formula"><strong>d(log S) = ( μ − ½σ² ) dt + σ·dW</strong></div>
+  <p>
+    Look hard at that drift. The log price does <em>not</em> grow at <code>μ</code>; it grows at
+    <code>μ − ½σ²</code>. Volatility is subtracted. This is the <strong>volatility drag</strong> (also
+    "variance drain"), and it is a direct consequence of the Itô correction — curvature of the
+    <code>log</code> function (it bends downward, <code>f″ &lt; 0</code>) turns the ceaseless wiggling into
+    a steady <em>penalty</em>. Integrating gives the closed form you saw previewed in the Lesson 012 lab:
+  </p>
+  <div class="formula">S<sub>t</sub> = S₀ · exp( (μ − ½σ²)·t + σ·W<sub>t</sub> )</div>
+  <p>
+    Here is the practical bite, and it confuses professionals. The <strong>average</strong> (mean) price
+    still grows at <code>μ</code>: <code>E[S<sub>t</sub>] = S₀·e<sup>μt</sup></code>. But the
+    <strong>typical</strong> price — the median, the one in the middle of all outcomes — grows only at
+    <code>μ − ½σ²</code>. The mean is dragged up by rare huge winners (a lognormal has a long right tail);
+    the path you are actually likely to live through grows slower. Crank up volatility and the gap widens.
+    Slide the control below: at <code>σ = 20%</code> the median still rises, but at high volatility the
+    median growth can go <em>negative</em> even while the mean keeps climbing at <code>μ</code>.
+  </p>
+
+  <div id="gbm"></div>
+  <p class="viz-cap">
+    <strong>The volatility drag on a stock.</strong> Geometric Brownian motion with growth
+    <code>μ = 10%</code>. The faint lines are sample price paths; the
+    <span style="color:#0d5c4b;font-weight:600">solid line is the mean</span> <code>E[S<sub>t</sub>] =
+    S₀e<sup>μt</sup></code> (it grows at <code>μ</code>, unaffected by <code>σ</code>); the
+    <span style="color:#b23a48;font-weight:600">dashed line is the median</span>, growing at
+    <code>μ − ½σ²</code>. Slide <em>σ</em> from <code>5%</code> to <code>80%</code>: as volatility rises,
+    the median falls away below the mean — most paths do <em>worse</em> than the average, and past
+    <code>σ ≈ 45%</code> the median drift turns negative. That gap is <code>½σ²</code>, the Itô correction.
+  </p>
+  <p class="takeaway">
+    Takeaway: <code>d(log S) = (μ − ½σ²)dt + σ dW</code>. Average growth is <code>μ</code>; typical
+    (median) growth is <code>μ − ½σ²</code>. The <code>½σ²</code> gap is pure Itô correction.
+  </p>
+
+  <h2>A pocketful of Itô one-liners</h2>
+  <p>
+    Every one of these is the same two moves — expand in a Taylor series, replace <code>(dW)²</code> by
+    <code>dt</code>. Keep this table; it is the working end of the whole lesson. (The last two use the
+    GBM process <code>dS = μS dt + σS dW</code>.)
+  </p>
+  <table>
+    <thead><tr><th>Function</th><th>Slope / curvature</th><th>Itô says <code>d(·)</code> =</th></tr></thead>
+    <tbody>
+      <tr><td><code>W²</code></td><td><code>f′=2W, f″=2</code></td><td><code>2W·dW + dt</code></td></tr>
+      <tr><td><code>W³</code></td><td><code>f′=3W², f″=6W</code></td><td><code>3W²·dW + 3W·dt</code></td></tr>
+      <tr><td><code>e<sup>W</sup></code></td><td><code>f′=f″=e<sup>W</sup></code></td><td><code>e<sup>W</sup>·dW + ½e<sup>W</sup>·dt</code></td></tr>
+      <tr><td><code>log S</code> (GBM)</td><td><code>f<sub>x</sub>=1/S, f<sub>xx</sub>=−1/S²</code></td><td><code>(μ − ½σ²)dt + σ·dW</code></td></tr>
+      <tr><td><code>S²</code> (GBM)</td><td><code>f<sub>x</sub>=2S, f<sub>xx</sub>=2</code></td><td><code>(2μ + σ²)S²·dt + 2σS²·dW</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    Notice the pattern in the last column: a <code>dW</code> term that always averages to zero, plus a
+    <code>dt</code> drift that is <em>bigger</em> than the naive chain rule whenever the function curves up
+    (<code>e<sup>W</sup></code>, <code>W²</code>, <code>S²</code>) and <em>smaller</em> when it curves down
+    (<code>log S</code>). The sign of the correction is the sign of the curvature. That is the one thing to
+    remember if you remember nothing else.
+  </p>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>What this buys you</h2>
+  <p>
+    Three payoffs and one honest warning, then the checks.
+  </p>
+  <ul>
+    <li><strong>Pricing PDEs come from here (Lesson 016).</strong> Apply Itô's lemma to an option's value
+      <code>V(t, S)</code>, then choose a hedge that cancels the random <code>dW</code> term. What is left
+      is a pure <code>dt</code> equation with no randomness — the <strong>Black–Scholes PDE</strong>. The
+      <code>½ b² f<sub>xx</sub></code> correction you just met <em>is</em> the second-derivative term in
+      that PDE. Every derivative-pricing equation is Itô's lemma plus a hedging argument.</li>
+    <li><strong>SDEs and simulation (Lesson 014).</strong> "<code>dS = μS dt + σS dW</code>" is a
+      <em>stochastic differential equation</em>; its solution is the <code>exp(…)</code> above, found by
+      applying Itô to <code>log S</code>. The same trick solves the Ornstein–Uhlenbeck (mean-reverting)
+      process next lesson. When you simulate GBM in code you use the solved form — with the
+      <code>−½σ²</code> in it, or your prices will drift wrong.</li>
+    <li><strong>It shows up in real P&amp;L.</strong> The volatility drag is why a leveraged or volatile
+      strategy can have a positive average return yet lose money for the typical investor; why rebalancing
+      a portfolio is not free; and why "compound annual growth" is below "average annual return." The
+      <code>−½σ²</code> is not exam trivia — it is a line item.</li>
+  </ul>
+  <div class="callout">
+    <strong>The warning (failure mode first, as always).</strong> Itô's lemma is exact <em>for the model
+    you feed it</em>. Feed it geometric Brownian motion and you inherit all of Brownian motion's lies from
+    Lesson <a href="0004-returns-stylized-facts.html">004</a>: constant volatility (real vol clusters and
+    jumps), Gaussian shocks (real tails are fat), and a single continuous <code>W</code> (real prices
+    gap). The formula will faithfully propagate a false model into a false price. Later units fix the model
+    — jumps (Lesson 018) add a term to Itô's lemma; stochastic volatility (Year 1 Q3) makes <code>σ</code>
+    itself random. Learn Itô as the exact machinery; never confuse "exact given the model" with "true."
+  </div>
+
+  <div class="trap">
+    <strong>Trap — the six ways this material is misused.</strong>
+    <strong>(1) Using the ordinary chain rule on a random input.</strong> Writing
+    <code>d(W²) = 2W·dW</code> drops the <code>+ dt</code>. Every function of a random process needs the
+    <code>½ f″ dt</code> term unless <code>f″ = 0</code>.
+    <strong>(2) Forgetting the drift of <code>log S</code> is <code>μ − ½σ²</code>, not <code>μ</code>.</strong>
+    This single sign-and-half error corrupts option prices, Monte-Carlo simulators, and Sharpe estimates.
+    <strong>(3) Keeping <code>dW·dt</code> or <code>(dt)²</code>.</strong> Only <code>(dW)² = dt</code>
+    survives; the other products are higher order and vanish.
+    <strong>(4) Evaluating the integrand at the right edge.</strong> The Itô integral takes the position at
+    the <em>start</em> of each step. Use the end (or midpoint) and you get a different calculus
+    (Stratonovich) with no martingale property — and, in finance, a look-ahead that does not exist.
+    <strong>(5) Thinking the <code>dW</code> term carries drift.</strong> It never does: <code>∫ … dW</code>
+    is always a martingale. All average trend lives in the <code>dt</code> bracket.
+    <strong>(6) Assuming mean = median for a stock.</strong> For lognormal prices the mean grows at
+    <code>μ</code> but the typical path grows at <code>μ − ½σ²</code>; quoting the mean as "what you'll
+    get" overstates the outcome.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+  <div id="quiz5"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Why do we <em>keep</em> <code>(dW)²</code> but drop <code>(dt)²</code> and <code>dW·dt</code> —
+      isn't that inconsistent?”</dt>
+    <dd>
+      It only looks inconsistent until you weigh them. Over a step of length <code>Δt</code>, a Brownian
+      move is about <code>√Δt</code>, so <code>(dW)²</code> is about <code>Δt</code> — the <em>same</em>
+      size as the terms we keep, so it must stay. But <code>(dt)²</code> is <code>Δt²</code> and
+      <code>dW·dt</code> is about <code>Δt·√Δt = Δt<sup>1.5</sup></code> — both shrink strictly faster than
+      <code>Δt</code>, so when you sum roughly <code>1/Δt</code> of them the totals still go to zero.
+      Consistency is precisely about size: keep anything of order <code>Δt</code>, drop anything smaller.
+    </dd>
+    <dt>“Isn't Itô's lemma just Taylor's theorem? Why the fancy name?”</dt>
+    <dd>
+      It <em>is</em> Taylor's theorem — with one substitution the ordinary version never makes. Ordinary
+      calculus stops at first order because the squared step is negligible; Itô keeps the second-order term
+      and replaces <code>(dW)²</code> by <code>dt</code>. The "lemma" packages that single rule so you do
+      not re-derive it each time. The surprising part is not the algebra — it is that a term everyone else
+      throws away creates a real, tradeable drift.
+    </dd>
+    <dt>“Why the <em>left</em> endpoint? Wouldn't the midpoint be more accurate?”</dt>
+    <dd>
+      The midpoint (the Stratonovich integral) <em>is</em> used in physics, and it obeys the ordinary chain
+      rule with no correction term. But it quietly peeks at the future: the midpoint value depends on the
+      move you are about to make. In finance that is forbidden — you size a position before the price moves,
+      not after. The left-endpoint (Itô) choice is the one where "position now × next shock" has mean zero,
+      which is why Itô integrals are martingales and why the whole risk-neutral pricing story (Lesson 015)
+      works. The correction term is the price you pay for honesty about time.
+    </dd>
+    <dt>“Do quants actually apply Itô's lemma by hand on the job?”</dt>
+    <dd>
+      Deriving a new model's dynamics, yes — on a whiteboard, exactly the two moves in this lesson.
+      Day-to-day you more often <em>use</em> its consequences: the <code>−½σ²</code> in every GBM simulator,
+      the second-derivative (“gamma”) term in a hedging P&amp;L, the Black–Scholes PDE. In interviews for
+      any derivatives-adjacent seat, "apply Itô to <code>log S</code>" and "why does <code>W²</code> need
+      the <code>−t</code>" are standard. The mechanics are the asset; the intuition (curvature × wiggle =
+      drift) is what separates a memoriser from someone who can price a new payoff.
+    </dd>
+    <dt>“If the mean price grows at <code>μ</code>, how can the typical path do worse? Where does the money
+      go?”</dt>
+    <dd>
+      Nowhere — it is concentrated. Lognormal outcomes are lopsided: most paths land a bit below the
+      starting trend, while a few land enormously above. The average is propped up entirely by those rare
+      giant winners, so it exceeds the median. No money is lost from the average; it is just that "average"
+      and "what you'll most likely experience" are different questions, and the gap between them is
+      <code>½σ²</code> per unit time. Higher volatility, wider gap.
+    </dd>
+  </dl>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    <strong>Shreve, <em>Stochastic Calculus for Finance II</em>, Chapter 4</strong> (see
+    <a href="../RESOURCES.md">RESOURCES.md</a>) — "Stochastic Calculus." Read §4.2 (the Itô integral and
+    why it is a martingale — the left-endpoint construction you met here), §4.3 (Itô–Doeblin formula for a
+    function of Brownian motion — our <code>df = f′dW + ½f″dt</code>), and §4.4 (the formula for a general
+    Itô process, and the <code>d(log S)</code> example done exactly as above). §4.4's geometric-Brownian
+    example is the paragraph to read twice.
+  </p>
+  <p>
+    If Shreve is terse, Baxter &amp; Rennie, <em>Financial Calculus</em> (Ch. 3) gives the same lemma with
+    less measure-theoretic scaffolding, and Wilmott's <em>Paul Wilmott Introduces Quantitative Finance</em>
+    (Ch. on Itô) is the most hand-holding derivation in print. Both are in
+    <a href="../RESOURCES.md">RESOURCES.md</a>.
+  </p>
+  <p>
+    <strong>Reference sheet (keep this one):</strong>
+    <a href="../reference/ito-lemma.html">The Itô integral &amp; Itô's lemma — the working rules</a>.
+    Printable, and the page Lessons 014–020 will link to instead of re-reading this.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0013-ito-lemma.ipynb"><code>labs/0013-ito-lemma.ipynb</code></a> — verify Itô's lemma
+    numerically: confirm <code>d(W²) = 2W dW + dt</code> by measuring the drift the naive chain rule
+    misses, apply the lemma to <code>d(log S)</code> and <code>d(S²)</code> for geometric Brownian motion
+    and match the simulated drifts to <code>μ − ½σ²</code> and <code>2μ + σ²</code>, and see the
+    mean-versus-median volatility drag with your own numbers. A unit is done only when its lab runs.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) Write the ordinary chain rule as a
+    two-term Taylor expansion and say which term ordinary calculus drops and why. (2) State Itô's lemma for
+    <code>f(W)</code> and name each of the two terms. (3) Compute <code>d(W²)</code> and explain how
+    <code>W² − t</code> being a martingale falls out. (4) For <code>dS = μS dt + σS dW</code>, derive the
+    drift of <code>log S</code> — every step — and say why it is <code>μ − ½σ²</code> not <code>μ</code>.
+    (5) Why is any <code>∫ … dW</code> a martingale? (6) Curvature up versus curvature down: which way does
+    the Itô correction push the drift? Re-read anything shaky before the lab.
+  </div>
+
+  <div class="ask-teacher">
+    Stuck on the Taylor step, want the general Itô formula drilled on a fresh function, or curious how the
+    <code>½ f″</code> term becomes the Black–Scholes PDE? Ask your teacher. Paste your teach-back for
+    grading — and if you can define these terms cold, they go into <a href="../GLOSSARY.md">GLOSSARY.md</a>.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Itô integral <code>∫H dW</code></strong> — the limit of "position (set at the <em>start</em>
+      of each step) × next Brownian shock," summed. Left-endpoint sizing makes every term average to zero,
+      so the integral is a martingale (no drift).</li>
+    <li><strong>Itô's lemma (for <code>f(W)</code>)</strong> — <code>df = f′(W)·dW + ½ f″(W)·dt</code>; the
+      chain rule for a function of Brownian motion, with an extra curvature-driven drift term.</li>
+    <li><strong>Itô process</strong> — <code>dX = a·dt + b·dW</code>: a drift <code>a</code> plus a random
+      part of size <code>b</code>. Its squared step is <code>(dX)² = b²·dt</code>.</li>
+    <li><strong>Itô's lemma (general)</strong> —
+      <code>df = (f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub>) dt + b·f<sub>x</sub>·dW</code>.
+      The <code>dW</code> term is a martingale; all drift is in the <code>dt</code> bracket.</li>
+    <li><strong>Itô correction</strong> — the <code>½ b² f<sub>xx</sub></code> (or <code>½ f″</code>) drift
+      term; its sign is the sign of the curvature. Zero for linear functions.</li>
+    <li><strong>Geometric Brownian motion (GBM)</strong> — <code>dS = μS·dt + σS·dW</code>, solved to
+      <code>S<sub>t</sub> = S₀·exp((μ − ½σ²)t + σW<sub>t</sub>)</code>; the standard positive-price model.</li>
+    <li><strong>Volatility drag (variance drain)</strong> — the <code>−½σ²</code> gap between a stock's
+      average growth <code>μ</code> and its typical (median) growth <code>μ − ½σ²</code>.</li>
+    <li><strong>Drift / diffusion</strong> — the <code>dt</code> part (average trend) and the <code>dW</code>
+      part (random wiggle) of a process.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    Lesson 012 built the object; today you learned to <em>compute</em> with it. <strong>Itô's lemma</strong>
+    is the chain rule for random functions: expand in a Taylor series, keep the second-order term because
+    <code>(dW)² = dt</code>, and out comes an extra drift <code>½ f″ dt</code> that ordinary calculus never
+    sees. That one term re-derives Lesson 012's <code>W² − t</code> martingale in a line, and produces the
+    <code>−½σ²</code> volatility drag that governs how real prices grow.
+  </p>
+  <p>
+    Next, Lesson 014 treats <code>dS = μS dt + σS dW</code> as a <strong>stochastic differential
+    equation</strong> and solves it (and the mean-reverting Ornstein–Uhlenbeck process) using exactly the
+    Itô trick you just learned. Lesson 015 changes measure (Girsanov) and finally explains why the tree's
+    <code>p* = ½</code> back in Lesson 011 was a legitimate price. Lesson 016 hedges away the <code>dW</code>
+    term to turn Itô's lemma into the <strong>Black–Scholes PDE</strong>. By Lesson 020 you price and hedge
+    a European option three independent ways — and every one of them starts with the formula on this page.
+    Run the lab first: measure the drift the naive chain rule misses, and see <code>μ − ½σ²</code> appear in
+    your own simulated prices.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0012-brownian-motion.html">← Lesson 012 (Random walks &amp; Brownian motion)</a></li>
+      <li><a href="../reference/ito-lemma.html">Reference: the Itô integral &amp; Itô's lemma</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 014 — SDEs: GBM &amp; Ornstein–Uhlenbeck →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/ito-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 13, count: 4 });
+
+  Ito.mountDrift(document.getElementById("drift"), { k: 6 });
+  Ito.mountGBM(document.getElementById("gbm"), { sigmaPct: 20 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "A stock follows dS = \u03bcS\u00b7dt + \u03c3S\u00b7dW (\u03bc = average growth, \u03c3 = volatility). Applying It\u00f4's lemma, the DRIFT of the log price log S is:",
+    options: [
+      { label: "\u03bc \u2014 same as the naive chain rule", value: "mu" },
+      { label: "\u03bc \u2212 \u00bd\u03c3\u00b2 \u2014 growth minus a vol drag", value: "musig" },
+      { label: "\u03bc + \u00bd\u03c3\u00b2 \u2014 growth plus a vol boost", value: "plus" },
+      { label: "\u03c3\u00b2 \u2212 \u00bd\u03bc \u2014 mostly the volatility", value: "sig" }
+    ],
+    correct: "musig",
+    reveal: "\u03bc \u2212 \u00bd\u03c3\u00b2. The log function curves DOWN (f'' = \u22121/S\u00b2 < 0), so the It\u00f4 correction \u00bd b\u00b2 f_xx = \u00bd(\u03c3S)\u00b2(\u22121/S\u00b2) = \u2212\u00bd\u03c3\u00b2 is a PENALTY. The naive chain rule gives \u03bc; It\u00f4 subtracts \u00bd\u03c3\u00b2. That is the volatility drag: the mean price still grows at \u03bc, but the typical (median) path grows only at \u03bc \u2212 \u00bd\u03c3\u00b2."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: what extra term does It\u00f4's lemma add to the ordinary chain rule, where does it come from, and why does d(log S) drift at \u03bc \u2212 \u00bd\u03c3\u00b2 instead of \u03bc?",
+    points: [
+      "Ordinary chain rule = first Taylor term f'\u00b7dx; it drops (dx)\u00b2 as negligible",
+      "For W the squared step is NOT negligible: (dW)\u00b2 = dt (Lesson 012)",
+      "So keep the 2nd-order term: df = f'\u00b7dW + \u00bd f''\u00b7(dW)\u00b2, then (dW)\u00b2 \u2192 dt",
+      "It\u00f4's lemma: df = f'(W)\u00b7dW + \u00bd f''(W)\u00b7dt \u2014 the \u00bd f'' dt is the new drift",
+      "The dW part is a martingale (mean 0); all drift sits in the dt bracket",
+      "For log S with dS = \u03bcS dt + \u03c3S dW: f_x = 1/S, f_xx = \u22121/S\u00b2",
+      "Drift = \u03bcS\u00b7(1/S) + \u00bd(\u03c3S)\u00b2\u00b7(\u22121/S\u00b2) = \u03bc \u2212 \u00bd\u03c3\u00b2",
+      "Curvature DOWN \u21d2 correction is a penalty \u21d2 median grows slower than the mean"
+    ],
+    model: "Ordinary calculus keeps only the first Taylor term, df = f'(x)\u00b7dx, because for a smooth path the squared step (dx)\u00b2 is proportional to (dt)\u00b2 and is negligible. Brownian motion breaks that: a step \u0394W is about \u221a\u0394t, so (dW)\u00b2 is about \u0394t \u2014 the SAME order as the terms we keep, and it sums to t (that is [W]_t = t from Lesson 012). So we must keep the second-order Taylor term and substitute (dW)\u00b2 = dt. That gives It\u00f4's lemma: df = f'(W)\u00b7dW + \u00bd f''(W)\u00b7dt. The first piece is a position f'(W) riding the next shock \u2014 an It\u00f4 integral, hence a martingale with zero average \u2014 so it carries no drift. The whole extra drift is the \u00bd f''(W) dt term, and it exists only because f is curved: a wiggle up and an equal wiggle down do not cancel when the function bends. For a stock S with dS = \u03bcS dt + \u03c3S dW, apply the general lemma to f = log S. Its derivatives are f_x = 1/S and f_xx = \u22121/S\u00b2, and the process has a = \u03bcS, b = \u03c3S, so the drift is \u03bcS\u00b7(1/S) + \u00bd(\u03c3S)\u00b2\u00b7(\u22121/S\u00b2) = \u03bc \u2212 \u00bd\u03c3\u00b2. The log curves downward, so its correction is a penalty: the average price still grows at \u03bc, but the typical (median) path grows only at \u03bc \u2212 \u00bd\u03c3\u00b2 \u2014 the volatility drag."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "It\u00f4's lemma has an extra term the ordinary chain rule lacks because:",
+    options: [
+      { label: "(dW)\u00b2 = dt is first-order, not junk", value: "a" },
+      { label: "Brownian motion has a nonzero mean", value: "b" },
+      { label: "the function must always be convex", value: "c" },
+      { label: "the time step dt is taken negative", value: "d" }
+    ],
+    correct: "a",
+    explain: "For a smooth path (\u0394x)\u00b2 is negligible; for Brownian motion (\u0394W)\u00b2 \u2248 \u0394t is the same order as the kept terms, so the second-order Taylor term survives as \u00bd f'' dt."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "For f(W) = W\u00b2, It\u00f4's lemma gives d(W\u00b2) equal to:",
+    options: [
+      { label: "2W\u00b7dW + dt \u2014 has a drift", value: "a" },
+      { label: "2W\u00b7dW \u2014 the naive one", value: "b" },
+      { label: "W\u00b7dW + \u00bd dt \u2014 all halved", value: "c" },
+      { label: "2\u00b7dW + 2W\u00b7dt \u2014 swapped", value: "d" }
+    ],
+    correct: "a",
+    explain: "f' = 2W, f'' = 2, so d(W\u00b2) = 2W dW + \u00bd\u00b72\u00b7dt = 2W dW + dt. Integrating shows W\u00b2 \u2212 t is the martingale (Lesson 012)."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Any It\u00f4 integral \u222b H dW is a martingale (zero drift) because H is taken at the:",
+    options: [
+      { label: "start of each step, before the shock", value: "a" },
+      { label: "end of each step, after the shock", value: "b" },
+      { label: "midpoint, averaging the two ends", value: "c" },
+      { label: "largest value reached in the step", value: "d" }
+    ],
+    correct: "a",
+    explain: "Left-endpoint sizing means H is known and the next shock \u0394W is fresh with mean 0, so each term H\u00b7E[\u0394W] = 0. You bet before the coin is flipped."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "For GBM dS = \u03bcS dt + \u03c3S dW, the drift of the log price log S is:",
+    options: [
+      { label: "\u03bc \u2212 \u00bd\u03c3\u00b2 \u2014 a downward drag", value: "a" },
+      { label: "\u03bc exactly \u2014 no correction", value: "b" },
+      { label: "\u03bc + \u00bd\u03c3\u00b2 \u2014 an upward push", value: "c" },
+      { label: "\u00bd\u03c3\u00b2 \u2212 \u03bc \u2014 mostly the vol", value: "d" }
+    ],
+    correct: "a",
+    explain: "f_x = 1/S, f_xx = \u22121/S\u00b2, so drift = \u03bcS(1/S) + \u00bd(\u03c3S)\u00b2(\u22121/S\u00b2) = \u03bc \u2212 \u00bd\u03c3\u00b2. The log curves down, so the correction is a penalty (volatility drag)."
+  });
+
+  Quiz.mount(document.getElementById("quiz5"), {
+    question: "The It\u00f4 correction \u00bd f''(\u00b7) dt vanishes exactly when the function is:",
+    options: [
+      { label: "linear \u2014 its curvature f'' is 0", value: "a" },
+      { label: "convex \u2014 its curvature f'' > 0", value: "b" },
+      { label: "concave \u2014 its curvature f'' < 0", value: "c" },
+      { label: "positive \u2014 its value f stays > 0", value: "d" }
+    ],
+    correct: "a",
+    explain: "The correction is \u00bd f'' dt, so it is zero only when f'' = 0, i.e. f is a straight line. Then It\u00f4's lemma collapses to the ordinary chain rule."
+  });
+</script>
+</body>
+</html>

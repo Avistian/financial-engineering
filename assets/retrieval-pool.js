@@ -610,6 +610,68 @@
       ],
       correct: "a",
       explain: "Since [W]_t = t, the squared increment (dW)\u00b2 accumulates at rate 1: (dW)\u00b2 = dt. Only dW\u00b7dt and (dt)\u00b2 are dropped. This surviving term is the extra piece in It\u00f4's lemma."
+    },
+
+    // ---- L013: the Itô integral & Itô's lemma ----
+    {
+      id: "l013-lemma", lesson: 13, quarter: "Q2", concept: "ito-lemma",
+      question: "It\u00f4's lemma for f(W) says df equals:",
+      options: [
+        { label: "f'(W)\u00b7dW + \u00bd f''(W)\u00b7dt", value: "a" },
+        { label: "f'(W)\u00b7dW, as in calculus", value: "b" },
+        { label: "\u00bd f''(W)\u00b7dW + f'(W)\u00b7dt", value: "c" },
+        { label: "f'(W)\u00b7dt + \u00bd f''(W)\u00b7dW", value: "d" }
+      ],
+      correct: "a",
+      explain: "Taylor-expand and substitute (dW)\u00b2 = dt: the surviving second-order term \u00bd f''(W)\u00b7dt is the drift the ordinary chain rule misses."
+    },
+    {
+      id: "l013-dw2", lesson: 13, quarter: "Q2", concept: "ito-dw2", misconception: true,
+      question: "Applying It\u00f4's lemma to f(W) = W\u00b2 gives d(W\u00b2) =",
+      options: [
+        { label: "2W\u00b7dW + dt \u2014 has a drift", value: "a" },
+        { label: "2W\u00b7dW \u2014 the naive one", value: "b" },
+        { label: "W\u00b7dW + \u00bd dt \u2014 all halved", value: "c" },
+        { label: "2\u00b7dW + 2W\u00b7dt \u2014 swapped", value: "d" }
+      ],
+      correct: "a",
+      explain: "f'=2W, f''=2, so d(W\u00b2)=2W dW + \u00bd\u00b72\u00b7dt = 2W dW + dt. That +dt is why W\u00b2 \u2212 t (not W\u00b2) is the martingale."
+    },
+    {
+      id: "l013-ito-integral", lesson: 13, quarter: "Q2", concept: "ito-integral",
+      question: "An It\u00f4 integral \u222bH dW is a martingale (zero drift) because H is taken at each step's:",
+      options: [
+        { label: "start, before the shock is seen", value: "a" },
+        { label: "end, after the shock is seen", value: "b" },
+        { label: "midpoint, averaging both ends", value: "c" },
+        { label: "peak, the largest value hit", value: "d" }
+      ],
+      correct: "a",
+      explain: "Left-endpoint (adapted) sizing: H is known and the next increment is fresh with mean 0, so every term H\u00b7E[\u0394W]=0. You bet before the coin is flipped."
+    },
+    {
+      id: "l013-logdrift", lesson: 13, quarter: "Q2", concept: "gbm-logdrift", misconception: true,
+      question: "For GBM dS = \u03bcS dt + \u03c3S dW, the drift of log S is:",
+      options: [
+        { label: "\u03bc \u2212 \u00bd\u03c3\u00b2 \u2014 a vol drag", value: "a" },
+        { label: "\u03bc exactly \u2014 no change", value: "b" },
+        { label: "\u03bc + \u00bd\u03c3\u00b2 \u2014 a vol boost", value: "c" },
+        { label: "\u00bd\u03c3\u00b2 \u2212 \u03bc \u2014 mostly vol", value: "d" }
+      ],
+      correct: "a",
+      explain: "log curves down (f''=\u22121/S\u00b2), so the It\u00f4 correction is a penalty: \u03bcS(1/S) + \u00bd(\u03c3S)\u00b2(\u22121/S\u00b2) = \u03bc \u2212 \u00bd\u03c3\u00b2. The mean price still grows at \u03bc, the median at \u03bc \u2212 \u00bd\u03c3\u00b2."
+    },
+    {
+      id: "l013-correction-sign", lesson: 13, quarter: "Q2", concept: "ito-correction",
+      question: "The It\u00f4 correction \u00bd f''\u00b7dt vanishes exactly when the function is:",
+      options: [
+        { label: "linear \u2014 its curvature is zero", value: "a" },
+        { label: "convex \u2014 its curvature is up", value: "b" },
+        { label: "concave \u2014 its curvature is down", value: "c" },
+        { label: "positive \u2014 its value stays up", value: "d" }
+      ],
+      correct: "a",
+      explain: "The correction is \u00bd f''\u00b7dt, zero only when f''=0 (a straight line). Then It\u00f4's lemma collapses to the ordinary chain rule."
     }
   ];
 })(window);

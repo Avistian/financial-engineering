@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "lessons": [
     {
       "id": 1,
@@ -126,6 +126,16 @@
       "checkpoint": false,
       "labPath": "labs/0012-brownian-motion.ipynb",
       "title": "Random Walks & Brownian Motion",
+      "published": true
+    },
+    {
+      "id": 13,
+      "slug": "0013-ito-lemma",
+      "year": 1,
+      "quarter": 2,
+      "checkpoint": false,
+      "labPath": "labs/0013-ito-lemma.ipynb",
+      "title": "The Itô Integral & Itô's Lemma",
       "published": true
     }
   ]

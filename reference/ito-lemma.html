@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — The Itô Integral &amp; Itô's Lemma</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    code { font-size: 0.85em; }
+  </style>
+</head>
+<body>
+<article>
+  <h1>The Itô Integral &amp; Itô's Lemma</h1>
+  <p class="subtitle">Reference · print-friendly cheat sheet · Units 013–020 (Year 1 Q2)</p>
+
+  <p>
+    The chain rule for functions of a random process. Taught in
+    <a href="../lessons/0013-ito-lemma.html">Lesson 013</a>; source Shreve II Ch. 4. Builds directly on
+    <code>(dW)² = dt</code> from <a href="brownian-motion.html">Lesson 012</a>.
+  </p>
+
+  <h2>The keep/drop rule (the whole of Itô calculus)</h2>
+  <table>
+    <thead><tr><th>Product</th><th>Size over Δt</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>(dW)²</code></td><td><code>Δt</code></td><td><strong>keep → dt</strong></td></tr>
+      <tr><td><code>dW·dt</code></td><td><code>Δt<sup>1.5</sup></code></td><td>drop (→ 0)</td></tr>
+      <tr><td><code>(dt)²</code></td><td><code>Δt²</code></td><td>drop (→ 0)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The Itô integral</h2>
+  <div class="formula">∫₀ᵗ H<sub>s</sub> dW<sub>s</sub> = lim Σ<sub>i</sub> H<sub>t<sub>i-1</sub></sub>·(W<sub>t<sub>i</sub></sub> − W<sub>t<sub>i-1</sub></sub>)</div>
+  <p>
+    Position <code>H</code> is taken at the <strong>left endpoint</strong> <code>t<sub>i-1</sub></code> —
+    set <em>before</em> the shock (adapted / non-anticipating). Each term
+    <code>H<sub>t<sub>i-1</sub></sub>·ΔW<sub>i</sub></code> has conditional mean <code>0</code> (known
+    <code>H</code> × fresh mean-0 shock), so:
+  </p>
+  <div class="callout">
+    <strong>Every <code>∫ … dW</code> is a martingale — it has zero drift.</strong> All average trend in
+    Itô's lemma lives in the <code>dt</code> term, never the <code>dW</code> term.
+  </div>
+
+  <h2>Itô's lemma</h2>
+  <table>
+    <thead><tr><th>Case</th><th>Formula</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Function of Brownian motion <code>f(W)</code></td>
+        <td><code>df = f′(W)·dW + ½ f″(W)·dt</code></td>
+      </tr>
+      <tr>
+        <td>Itô process <code>dX = a·dt + b·dW</code>, then <code>(dX)² = b²·dt</code></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Function of an Itô process <code>f(t, X)</code></td>
+        <td><code>df = ( f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub> ) dt + b·f<sub>x</sub>·dW</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Recipe:</strong> Taylor-expand → keep the one second-order term in <code>X</code> → substitute
+    <code>(dX)² = b² dt</code> → collect <code>dt</code> and <code>dW</code>. The
+    <strong>Itô correction</strong> is <code>½ b² f<sub>xx</sub></code>: its sign is the sign of the
+    curvature, and it is zero for linear <code>f</code> (then Itô = ordinary chain rule).
+  </p>
+
+  <h2>Worked one-liners</h2>
+  <table>
+    <thead><tr><th>Function</th><th>Derivatives</th><th><code>d(·)</code></th></tr></thead>
+    <tbody>
+      <tr><td><code>W²</code></td><td><code>2W, 2</code></td><td><code>2W·dW + dt</code> &nbsp;⇒ <code>W²−t</code> is a martingale</td></tr>
+      <tr><td><code>W³</code></td><td><code>3W², 6W</code></td><td><code>3W²·dW + 3W·dt</code></td></tr>
+      <tr><td><code>e<sup>W</sup></code></td><td><code>e<sup>W</sup>, e<sup>W</sup></code></td><td><code>e<sup>W</sup>·dW + ½e<sup>W</sup>·dt</code></td></tr>
+      <tr><td><code>log S</code> (GBM)</td><td><code>1/S, −1/S²</code></td><td><code>(μ − ½σ²)dt + σ·dW</code></td></tr>
+      <tr><td><code>S²</code> (GBM)</td><td><code>2S, 2</code></td><td><code>(2μ + σ²)S²·dt + 2σS²·dW</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Geometric Brownian motion (the workhorse model)</h2>
+  <div class="formula">dS = μS·dt + σS·dW &nbsp;⟹&nbsp; S<sub>t</sub> = S₀·exp( (μ − ½σ²)·t + σ·W<sub>t</sub> )</div>
+  <table>
+    <thead><tr><th>Quantity</th><th>Grows at</th><th>Value at t</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Mean</strong> <code>E[S<sub>t</sub>]</code></td><td><code>μ</code></td><td><code>S₀·e<sup>μt</sup></code></td></tr>
+      <tr><td><strong>Median</strong> (typical path)</td><td><code>μ − ½σ²</code></td><td><code>S₀·e<sup>(μ−½σ²)t</sup></code></td></tr>
+      <tr><td><strong>log S</strong> drift</td><td><code>μ − ½σ²</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The <code>½σ²</code> gap is the <strong>volatility drag</strong> (variance drain): mean growth is
+    <code>μ</code>, but the path you are likely to live through grows at <code>μ − ½σ²</code>. At
+    <code>σ &gt; √(2μ)</code> the median growth is negative even though the mean still rises.
+  </p>
+
+  <div class="trap">
+    <strong>Traps.</strong> (1) Using the ordinary chain rule — always add <code>½ f″ dt</code> unless
+    <code>f″ = 0</code>. (2) <code>log S</code> drifts at <code>μ − ½σ²</code>, not <code>μ</code>.
+    (3) Keeping <code>dW·dt</code> or <code>(dt)²</code> — only <code>(dW)² = dt</code> survives.
+    (4) Right-endpoint integrand — Itô uses the <em>left</em> edge; the end/midpoint is Stratonovich (no
+    martingale, a look-ahead in finance). (5) Expecting drift in the <code>dW</code> term — it is always a
+    martingale. (6) Quoting the mean as "what you'll get" — for lognormal prices mean &gt; median.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="../lessons/0013-ito-lemma.html">Lesson 013</a></li>
+      <li><a href="../labs/0013-ito-lemma.ipynb">Lab 013</a></li>
+      <li><a href="brownian-motion.html">Reference: Brownian motion &amp; quadratic variation</a></li>
+      <li><a href="conditional-expectation.html">Reference: conditional expectation &amp; martingales</a></li>
+      <li><a href="curriculum.html">Curriculum</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

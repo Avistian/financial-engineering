@@ -53,3 +53,10 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Quadratic variation ([W]_t = t) | — | — | 012 |
 | (dW)² = dt heuristic | — | — | 012 |
 | Nowhere differentiable | — | — | 012 |
+| Itô integral (∫H dW) | — | — | 013 |
+| Itô's lemma | — | — | 013 |
+| Itô process (dX = a dt + b dW) | — | — | 013 |
+| Itô correction (½ b² f_xx) | — | — | 013 |
+| Geometric Brownian motion (GBM) | — | — | 013 |
+| Volatility drag (−½σ²) | — | — | 013 |
+| Drift / diffusion | — | — | 013 |

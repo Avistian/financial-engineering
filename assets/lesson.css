@@ -671,6 +671,31 @@ dl.objections dd {
 }
 .bm-slider, .qv-slider { flex: 1; }
 
+/* Itô's lemma widgets (Lesson 013): the correction-as-drift plot and the GBM drag plot */
+.ito-viz, .gbm-viz { margin: 1.25rem 0; }
+.ito-canvas, .gbm-canvas {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fffdf8;
+}
+.ito-readout, .gbm-readout {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  min-height: 3.4rem;
+}
+.ito-readout strong, .gbm-readout strong { color: var(--ink); }
+.ito-note, .gbm-note { color: var(--accent); font-weight: 600; }
+.ito-controls, .gbm-controls {
+  display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;
+}
+.ito-slider-label, .gbm-slider-label {
+  font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted);
+  white-space: nowrap; min-width: 8.5rem;
+}
+.ito-slider, .gbm-slider { flex: 1; }
+
 /* Small tables of tree outcomes: keep them readable on a phone */
 table.tight { font-size: 0.8rem; }
 table.tight td, table.tight th { padding: 0.3rem 0.4rem; }

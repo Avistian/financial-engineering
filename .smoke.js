@@ -58,6 +58,7 @@ const files = [
   "assets/tree-viz.js",
   "assets/projection-viz.js",
   "assets/bm-viz.js",
+  "assets/ito-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -289,6 +290,57 @@ trap("BM.mountPaths + slide", () => {
   if (!(w.wFine.length === 513 && w.wFine[0] === 0)) throw new Error("fine path should have 513 points starting at 0");
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "1"; i.dispatch("input"); i.value = "9"; i.dispatch("input"); });
+});
+
+trap("Ito drift geometry stays inside the canvas (every N)", () => {
+  for (let k = 1; k <= 8; k++) {
+    const canvases = withRecordedCanvas(() => {
+      window.Ito.mountDrift(makeEl("div"), { k: k });
+    });
+    assertInBounds(canvases[0], "ItoDrift[k=" + k + "]");
+  }
+});
+
+trap("Ito GBM geometry stays inside the canvas (every sigma)", () => {
+  for (let s = 5; s <= 80; s += 5) {
+    const canvases = withRecordedCanvas(() => {
+      window.Ito.mountGBM(makeEl("div"), { sigmaPct: s });
+    });
+    assertInBounds(canvases[0], "ItoGBM[sigma=" + s + "]");
+  }
+});
+
+trap("Ito drift numbers: E[W^2] -> t = 1, E[integral 2W dW] -> 0 (martingale)", () => {
+  const el = makeEl("div");
+  const w = window.Ito.mountDrift(el, { k: 8 });
+  const N = w.NPATHS;
+  // the whole rise of E[W^2] is the (dW)^2=dt drift; the Ito integral stays a martingale at 0
+  if (!(Math.abs(w.meanW2(N) - 1.0) < 0.15)) throw new Error("meanW2(all) should be ~1 = t, got " + w.meanW2(N));
+  if (!(Math.abs(w.meanIto(N)) < 0.15)) throw new Error("meanIto(all) should be ~0 (martingale), got " + w.meanIto(N));
+  // decomposition: E[W^2] - E[∫2W dW] must equal the quadratic-variation drift (~t=1)
+  if (!(Math.abs((w.meanW2(N) - w.meanIto(N)) - 1.0) < 0.05)) {
+    throw new Error("E[W^2] - E[∫2W dW] should be the QV drift ~1, got " + (w.meanW2(N) - w.meanIto(N)));
+  }
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "1"; i.dispatch("input"); i.value = "8"; i.dispatch("input"); });
+});
+
+trap("Ito GBM numbers: median drift = mu - 1/2 sigma^2 decreases with sigma; mean fixed", () => {
+  const el = makeEl("div");
+  const w = window.Ito.mountGBM(el, { sigmaPct: 20 });
+  const near = (a, b) => Math.abs(a - b) < 1e-9;
+  if (!near(w.meanRate, 0.10)) throw new Error("meanRate should be mu = 0.10, got " + w.meanRate);
+  if (!near(w.medianRate(0.2), 0.10 - 0.5 * 0.04)) throw new Error("medianRate(0.2) wrong: " + w.medianRate(0.2));
+  if (!near(w.drag(0.4), 0.08)) throw new Error("drag(0.4) should be 0.08, got " + w.drag(0.4));
+  // median growth strictly falls as volatility rises (the whole point of the drag)
+  let prev = 1e9;
+  for (let s = 5; s <= 80; s += 5) {
+    const r = w.medianRate(s / 100);
+    if (!(r < prev)) throw new Error("median drift must decrease with sigma at sigma=" + s);
+    prev = r;
+  }
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "5"; i.dispatch("input"); i.value = "80"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

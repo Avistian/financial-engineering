@@ -103,6 +103,11 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
   the martingale property (and `E[W_T²]=T`); then measure the quadratic variation — `[W]_t → t` for
   Brownian motion versus `→ 0` for a smooth curve — and watch the first-order path length explode, the
   numerical face of "continuous but nowhere differentiable" (Lesson 012).
+- `0013-ito-lemma.ipynb` — *verify Itô's lemma numerically*: simulate GBM with the `−½σ²` correction;
+  confirm `d(W²) = 2W dW + dt` (the left-endpoint Itô integral `∫2W dW` is a martingale, the missing
+  drift is the quadratic variation `→ t`, and the identity `W_T² = ∫2W dW + Σ(ΔW)²` holds exactly); show
+  `log S` drifts at `μ − ½σ²` (not `μ`) and `d(S²)` grows at `2μ + σ²`; see the mean-vs-median volatility
+  drag; and confirm `E[e^{W_t}] = e^{t/2}` — the `½f″dt` correction for a third function (Lesson 013).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 
