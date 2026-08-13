@@ -94,6 +94,29 @@
   `.cursor/rules/lesson-plain-language.mdc`. Applies to **all future lessons** (and to tutor chat
   when teaching from this curriculum).
 
+## Standing decision — "even more basic" (still in math terms) (from 2026-08-13)
+- **Feedback:** the learner had difficulty understanding Lessons 012 and 013 and asked to make lessons
+  "even more basic (still in math terms though)." So this is *not* a request to drop the math — it is a
+  request for the math to be **grounded harder** before it is used. Clarity, not length, is the lever.
+- **Two required devices on every math-heavy lesson (retro-fit where the learner revisits):**
+  1. **Say-it-in-words box (`.aloud`)** right after every load-bearing equation — the equation read aloud
+     as one plain sentence, symbol by symbol, no new notation.
+  2. **With-real-numbers box (`.numplay`)** — plug in actual small numbers and compute a step by hand so
+     the formula *does something* concrete before it is trusted abstractly.
+- Both are lesson-local CSS classes (copy from Lesson 014's `<style>`). First applied in **Lesson 014**;
+  retro-fitted to **Lesson 013** (three boxes added: simple lemma, `d(W²)` numbers, general lemma) since
+  the learner said they will revisit 013.
+- Encoded in `.agents/skills/lesson-pedagogy/SKILL.md` ("Even more basic"). Applies to all future
+  math-heavy lessons. Does **not** weaken retrieval/quiz rigor.
+
+## Length A/B — provisional resolution (2026-08-13)
+- The learner did not pick a KB target; instead they said 012/013 were hard to *understand*. Reading that
+  as "the problem was clarity, not length," I am treating length as **"as long as the scaffolding needs"**
+  and pouring the extra budget into `.aloud` / `.numplay` grounding rather than more prose. Lesson 014
+  landed ~ the 012/013 size band but denser with worked micro-examples. If the learner still finds a
+  lesson long *and* unclear, split it; if unclear but fine on length, add more grounding boxes. Keep
+  asking only if a future lesson feels genuinely too long in one sitting.
+
 ## Standing weekly habits (don't let these lapse)
 - 10 mental-math drills + 5 probability brainteasers/week (Green Book / Heard on the Street).
 - 3–5 LeetCode problems/week from Year 1 (rotating arrays → DP → graphs → trees).
@@ -108,16 +131,19 @@
 ## Open questions / parking lot
 - Secure real LOB data (LOBSTER / Databento / FI-2010) before Year 2 Q3.
 - Decide on a compute setup for PyTorch labs (units 073–080) — local GPU vs Colab/cloud.
-- **Length A/B — ask the learner directly (now a 3-point series).** Lesson 011 ~70 KB (four-layer build);
-  Lesson 012 ~49 KB; Lesson 013 ~47 KB (both leaner, one idea per beat). Ask which felt best in one
-  sitting and record it — the real datapoint to calibrate units 014–020 on, not my "leaner is better"
-  assumption. (Depth-over-length still stands; the question is only how much per lesson.)
-- **The `−½σ²` sign must be automatic before Lessons 014/016.** SDE solutions and the Black–Scholes PDE
-  both carry the Itô correction. Grade the 013 teach-back for the `d(log S)` derivation cold (every `S`
-  cancellation) and for *why* `∫…dW` is a martingale (left-endpoint sizing). Watch the sign-of-curvature
-  rule: `log S` drags down (`−½σ²`), `S²`/`e^W` push up (`+`). If the learner can derive `μ−½σ²` unaided,
-  it goes into "Derivations I own" below.
-- **Glossary drill owed:** rows for 006–013 are all still blank (39 terms). Do one cold-definition pass
+- **Length A/B — provisionally resolved (2026-08-13):** the learner's real signal was *clarity*, not
+  length (012/013 hard to understand). Treating length as "as long as the scaffolding needs" and spending
+  the budget on `.aloud`/`.numplay` grounding. See the standing decision above. Only re-open if a future
+  lesson feels too long *in one sitting*.
+- **The `−½σ²` sign must be automatic before Lesson 016 (Black–Scholes PDE).** 014 shipped and re-used it
+  in the GBM solve; 016's PDE carries it again. Grade the 013/014 teach-backs cold: the `d(log S)`
+  derivation (every `S` cancellation), *why* `∫…dW` is a martingale, and the sign-of-curvature rule
+  (`log S` drags down `−½σ²`; `S²`/`e^W` push up; OU's `e^{θt}X` is linear ⇒ **no** correction). If the
+  learner derives `μ−½σ²` and the OU solve unaided, both go into "Derivations I own."
+- **New for 014:** watch that the learner keeps the two OU spreads distinct (mean → `m` vs wobble →
+  `σ²/2θ`), reads `θ(m−X)` as a pull *toward* `m`, and remembers the small-sample θ bias (short fits
+  overestimate reversion) — that bias is the lab's punchline and a real pairs-trade trap.
+- **Glossary drill owed:** rows for 006–014 are all still blank (47 terms now). Do one cold-definition pass
   and fill only what the learner defines unaided.
 - Lesson 010 was **self-reported** as passed (no EXIT TICKET graded here) — offer a fresh checkpoint
   scenario at the next natural break.

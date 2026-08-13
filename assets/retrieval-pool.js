@@ -672,6 +672,68 @@
       ],
       correct: "a",
       explain: "The correction is \u00bd f''\u00b7dt, zero only when f''=0 (a straight line). Then It\u00f4's lemma collapses to the ordinary chain rule."
+    },
+
+    // ---- L014: stochastic differential equations (GBM & OU) ----
+    {
+      id: "l014-sde-def", lesson: 14, quarter: "Q2", concept: "sde-def",
+      question: "What single feature makes dX = a dt + b dW a stochastic (not ordinary) differential equation?",
+      options: [
+        { label: "the fresh random shove b\u00b7dW", value: "a" },
+        { label: "the steady drift term a\u00b7dt", value: "b" },
+        { label: "that a and b may depend on t", value: "c" },
+        { label: "the fact that X starts at X\u2080", value: "d" }
+      ],
+      correct: "a",
+      explain: "The b\u00b7dW term is a fresh random draw (mean 0, variance dt). Drop it and you have an ODE with one determined solution; keep it and each run gives a different path."
+    },
+    {
+      id: "l014-solve-trick", lesson: 14, quarter: "Q2", concept: "sde-solve",
+      question: "The trick to solve an SDE in closed form is to apply It\u00f4 to a function f whose expansion:",
+      options: [
+        { label: "has no X left on the right side", value: "a" },
+        { label: "removes the random dW entirely", value: "b" },
+        { label: "makes the drift a exactly zero", value: "c" },
+        { label: "is always positive for any X", value: "d" }
+      ],
+      correct: "a",
+      explain: "If df has only t and dW on the right (no X), the steps stop referring to where you are, so you can integrate directly. log S does it for GBM; e^{\u03b8t}X for OU."
+    },
+    {
+      id: "l014-ou-revert", lesson: 14, quarter: "Q2", concept: "ou-mean", misconception: true,
+      question: "For OU dX = \u03b8(m\u2212X)dt + \u03c3 dW started below m, the long-run mean of X is:",
+      options: [
+        { label: "m \u2014 pulled to the target", value: "a" },
+        { label: "X\u2080 \u2014 it returns to the start", value: "b" },
+        { label: "0 \u2014 the pull drains it away", value: "c" },
+        { label: "\u221e \u2014 it grows without bound", value: "d" }
+      ],
+      correct: "a",
+      explain: "The drift \u03b8(m\u2212X) points toward m from either side, so E[X_t] = X\u2080e^{\u2212\u03b8t} + m(1\u2212e^{\u2212\u03b8t}) \u2192 m. It wobbles around m with variance \u03c3\u00b2/2\u03b8, never pinning to one value."
+    },
+    {
+      id: "l014-ou-nocorr", lesson: 14, quarter: "Q2", concept: "ou-solve", misconception: true,
+      question: "Solving OU with f = e^{\u03b8t}X carries no \u00bd b\u00b2 f_xx correction because f is:",
+      options: [
+        { label: "it is linear in X, so f_xx = 0", value: "a" },
+        { label: "growing, so the term cancels", value: "b" },
+        { label: "positive, so curvature is nil", value: "c" },
+        { label: "random, so It\u00f4 does not apply", value: "d" }
+      ],
+      correct: "a",
+      explain: "e^{\u03b8t}X is a straight line in X, so f_xx = 0 and the It\u00f4 correction vanishes \u2014 unlike the GBM/log solve, where log S curves (f_xx = \u22121/S\u00b2) and the \u2212\u00bd\u03c3\u00b2 appears."
+    },
+    {
+      id: "l014-existence", lesson: 14, quarter: "Q2", concept: "existence",
+      question: "An SDE is guaranteed a single solution for all time when its drift and diffusion have:",
+      options: [
+        { label: "bounded slope and at-most-linear growth", value: "a" },
+        { label: "values that are always strictly positive", value: "b" },
+        { label: "faster-than-linear growth to self-correct", value: "c" },
+        { label: "no dependence on the state X at all", value: "d" }
+      ],
+      correct: "a",
+      explain: "Bounded steepness (Lipschitz) makes the path unique; no faster-than-linear growth prevents finite-time blow-up (dx/dt=x\u00b2 explodes at t*=1/x\u2080). GBM and OU satisfy both."
     }
   ];
 })(window);

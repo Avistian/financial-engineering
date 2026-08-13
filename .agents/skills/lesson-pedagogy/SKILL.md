@@ -44,6 +44,25 @@ Longer self-contained lessons beat terse skeletons.
 
 Retrieval (warm-ups, predict, teach-back, quizzes) stays effortful. Slow the teaching, not the testing.
 
+## Even more basic (2026-08-13 — mandatory on math-heavy lessons)
+
+The learner reported that Lessons 012–013 were still hard to *understand* even with plain language and
+slow pacing. Plain language and depth are necessary but not sufficient; the remaining gap is that abstract
+symbols never touch ground. Two concrete devices are now required on every math-heavy lesson (and
+retro-fitted where the learner revisits):
+
+1. **Say-it-in-words box (`.aloud`).** Immediately after *every* load-bearing equation, add a short box
+   that reads the equation aloud as one plain English sentence, symbol by symbol ("how f changes = slope
+   times step, plus half the curvature times the step length"). No new notation, no jargon — just the
+   spoken translation.
+2. **With-real-numbers box (`.numplay`).** Before or right after an abstract result, plug in actual small
+   numbers and compute a step or two by hand (e.g. θ=2, m=100, X=80 ⇒ pull = +40). The learner should see
+   the formula *do something* on concrete values before trusting it in the abstract.
+
+Both are lesson-local CSS classes (`.aloud`, `.numplay`) — copy the block from Lesson 014's `<style>`.
+Keep them short (2–4 sentences). This does not replace the slow-lane derivation; it wraps it so each
+symbol arrives already grounded. Rigor of quizzes/teach-backs is unchanged.
+
 ## Also always
 
 - Failure-mode first (`.trap` is mandatory).

@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "lessons": [
     {
       "id": 1,
@@ -136,6 +136,16 @@
       "checkpoint": false,
       "labPath": "labs/0013-ito-lemma.ipynb",
       "title": "The Itô Integral & Itô's Lemma",
+      "published": true
+    },
+    {
+      "id": 14,
+      "slug": "0014-sdes",
+      "year": 1,
+      "quarter": 2,
+      "checkpoint": false,
+      "labPath": "labs/0014-ornstein-uhlenbeck.ipynb",
+      "title": "Stochastic Differential Equations: GBM & Ornstein–Uhlenbeck",
       "published": true
     }
   ]

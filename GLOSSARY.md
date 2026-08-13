@@ -60,3 +60,11 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Geometric Brownian motion (GBM) | — | — | 013 |
 | Volatility drag (−½σ²) | — | — | 013 |
 | Drift / diffusion | — | — | 013 |
+| Stochastic differential equation (SDE) | — | — | 014 |
+| Solving an SDE (cancel X, integrate) | — | — | 014 |
+| Ornstein–Uhlenbeck / mean reversion | — | — | 014 |
+| Integrating factor (e^{θt}) | — | — | 014 |
+| Long-run mean / stationary distribution | — | — | 014 |
+| Half-life of reversion (ln2/θ) | — | — | 014 |
+| Itô isometry | — | — | 014 |
+| Existence & uniqueness (Lipschitz / linear growth) | — | — | 014 |

@@ -108,6 +108,11 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
   drift is the quadratic variation `→ t`, and the identity `W_T² = ∫2W dW + Σ(ΔW)²` holds exactly); show
   `log S` drifts at `μ − ½σ²` (not `μ`) and `d(S²)` grows at `2μ + σ²`; see the mean-vs-median volatility
   drag; and confirm `E[e^{W_t}] = e^{t/2}` — the `½f″dt` correction for a third function (Lesson 013).
+- `0014-ornstein-uhlenbeck.ipynb` — *simulate and then fit a mean-reverting SDE*: build an OU process
+  `dX = θ(m−X)dt + σ dW` by Euler and watch the drift pull the mean from `X₀` to `m`; match the closed-form
+  mean `X₀e^{−θt}+m(1−e^{−θt})`, the stationary variance `σ²/2θ`, and the half-life `ln2/θ`; **recover**
+  `(θ, m, σ)` from one long path by regressing `ΔX` on `X`; then expose the small-sample trap — fitting `θ`
+  on short windows overestimates it, so a spread looks like it reverts faster than it does (Lesson 014).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 

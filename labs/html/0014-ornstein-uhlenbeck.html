@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>0004-returns-stylized-facts</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>0014-ornstein-uhlenbeck</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7796,15 +7796,22 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=64ec879f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ffb1aa22">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Lab-004-%E2%80%94-Returns-&amp;-the-Stylized-Facts">Lab 004 — Returns &amp; the Stylized Facts<a class="anchor-link" href="#Lab-004-%E2%80%94-Returns-&amp;-the-Stylized-Facts">¶</a></h1><p><strong>Lesson:</strong> <a href="../lessons/0004-returns-stylized-facts.html"><code>0004-returns-stylized-facts.html</code></a> · <strong>Cheat sheet:</strong> <a href="../reference/stylized-facts.html"><code>stylized-facts.html</code></a></p>
-<p><strong>The one skill:</strong> compute log returns and <em>verify the stylized facts</em> in data — fat tails, absent linear autocorrelation, volatility clustering — and see what a Gaussian series is missing.</p>
-<p><strong>Exit criteria:</strong> the EXIT TICKET cell prints cleanly (all CHECK cells pass).</p>
+<h1 id="Lab-014-%E2%80%94-Simulate-&amp;-fit-an-Ornstein%E2%80%93Uhlenbeck-process">Lab 014 — Simulate &amp; fit an Ornstein–Uhlenbeck process<a class="anchor-link" href="#Lab-014-%E2%80%94-Simulate-&amp;-fit-an-Ornstein%E2%80%93Uhlenbeck-process">¶</a></h1><p><strong>Lesson:</strong> <a href="../lessons/0014-sdes.html"><code>0014-sdes.html</code></a>
+· <strong>Reference:</strong> <a href="../reference/sdes.html"><code>sdes.html</code></a></p>
+<p><strong>The one skill:</strong> take a mean-reverting SDE, simulate it, and then <em>recover its parameters from data</em> —
+the core move behind a pairs-trading signal. By the end you will have checked, with numbers, that (1) the
+OU drift <code>θ(m − X)</code> pulls the mean from <code>X₀</code> up to the target <code>m</code>, (2) the closed-form mean
+<code>X₀e^{−θt} + m(1 − e^{−θt})</code> matches the simulation, (3) the spread settles to the <strong>stationary variance</strong>
+<code>σ²/2θ</code>, (4) the <strong>half-life</strong> of reversion is <code>ln2/θ</code>, (5) you can <strong>fit</strong> <code>(θ, m, σ)</code> from one path by
+regressing <code>ΔX</code> on <code>X</code>, and (6) fitting <code>θ</code> on <strong>short</strong> samples <strong>overestimates</strong> it — the classic
+mean-reversion estimation trap.</p>
+<p><strong>Exit criteria:</strong> every CHECK passes and the EXIT TICKET prints cleanly.</p>
 <p><strong>How this notebook works</strong></p>
 <table>
 <thead>
@@ -7816,7 +7823,7 @@ a.anchor-link {
 <tbody>
 <tr>
 <td><strong>PROVIDED</strong></td>
-<td>Run it. Imports, data, helpers.</td>
+<td>Run it. Imports, parameters, the simulator scaffold.</td>
 </tr>
 <tr>
 <td><strong>TODO</strong></td>
@@ -7828,30 +7835,30 @@ a.anchor-link {
 </tr>
 <tr>
 <td><strong>EXIT TICKET</strong></td>
-<td>Final deliverable. Prints your findings.</td>
+<td>Final deliverable. Prints your summary.</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Environment:</strong> Python 3 + <code>numpy</code>, <code>pandas</code>, <code>scipy</code>. See <a href="./README.md"><code>labs/README.md</code></a>.</p>
+<p><strong>Environment:</strong> Python 3 + <code>numpy</code> only. Fully self-contained (no network, runs in seconds).
+See <a href="./README.md"><code>labs/README.md</code></a>.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b79b7979">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7b17755b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Running-on-Google-Colab?">Running on Google Colab?<a class="anchor-link" href="#Running-on-Google-Colab?">¶</a></h3><p>Colab opens only this single file, so the lab dependencies (numpy, scipy, statsmodels,
-yfinance, …) and the course repo are <strong>not</strong> guaranteed to be present. The cell below fixes
-that: on Colab it shallow-clones the course repo, installs <code>requirements-labs.txt</code>, and
-switches into <code>labs/</code> so relative paths resolve. <strong>On a local venv or Binder it does nothing —
-just run it and continue.</strong></p>
+<h3 id="Running-on-Google-Colab?">Running on Google Colab?<a class="anchor-link" href="#Running-on-Google-Colab?">¶</a></h3><p>Colab opens only this single file, so the lab dependencies and the course repo are <strong>not</strong>
+guaranteed to be present. The cell below fixes that: on Colab it shallow-clones the course repo,
+installs <code>requirements-labs.txt</code>, and switches into <code>labs/</code> so relative paths resolve. <strong>On a local
+venv or Binder it does nothing — just run it and continue.</strong></p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3c9e5f91">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f6ea256d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7859,13 +7866,13 @@ just run it and continue.</strong></p>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># @colab-bootstrap — PROVIDED. Makes the lab self-sufficient on Google Colab; a no-op elsewhere.</span>
+<div class="highlight hl-python"><pre><span></span><span class="c1"># @colab-bootstrap — PROVIDED. Makes the lab self-sufficient on Google Colab; a no-op elsewhere.</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
 
 <span class="k">if</span> <span class="s2">"google.colab"</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="s2">"/content/financial-engineering"</span><span class="p">):</span>
-        <span class="o">!</span>git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>https://github.com/Avistian/financial-engineering.git<span class="w"> </span>/content/financial-engineering
-    <span class="o">%</span><span class="k">pip</span> install -q -r /content/financial-engineering/requirements-labs.txt
+        <span class="err">!</span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">depth</span> <span class="mi">1</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Avistian</span><span class="o">/</span><span class="n">financial</span><span class="o">-</span><span class="n">engineering</span><span class="o">.</span><span class="n">git</span> <span class="o">/</span><span class="n">content</span><span class="o">/</span><span class="n">financial</span><span class="o">-</span><span class="n">engineering</span>
+    <span class="o">%</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">q</span> <span class="o">-</span><span class="n">r</span> <span class="o">/</span><span class="n">content</span><span class="o">/</span><span class="n">financial</span><span class="o">-</span><span class="n">engineering</span><span class="o">/</span><span class="n">requirements</span><span class="o">-</span><span class="n">labs</span><span class="o">.</span><span class="n">txt</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s2">"/content/financial-engineering/labs"</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">"Colab ready — working dir:"</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
 <span class="k">else</span><span class="p">:</span>
@@ -7876,374 +7883,56 @@ just run it and continue.</strong></p>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a692d728">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a1d30c89">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Concept-recap-(read-before-coding)">Concept recap (read before coding)<a class="anchor-link" href="#Concept-recap-(read-before-coding)">¶</a></h2><p><strong>Log return:</strong> $r_t = \ln(P_t / P_{t-1})$. Log returns are additive across time and symmetric around 0.</p>
-<p><strong>The three facts you'll measure:</strong></p>
-<ol>
-<li><strong>Fat tails</strong> — excess kurtosis $\gg 0$ (a normal has excess kurtosis 0). Extreme moves are far more common than Gaussian predicts.</li>
-<li><strong>No linear autocorrelation</strong> — $\mathrm{corr}(r_t, r_{t+1}) \approx 0$. You can't predict direction from the last return alone.</li>
-<li><strong>Volatility clustering</strong> — $\mathrm{corr}(|r_t|, |r_{t+1}|) &gt; 0$. Big moves follow big moves, so <em>volatility</em> is forecastable even though direction isn't.</li>
-</ol>
-<p><strong>Toy worked example</strong> (not the lab's answer). For returns <code>[0.01, -0.02, 0.015, -0.03]</code>, the sign flips every step → raw lag-1 autocorrelation is <em>negative</em>, while the magnitudes <code>[.01,.02,.015,.03]</code> trend up → |r| autocorrelation is <em>positive</em>. That gap between raw and absolute autocorrelation is exactly volatility clustering.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bb753a75">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># PROVIDED — imports and data. Tries real data; falls back to a realistic</span>
-<span class="c1"># simulation with fat tails + volatility clustering so the lab always runs offline.</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">load_prices</span><span class="p">(</span><span class="n">ticker</span><span class="o">=</span><span class="s2">"SPY"</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Return a pandas Series of daily close prices."""</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">yfinance</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">yf</span>  <span class="c1"># optional; only if you have it + network</span>
-        <span class="n">px</span> <span class="o">=</span> <span class="n">yf</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">ticker</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s2">"10y"</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"Close"</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Loaded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)</span><span class="si">}</span><span class="s2"> real daily closes for </span><span class="si">{</span><span class="n">ticker</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">px</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"(Real data unavailable: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">) — using a simulated series."</span><span class="p">)</span>
-    <span class="c1"># Fallback: GARCH-like vol clustering + Student-t (fat-tailed) innovations.</span>
-    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="n">omega</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.90</span>
-    <span class="n">var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">);</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-    <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="n">var</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">ret</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">var</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">ret</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">[</span><span class="n">t</span><span class="p">])</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_t</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">price</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">ret</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Simulated </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> daily closes (fat tails + vol clustering)."</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"close"</span><span class="p">)</span>
-
-<span class="n">px</span> <span class="o">=</span> <span class="n">load_prices</span><span class="p">()</span>
-<span class="n">px</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Loaded 2512 real daily closes for SPY.
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
+<h2 id="Concept-recap-(read-before-coding)">Concept recap (read before coding)<a class="anchor-link" href="#Concept-recap-(read-before-coding)">¶</a></h2><p><strong>The OU SDE.</strong> $dX = \theta(m - X)\,dt + \sigma\,dW$. Three knobs: $m$ = target level, $\theta$ = pull
+strength, $\sigma$ = shove size. The drift $\theta(m-X)$ points <em>toward</em> $m$ from either side — that is
+mean reversion.</p>
+<p><strong>Solved form</strong> (apply Itô to the linear function $e^{\theta t}X$, so <strong>no</strong> correction term):</p>
+<p>$$X_t = X_0 e^{-\theta t} + m\,(1 - e^{-\theta t}) + \sigma\!\int_0^t e^{-\theta(t-s)}\,dW_s$$</p>
+<table>
 <thead>
-<tr style="text-align: right;">
-<th>Ticker</th>
-<th>SPY</th>
-</tr>
 <tr>
-<th>Date</th>
-<th></th>
+<th>Quantity</th>
+<th>Formula</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<th>2016-07-14</th>
-<td>184.093842</td>
+<td>Mean</td>
+<td>$E[X_t] = X_0 e^{-\theta t} + m(1 - e^{-\theta t}) \to m$</td>
+<td>pulled to the target</td>
 </tr>
 <tr>
-<th>2016-07-15</th>
-<td>183.846893</td>
+<td>Variance</td>
+<td>$\dfrac{\sigma^2}{2\theta}(1 - e^{-2\theta t}) \to \dfrac{\sigma^2}{2\theta}$</td>
+<td>stationary spread</td>
 </tr>
 <tr>
-<th>2016-07-18</th>
-<td>184.340897</td>
+<td>Stationary law</td>
+<td>$N\!\big(m,\ \sigma^2/2\theta\big)$</td>
+<td>the long-run wobble</td>
 </tr>
 <tr>
-<th>2016-07-19</th>
-<td>184.153488</td>
-</tr>
-<tr>
-<th>2016-07-20</th>
-<td>184.920151</td>
+<td>Half-life</td>
+<td>$\ln 2 / \theta$</td>
+<td>time for the gap to $m$ to halve</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Fitting OU from data.</strong> The Euler step $\Delta X = \theta(m - X)\,dt + \sigma\sqrt{dt}\,Z$ is a linear
+regression of $\Delta X$ on $X$: $\ \Delta X \approx \alpha + \beta X$ with $\beta = -\theta\,dt$ and
+$\alpha = \theta m\,dt$. So $\hat\theta = -\beta/dt$, $\hat m = \alpha/(-\beta)$, and $\hat\sigma$ = (residual
+std)$/\sqrt{dt}$.</p>
 </div>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=08d85c81">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Task-1-%E2%80%94-Log-returns">Task 1 — Log returns<a class="anchor-link" href="#Task-1-%E2%80%94-Log-returns">¶</a></h3><p><strong>Goal:</strong> turn the price series into a clean log-return series <code>r</code>.</p>
-<p><strong>Why it matters:</strong> every downstream fact is a property of returns, not prices. Getting the transform right (and dropping the first NaN) is the foundation.</p>
-<p><strong>Hint boundary:</strong> use <code>np.log</code> on the ratio of consecutive prices, then drop the NaN. Do <em>not</em> use simple percentage returns here.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=1eeee03c">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TODO — compute log returns of px, drop the leading NaN, name the result `r`.</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">px</span> <span class="o">/</span> <span class="n">px</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">SPY</span>
-<span class="n">r</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[13]:</div>
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>count    2511.000000
-mean        0.000559
-std         0.011320
-min        -0.115887
-25%        -0.003587
-50%         0.000718
-75%         0.005931
-max         0.099863
-Name: SPY, dtype: float64</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f6493689">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CHECK — do not edit</span>
-<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">),</span> <span class="s2">"r must be a pandas Series"</span>
-<span class="k">assert</span> <span class="n">r</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"drop the NaN(s)"</span>
-<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s2">"daily log returns should have a near-zero mean"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 1 OK — </span><span class="si">%d</span><span class="s2"> log returns"</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Task 1 OK — 2511 log returns
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=62d651ed">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Task-2-%E2%80%94-Fat-tails">Task 2 — Fat tails<a class="anchor-link" href="#Task-2-%E2%80%94-Fat-tails">¶</a></h3><p><strong>Goal:</strong> compute the <strong>excess kurtosis</strong> of <code>r</code> and compare it to a normal (0).</p>
-<p><strong>Why it matters:</strong> if kurtosis is large, any risk model built on the normal distribution will undercount crash risk.</p>
-<p><strong>Hint boundary:</strong> <code>scipy.stats.kurtosis</code> returns <em>excess</em> kurtosis by default (Fisher). Store it in <code>excess_kurt</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ac4a4154">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TODO — excess kurtosis of r (scipy Fisher definition).</span>
-<span class="n">excess_kurt</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"excess kurtosis = </span><span class="si">{</span><span class="n">excess_kurt</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  (normal = 0)"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>excess kurtosis = 15.39  (normal = 0)
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=185ac734">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CHECK — do not edit</span>
-<span class="k">assert</span> <span class="n">excess_kurt</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"real/simulated returns should show clear excess kurtosis (fat tails)"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 2 OK — fat tails confirmed"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Task 2 OK — fat tails confirmed
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=46348934">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Task-3-%E2%80%94-The-autocorrelation-gap-(volatility-clustering)">Task 3 — The autocorrelation gap (volatility clustering)<a class="anchor-link" href="#Task-3-%E2%80%94-The-autocorrelation-gap-(volatility-clustering)">¶</a></h3><p><strong>Goal:</strong> compute lag-1 autocorrelation of <strong>raw</strong> returns vs <strong>absolute</strong> returns.</p>
-<p><strong>Why it matters:</strong> raw ≈ 0 (direction unpredictable) but |r| &gt; 0 (volatility predictable) is the single most important asymmetry a QR exploits — model vol, not direction, from the past.</p>
-<p><strong>Hint boundary:</strong> <code>Series.autocorr(lag=1)</code>. Apply it to <code>r</code> and to <code>r.abs()</code>.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8da4d46a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TODO — lag-1 autocorrelation of raw and absolute returns.</span>
-<span class="n">ac_raw</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">autocorr</span><span class="p">(</span><span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">ac_abs</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">autocorr</span><span class="p">(</span><span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"autocorr(r, 1)   = </span><span class="si">{</span><span class="n">ac_raw</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"autocorr(|r|, 1) = </span><span class="si">{</span><span class="n">ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>autocorr(r, 1)   = -0.133
-autocorr(|r|, 1) = +0.363
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=358cf9c2">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CHECK — do not edit</span>
-<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ac_raw</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.15</span><span class="p">,</span> <span class="s2">"raw-return autocorrelation should be small"</span>
-<span class="k">assert</span> <span class="n">ac_abs</span> <span class="o">&gt;</span> <span class="n">ac_raw</span><span class="p">,</span> <span class="s2">"|return| autocorrelation should exceed raw — that's volatility clustering"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 3 OK — volatility clustering confirmed"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Task 3 OK — volatility clustering confirmed
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d33a6cda">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Task-4-%E2%80%94-What-a-Gaussian-is-missing">Task 4 — What a Gaussian is missing<a class="anchor-link" href="#Task-4-%E2%80%94-What-a-Gaussian-is-missing">¶</a></h3><p><strong>Goal:</strong> simulate an IID normal series with the <em>same mean and std</em> as <code>r</code>, and compare its excess kurtosis and |r| autocorrelation.</p>
-<p><strong>Why it matters:</strong> this makes concrete <em>why</em> the normal-IID assumption (behind naïve Sharpe/t-stat significance) is wrong for markets.</p>
-<p><strong>Hint boundary:</strong> draw <code>len(r)</code> samples from <code>np.random.default_rng(0).normal(mean, std, size)</code>; wrap in a <code>pd.Series</code>; reuse the same two measurements.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d8b109c9">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5f2d97b1">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8251,19 +7940,48 @@ autocorr(|r|, 1) = +0.363
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TODO — build a Gaussian comparison series `g` and measure it.</span>
-<span class="n">g</span> <span class="o">=</span> 
-<span class="n">g</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
-<span class="n">g_kurt</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
-<span class="n">g_ac_abs</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">autocorr</span><span class="p">(</span><span class="n">lag</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Gaussian excess kurtosis = </span><span class="si">{</span><span class="n">g_kurt</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">  (vs real </span><span class="si">{</span><span class="n">excess_kurt</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Gaussian autocorr(|g|,1) = </span><span class="si">{</span><span class="n">g_ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">  (vs real </span><span class="si">{</span><span class="n">ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<div class="highlight hl-python"><pre><span></span><span class="c1"># PROVIDED — RNG, OU parameters (the "truth" we will recover), and shared Brownian increments. Run it.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">20140613</span><span class="p">)</span>
+
+<span class="n">THETA</span> <span class="o">=</span> <span class="mf">3.0</span>      <span class="c1"># pull strength (mean-reversion speed)</span>
+<span class="n">M</span>     <span class="o">=</span> <span class="mf">100.0</span>    <span class="c1"># long-run mean (the level it is pulled toward)</span>
+<span class="n">SIGMA</span> <span class="o">=</span> <span class="mf">8.0</span>      <span class="c1"># shove size (volatility)</span>
+<span class="n">X0</span>    <span class="o">=</span> <span class="mf">80.0</span>     <span class="c1"># starting value (below M, so we can watch it get pulled up)</span>
+<span class="n">T</span>     <span class="o">=</span> <span class="mf">4.0</span>      <span class="c1"># horizon</span>
+<span class="n">N_PATHS</span> <span class="o">=</span> <span class="mi">20000</span>
+<span class="n">N_STEPS</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">T</span> <span class="o">/</span> <span class="n">N_STEPS</span>
+<span class="n">tgrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">N_STEPS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># shared Brownian increments N(0, dt), shape (N_PATHS, N_STEPS)</span>
+<span class="n">dW</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">N_PATHS</span><span class="p">,</span> <span class="n">N_STEPS</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"numpy"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="s2">"| paths"</span><span class="p">,</span> <span class="n">N_PATHS</span><span class="p">,</span> <span class="s2">"| steps"</span><span class="p">,</span> <span class="n">N_STEPS</span><span class="p">,</span> <span class="s2">"| dt"</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"half-life ln2/theta ="</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">THETA</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+      <span class="s2">"| stationary var sigma^2/2theta ="</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">SIGMA</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">THETA</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f2259b03">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=21007958">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-1-%E2%80%94-Simulate-OU-with-the-mean-reverting-drift">Task 1 — Simulate OU with the mean-reverting drift<a class="anchor-link" href="#Task-1-%E2%80%94-Simulate-OU-with-the-mean-reverting-drift">¶</a></h3><p><strong>Goal:</strong> step the OU SDE forward with Euler:
+$X_{i+1} = X_i + \theta(m - X_i)\,dt + \sigma\,\Delta W_i$. Fill the <strong>drift</strong> term — the pull toward <code>m</code>.</p>
+<p><strong>Why:</strong> the whole character of OU lives in that one term. Get its sign right and the mean is dragged from
+<code>X₀ = 80</code> up to <code>M = 100</code>; flip it and the process explodes away from <code>M</code>.</p>
+<p><strong>Hint boundary:</strong> the drift is <code>theta * (m - X_now)</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5906856f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8271,16 +7989,27 @@ autocorr(|r|, 1) = +0.363
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CHECK — do not edit</span>
-<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">g_kurt</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"a Gaussian series should have ~0 excess kurtosis"</span>
-<span class="k">assert</span> <span class="n">g_ac_abs</span> <span class="o">&lt;</span> <span class="n">ac_abs</span><span class="p">,</span> <span class="s2">"the Gaussian series should NOT show volatility clustering"</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 4 OK — the Gaussian is missing both fat tails and clustering"</span><span class="p">)</span>
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — the OU mean-reverting drift.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ou_drift</span><span class="p">(</span><span class="n">X_now</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">____</span>                             <span class="c1"># theta * (m - X_now): the pull toward m</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">simulate_ou</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">X0</span><span class="p">,</span> <span class="n">dW</span><span class="p">):</span>
+    <span class="n">n_paths</span><span class="p">,</span> <span class="n">n_steps</span> <span class="o">=</span> <span class="n">dW</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_paths</span><span class="p">,</span> <span class="n">n_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">X0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">ou_drift</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">theta</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">dW</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">X</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">simulate_ou</span><span class="p">(</span><span class="n">THETA</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">SIGMA</span><span class="p">,</span> <span class="n">X0</span><span class="p">,</span> <span class="n">dW</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"X shape </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, starts at </span><span class="si">{</span><span class="n">X</span><span class="p">[:,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"E[X_T] = </span><span class="si">{</span><span class="n">X</span><span class="p">[:,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   (should be ~ M = </span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2">: theta*T is large, so fully reverted)"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=757fdc5d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9b361140">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8288,33 +8017,349 @@ autocorr(|r|, 1) = +0.363
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># EXIT TICKET — paste this output to your teacher.</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"=== Stylized-facts report ==="</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n returns              : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"excess kurtosis (real) : </span><span class="si">{</span><span class="n">excess_kurt</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">   [fat tails: &gt;0]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"autocorr raw returns   : </span><span class="si">{</span><span class="n">ac_raw</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">   [~0: no linear predictability]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"autocorr |returns|     : </span><span class="si">{</span><span class="n">ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">   [&gt;raw: volatility clustering]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Gaussian kurtosis      : </span><span class="si">{</span><span class="n">g_kurt</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">   [~0: thin tails]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Gaussian autocorr |g|  : </span><span class="si">{</span><span class="n">g_ac_abs</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">   [~0: no clustering]"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">One-sentence takeaway (edit me):"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Real returns show fat tails and volatility clustering that an IID-normal series lacks,"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"so any Sharpe/t-stat assuming normal-IID overstates significance."</span><span class="p">)</span>
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">N_PATHS</span><span class="p">,</span> <span class="n">N_STEPS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X0</span><span class="p">),</span> <span class="s2">"X starts at X0, right shape"</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">"E[X_T] must be ~ M (fully reverted)"</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 1 OK — OU simulated; the drift theta*(m-X) pulled the mean from X0 up to ~ M."</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=901e9aca">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f6173c42">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-2-%E2%80%94-The-closed-form-mean-matches-the-simulation">Task 2 — The closed-form mean matches the simulation<a class="anchor-link" href="#Task-2-%E2%80%94-The-closed-form-mean-matches-the-simulation">¶</a></h3><p><strong>Goal:</strong> fill the closed-form mean $E[X_t] = X_0 e^{-\theta t} + m(1 - e^{-\theta t})$ across <code>tgrid</code>, and
+confirm it tracks the empirical mean of the simulated paths.</p>
+<p><strong>Why:</strong> this is the solved SDE's first payoff — you can predict the average path exactly, without
+simulating, and see the start's memory fade as the pull to <code>m</code> takes over.</p>
+<p><strong>Hint boundary:</strong> <code>X0*np.exp(-THETA*tgrid) + M*(1 - np.exp(-THETA*tgrid))</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=58c6678b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — the OU closed-form mean.</span>
+<span class="n">mean_theory</span> <span class="o">=</span> <span class="n">____</span>                           <span class="c1"># X0*exp(-theta t) + M*(1 - exp(-theta t))</span>
+
+<span class="n">mean_emp</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>                     <span class="c1"># provided: empirical mean at each t</span>
+<span class="n">i1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">tgrid</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"max |empirical mean - theory| = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mean_emp</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mean_theory</span><span class="p">))</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"mean at t=1: theory </span><span class="si">{</span><span class="n">mean_theory</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, empirical </span><span class="si">{</span><span class="n">mean_emp</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=ee159335">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mean_emp</span> <span class="o">-</span> <span class="n">mean_theory</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">"closed-form mean must match the simulated mean"</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 2 OK — E[X_t] = X0 e^{-theta t} + M(1 - e^{-theta t}); memory fades, pull to M wins."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6586a6e9">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-3-%E2%80%94-The-stationary-variance-%CF%83%C2%B2/2%CE%B8">Task 3 — The stationary variance σ²/2θ<a class="anchor-link" href="#Task-3-%E2%80%94-The-stationary-variance-%CF%83%C2%B2/2%CE%B8">¶</a></h3><p><strong>Goal:</strong> fill the stationary variance $\sigma^2/2\theta$ and confirm the simulated variance at the horizon
+(where the process is fully reverted) matches it.</p>
+<p><strong>Why:</strong> the long-run <em>spread</em> — not the mean — is what tells a pairs trader how wide the swings (and
+drawdowns) can get. It is a tug-of-war: more shoving (<code>σ</code>) widens it, a stiffer spring (<code>θ</code>) narrows it.</p>
+<p><strong>Hint boundary:</strong> <code>SIGMA**2 / (2*THETA)</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=a0cb2fd4">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — the OU stationary variance.</span>
+<span class="n">var_stat</span> <span class="o">=</span> <span class="n">____</span>                              <span class="c1"># SIGMA**2 / (2*THETA)</span>
+
+<span class="n">var_emp_T</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>                    <span class="c1"># provided: variance at t = T (stationary)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"stationary variance sigma^2/2theta = </span><span class="si">{</span><span class="n">var_stat</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  (std </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_stat</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"empirical Var(X_T)                 = </span><span class="si">{</span><span class="n">var_emp_T</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d341ecd7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">var_stat</span> <span class="o">-</span> <span class="n">SIGMA</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">THETA</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-9</span><span class="p">,</span> <span class="s2">"stationary variance is sigma^2/(2 theta)"</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">var_emp_T</span> <span class="o">-</span> <span class="n">var_stat</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"at t=T (fully reverted) Var(X_T) must match the stationary variance"</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Task 3 OK — OU settles to N(M, sigma^2/2theta): variance ~ </span><span class="si">{</span><span class="n">var_stat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=53611630">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-4-%E2%80%94-The-half-life-of-reversion-ln2/%CE%B8">Task 4 — The half-life of reversion ln2/θ<a class="anchor-link" href="#Task-4-%E2%80%94-The-half-life-of-reversion-ln2/%CE%B8">¶</a></h3><p><strong>Goal:</strong> fill the half-life $\ln 2/\theta$ and confirm the mean closes <strong>half</strong> the initial gap
+($X_0 \to M$) in exactly that time.</p>
+<p><strong>Why:</strong> the half-life is the number a PM asks for — "how long is this trade?" It converts the abstract
+<code>θ</code> into a horizon you can act on.</p>
+<p><strong>Hint boundary:</strong> <code>np.log(2)/THETA</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=aa626dc6">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — the half-life of mean reversion.</span>
+<span class="n">half_life</span> <span class="o">=</span> <span class="n">____</span>                             <span class="c1"># np.log(2)/THETA</span>
+
+<span class="n">gap0</span> <span class="o">=</span> <span class="n">M</span> <span class="o">-</span> <span class="n">X0</span>                                 <span class="c1"># provided: initial gap to the target</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">X0</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">gap0</span>                      <span class="c1"># halfway to M (= 90)</span>
+<span class="n">emp_half</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mean_emp</span><span class="p">,</span> <span class="n">tgrid</span><span class="p">)</span> <span class="c1"># mean_emp increases here, so interp on it</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"half-life ln2/theta = </span><span class="si">{</span><span class="n">half_life</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"empirical half-life = </span><span class="si">{</span><span class="n">emp_half</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  (time for the mean to reach </span><span class="si">{</span><span class="n">target</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=233b6325">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">half_life</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">THETA</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-9</span><span class="p">,</span> <span class="s2">"half-life is ln2/theta"</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">emp_half</span> <span class="o">-</span> <span class="n">half_life</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.03</span><span class="p">,</span> <span class="s2">"measured half-life must match ln2/theta"</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Task 4 OK — the gap to M halves every ln2/theta = </span><span class="si">{</span><span class="n">half_life</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> time units."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e30d391c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-5-%E2%80%94-Fit-(%CE%B8,-m,-%CF%83)-from-one-long-path">Task 5 — Fit (θ, m, σ) from one long path<a class="anchor-link" href="#Task-5-%E2%80%94-Fit-(%CE%B8,-m,-%CF%83)-from-one-long-path">¶</a></h3><p><strong>Goal:</strong> simulate one long OU path, then recover its parameters by regressing the step change <code>ΔX</code> on the
+level <code>X</code>. The Euler step makes this a straight line: <code>ΔX ≈ α + βX</code> with <code>β = −θ·dt</code>, <code>α = θm·dt</code>. Fill the
+recovery <code>θ_hat = −β/dt</code>.</p>
+<p><strong>Why:</strong> this <em>is</em> the estimation half of a pairs-trade signal — from a price-gap series you back out how
+fast it reverts (<code>θ</code>), to what level (<code>m</code>), and how noisy it is (<code>σ</code>).</p>
+<p><strong>Hint boundary:</strong> <code>theta_hat = -beta / dt_fit</code>; <code>m_hat</code> and <code>sigma_hat</code> are provided.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9a66ab45">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — recover theta from the regression slope.</span>
+<span class="c1"># one long single OU path, sampled long enough to see many reversions</span>
+<span class="n">N_FIT</span> <span class="o">=</span> <span class="mi">200000</span>
+<span class="n">dt_fit</span> <span class="o">=</span> <span class="mf">0.02</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="n">N_FIT</span><span class="p">)</span>
+<span class="n">xf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">N_FIT</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">xf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">M</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_FIT</span><span class="p">):</span>
+    <span class="n">xf</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">xf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">THETA</span> <span class="o">*</span> <span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="n">xf</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">dt_fit</span> <span class="o">+</span> <span class="n">SIGMA</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dt_fit</span><span class="p">)</span> <span class="o">*</span> <span class="n">z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<span class="n">Xi</span> <span class="o">=</span> <span class="n">xf</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>                                  <span class="c1"># level at the start of each step</span>
+<span class="n">dX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xf</span><span class="p">)</span>                              <span class="c1"># the step change</span>
+<span class="n">beta</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">Xi</span><span class="p">,</span> <span class="n">dX</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>           <span class="c1"># dX ~ alpha + beta * Xi</span>
+
+<span class="n">theta_hat</span> <span class="o">=</span> <span class="n">____</span>                             <span class="c1"># -beta / dt_fit</span>
+<span class="n">m_hat</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">/</span> <span class="p">(</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span>                       <span class="c1"># provided: = alpha / (theta_hat * dt_fit)</span>
+<span class="n">sigma_hat</span> <span class="o">=</span> <span class="p">(</span><span class="n">dX</span> <span class="o">-</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">Xi</span><span class="p">))</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dt_fit</span><span class="p">)</span>   <span class="c1"># provided: residual std / sqrt(dt)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"theta: true </span><span class="si">{</span><span class="n">THETA</span><span class="si">}</span><span class="s2">, fitted </span><span class="si">{</span><span class="n">theta_hat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"m    : true </span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2">, fitted </span><span class="si">{</span><span class="n">m_hat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"sigma: true </span><span class="si">{</span><span class="n">SIGMA</span><span class="si">}</span><span class="s2">, fitted </span><span class="si">{</span><span class="n">sigma_hat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5ec98a3b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">theta_hat</span> <span class="o">-</span> <span class="n">THETA</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">"fitted theta must be close to the true theta on a long path"</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">m_hat</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">"fitted m must be close to true M"</span>
+<span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sigma_hat</span> <span class="o">-</span> <span class="n">SIGMA</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">"fitted sigma must be close to true SIGMA"</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 5 OK — recovered (theta, m, sigma) from one path by regressing dX on X."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b42cd574">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Task-6-%E2%80%94-The-small-sample-trap:-short-fits-overestimate-%CE%B8">Task 6 — The small-sample trap: short fits overestimate θ<a class="anchor-link" href="#Task-6-%E2%80%94-The-small-sample-trap:-short-fits-overestimate-%CE%B8">¶</a></h3><p><strong>Goal:</strong> fit <code>θ</code> on <strong>many short</strong> OU paths and average. Fill the recovery <code>θ_hat = −β/dt_s</code>. You will see
+the average estimate come out <strong>above</strong> the true <code>θ</code> — a real, well-known bias.</p>
+<p><strong>Why:</strong> this is the failure mode of the whole method. A spread fitted on a short window <em>looks</em> like it
+reverts faster than it does, so a naive pairs trade expects a quicker payoff than reality delivers. Knowing
+the model <strong>and</strong> its bias is the point.</p>
+<p><strong>Hint boundary:</strong> <code>theta_hat_short = -beta_short / dt_s</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=07f67526">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># TODO — recover theta on each short path (vectorized), then average.</span>
+<span class="n">window</span> <span class="o">=</span> <span class="mi">60</span>
+<span class="n">dt_s</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="n">n_short</span> <span class="o">=</span> <span class="mi">8000</span>
+<span class="n">zs</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">n_short</span><span class="p">,</span> <span class="n">window</span><span class="p">))</span>
+<span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_short</span><span class="p">,</span> <span class="n">window</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">xs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">M</span>                                  <span class="c1"># start each short path at the long-run mean</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">window</span><span class="p">):</span>
+    <span class="n">xs</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">THETA</span> <span class="o">*</span> <span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="n">xs</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">dt_s</span> <span class="o">+</span> <span class="n">SIGMA</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dt_s</span><span class="p">)</span> <span class="o">*</span> <span class="n">zs</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+
+<span class="n">Xi_s</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span> <span class="n">dX_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Xi_c</span> <span class="o">=</span> <span class="n">Xi_s</span> <span class="o">-</span> <span class="n">Xi_s</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>         <span class="c1"># per-row centering</span>
+<span class="n">dX_c</span> <span class="o">=</span> <span class="n">dX_s</span> <span class="o">-</span> <span class="n">dX_s</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">beta_short</span> <span class="o">=</span> <span class="p">(</span><span class="n">Xi_c</span> <span class="o">*</span> <span class="n">dX_c</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Xi_c</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># per-path slope</span>
+
+<span class="n">theta_hat_short</span> <span class="o">=</span> <span class="n">____</span>                        <span class="c1"># -beta_short / dt_s</span>
+<span class="n">mean_theta_hat</span> <span class="o">=</span> <span class="n">theta_hat_short</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"true theta        = </span><span class="si">{</span><span class="n">THETA</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"mean fitted theta = </span><span class="si">{</span><span class="n">mean_theta_hat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   (</span><span class="si">{</span><span class="n">n_short</span><span class="si">}</span><span class="s2"> short paths of </span><span class="si">{</span><span class="n">window</span><span class="si">}</span><span class="s2"> steps, dt=</span><span class="si">{</span><span class="n">dt_s</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"upward bias       = </span><span class="si">{</span><span class="n">mean_theta_hat</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">THETA</span><span class="si">:</span><span class="s2">+.3f</span><span class="si">}</span><span class="s2">   (short samples OVERestimate mean reversion)"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f2cfd273">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># CHECK — do not edit</span>
+<span class="k">assert</span> <span class="n">theta_hat_short</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">n_short</span><span class="p">,),</span> <span class="s2">"one theta estimate per short path"</span>
+<span class="k">assert</span> <span class="n">mean_theta_hat</span> <span class="o">&gt;</span> <span class="n">THETA</span><span class="p">,</span> <span class="s2">"short-sample theta is biased HIGH — the classic OU estimation trap"</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Task 6 OK — fitting theta on short windows overestimates it: mean reversion looks faster than it is."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=287468a4">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-python"><pre><span></span><span class="c1"># EXIT TICKET — paste this output to your teacher.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"=== Lab 014: simulate &amp; fit an Ornstein-Uhlenbeck process ==="</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OU truth         : theta=</span><span class="si">{</span><span class="n">THETA</span><span class="si">}</span><span class="s2">, m=</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2">, sigma=</span><span class="si">{</span><span class="n">SIGMA</span><span class="si">}</span><span class="s2">, X0=</span><span class="si">{</span><span class="n">X0</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Simulated mean   : E[X_T]=</span><span class="si">{</span><span class="n">X</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ~ M=</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2">; matches closed form to </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mean_emp</span><span class="o">-</span><span class="n">mean_theory</span><span class="p">))</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Stationary spread: Var(X_T)=</span><span class="si">{</span><span class="n">X</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ~ sigma^2/2theta=</span><span class="si">{</span><span class="n">SIGMA</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">THETA</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Half-life        : ln2/theta=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">THETA</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">; measured </span><span class="si">{</span><span class="n">emp_half</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Fit (long path)  : theta_hat=</span><span class="si">{</span><span class="n">theta_hat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, m_hat=</span><span class="si">{</span><span class="n">m_hat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, sigma_hat=</span><span class="si">{</span><span class="n">sigma_hat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Small-sample bias: mean theta_hat=</span><span class="si">{</span><span class="n">mean_theta_hat</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> &gt; true </span><span class="si">{</span><span class="n">THETA</span><span class="si">}</span><span class="s2"> (biased +</span><span class="si">{</span><span class="n">mean_theta_hat</span><span class="o">-</span><span class="n">THETA</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"One-sentence takeaway (edit me):"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"OU dX=theta(m-X)dt+sigma dW mean-reverts to m with long-run spread sigma^2/2theta; you can recover"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"(theta,m,sigma) by regressing dX on X, but SHORT samples overstate theta - the pairs-trade trap."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=73be05f8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="Stretch-(optional,-ungraded)">Stretch (optional, ungraded)<a class="anchor-link" href="#Stretch-(optional,-ungraded)">¶</a></h3><ul>
-<li>Plot <code>r.rolling(21).std()</code> — see the vol clusters with your eyes.</li>
-<li>Fit a Student-t to <code>r</code> with <code>stats.t.fit</code> and read off the degrees of freedom (lower ν = fatter tails).</li>
-<li>Compute the autocorrelation of <code>|r|</code> out to lag 20 and observe the slow decay (long memory in volatility → motivates HAR-RV in Unit 025).</li>
+<li><strong>Trade the spread.</strong> Turn the fitted OU into a signal: go long when <code>X</code> is <code>k</code> stationary-std below <code>m</code>,
+short when <code>k</code> above, exit at <code>m</code>. Backtest the P&amp;L on a fresh simulated path and see how it depends on
+the (biased) <code>θ̂</code>.</li>
+<li><strong>Bias vs sample length.</strong> Repeat Task 6 for <code>window</code> in <code>[30, 60, 120, 250, 500]</code> and plot the mean <code>θ̂</code>
+against window length — watch the upward bias shrink as the sample grows.</li>
+<li><strong>Exact (non-Euler) simulation.</strong> OU has an exact one-step update
+<code>X_{t+dt} = m + (X_t − m)e^{−θ dt} + √(σ²/2θ (1−e^{−2θ dt}))·Z</code>. Simulate with it and confirm it matches
+the Euler scheme as <code>dt → 0</code> but is exact for any <code>dt</code>.</li>
+<li><strong>GBM cross-check (Lesson 013).</strong> Simulate GBM <code>S_t = S₀ exp((μ−½σ²)t + σW_t)</code> and confirm <code>log S</code> has
+drift <code>μ − ½σ²</code> — the other SDE you solved this quarter.</li>
+<li><strong>Vasicek rates.</strong> Reinterpret OU as the short interest rate (the Vasicek model) and price a zero-coupon
+bond <code>E[exp(−∫₀ᵀ X_s ds)]</code> by Monte Carlo. This is a preview of the rates track.</li>
 </ul>
 </div>
 </div>

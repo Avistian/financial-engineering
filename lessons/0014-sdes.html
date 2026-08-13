@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 014 — Stochastic Differential Equations: GBM &amp; Ornstein–Uhlenbeck</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+    .step { margin: 0.9rem 0 0.9rem 0; padding-left: 0.9rem; border-left: 3px solid var(--border); }
+    .step strong { color: var(--accent); }
+    .takeaway { font-family: var(--font-sans); font-size: 0.85rem; color: var(--accent);
+                font-weight: 600; margin: 0.6rem 0 1.1rem; }
+    /* "even more basic" scaffolds (2026-08-13): say-it-in-words + do-it-with-numbers */
+    .aloud { background: #eef4f8; border-left: 3px solid #7fa8c9; border-radius: 4px;
+             padding: 0.6rem 0.8rem; margin: 0.7rem 0; font-size: 0.9rem; }
+    .aloud strong { color: #2c5f86; }
+    .numplay { background: #fbf7ec; border: 1px dashed var(--gold); border-radius: 6px;
+               padding: 0.7rem 0.9rem; margin: 0.9rem 0; font-size: 0.9rem; }
+    .numplay strong { color: var(--gold); }
+    .numplay table { margin: 0.5rem 0 0; font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q2</p>
+  <h1>Stochastic Differential Equations: GBM &amp; Ornstein–Uhlenbeck</h1>
+  <p class="subtitle">Lesson 014 · How random quantities evolve — and how to solve for them · ~60 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <div class="callout">
+    <strong>Read this first — how this lesson is paced.</strong> You told me Lessons 012 and 013 were
+    hard to follow. So this one goes slower and more concrete: every new equation gets a
+    <span style="background:#eef4f8;padding:0 .2em;border-radius:3px">say-it-in-words</span> box that
+    reads the symbols aloud like a sentence, and a
+    <span style="background:#fbf7ec;padding:0 .2em;border-radius:3px">with-real-numbers</span> box that
+    plugs in actual numbers so nothing stays abstract. Nothing here needs anything past Itô's lemma from
+    Lesson <a href="0013-ito-lemma.html">013</a> — and we re-state that in one line before we use it.
+  </div>
+
+  <p>
+    So far you have met one random object (Brownian motion, Lesson 012) and one rule for functions of it
+    (Itô's lemma, Lesson 013). Today we use them to describe <strong>how a real quantity changes over
+    time when part of the change is random</strong> — a stock price, an interest rate, the gap between two
+    related stocks. The description is called a <strong>stochastic differential equation</strong>, or
+    <strong>SDE</strong> for short. "Stochastic" is just a fancy word for "random"; "differential
+    equation" means "a rule for how something changes over a tiny step." Put together: <em>an SDE is a
+    rule for how a random quantity nudges forward, one tiny step at a time.</em>
+  </p>
+  <p>
+    Here is the honest map for the hour. First, what an SDE actually <em>is</em>, next to the ordinary
+    (non-random) equations you already know. Then the <strong>one trick</strong> that solves the two SDEs
+    that can be solved by hand — and you already own the trick, it is just Itô's lemma pointed the right
+    way. We solve the stock model (<strong>geometric Brownian motion</strong>) you half-saw last lesson,
+    then the <strong>mean-reverting</strong> model (<strong>Ornstein–Uhlenbeck</strong>) that underlies
+    pairs trading and interest-rate models — the first genuinely new object of the day. We close on a
+    plain-English version of a deep question: when does an SDE even <em>have</em> a solution, and only
+    one?
+  </p>
+
+  <h2>What an SDE is (next to equations you already know)</h2>
+  <p>
+    Start from something with no randomness at all. An <strong>ordinary differential equation</strong>
+    (ODE) is a rule that says "over a tiny time step <code>dt</code>, the quantity <code>x</code> changes
+    by this much." For example, money in a bank account at continuous interest <code>r</code> grows by
+    <code>dx = r·x·dt</code>: the change is "rate times balance times the length of the step." Given a
+    starting balance, the future is <em>completely determined</em> — run it twice and you get the exact
+    same curve, <code>x_t = x_0 e^{rt}</code>.
+  </p>
+  <p>
+    An SDE adds one thing: a <strong>random shove</strong> on every step, built from the Brownian motion
+    <code>W</code> of Lesson 012. We write the general one-dimensional SDE as
+  </p>
+  <div class="formula">dX = a(X, t)·dt &nbsp;+&nbsp; b(X, t)·dW</div>
+  <div class="aloud">
+    <strong>Say it in words.</strong> "Over the next tiny step, <code>X</code> moves by two things added
+    together: a <em>steady push</em> <code>a·dt</code> — the direction it is pulled, times the length of
+    the step — plus a <em>random shove</em> <code>b·dW</code> — a fresh coin-flip-sized kick whose typical
+    size is <code>b</code>." The steady push <code>a</code> is called the <strong>drift</strong>; the
+    shove size <code>b</code> is called the <strong>diffusion</strong> (or volatility). Both may depend on
+    where <code>X</code> currently is and on the time.
+  </div>
+  <p>
+    The random shove is what makes it an SDE and not an ODE. Run an SDE twice and you get <em>two
+    different paths</em>, because <code>dW</code> is a fresh random draw each time (mean <code>0</code>,
+    variance <code>dt</code> — Lesson 012). "Solving" an SDE therefore cannot mean "find the one curve."
+    It means one of two things, and we will do both:
+  </p>
+  <ul>
+    <li><strong>A closed-form solution:</strong> a formula for <code>X_t</code> written directly in terms
+      of <code>W_t</code> (and <code>t</code>), so you can read off its average, its spread, and simulate
+      it in one line. Only special SDEs have one — the two in this lesson do.</li>
+    <li><strong>A simulation:</strong> take the SDE literally as a recipe and step it forward on a
+      computer (<code>X_{next} = X_{now} + a·dt + b·√dt·(a standard normal draw)</code>). This always
+      works; it is the whole of the lab.</li>
+  </ul>
+  <p class="takeaway">
+    Takeaway: an SDE is an ODE plus a random shove <code>b·dW</code>. Drift <code>a</code> = the steady
+    pull; diffusion <code>b</code> = the size of the random kick. "Solving" means a formula for
+    <code>X_t</code>, or a step-by-step simulation.
+  </p>
+
+  <h2>Re-warm: Itô's lemma in one line (we are about to lean on it)</h2>
+  <p>
+    Everything today rests on one result from Lesson <a href="0013-ito-lemma.html">013</a>. Let us restate
+    it so it is fresh, with nothing assumed. If <code>X</code> follows an Itô process
+    <code>dX = a·dt + b·dW</code>, and <code>f(t, X)</code> is a smooth function of time and of
+    <code>X</code>, then <code>f</code> itself moves according to
+  </p>
+  <div class="formula">
+    df = ( f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub> ) dt &nbsp;+&nbsp; b·f<sub>x</sub>·dW
+  </div>
+  <div class="aloud">
+    <strong>Say it in words.</strong> "How <code>f</code> changes = [ how <code>f</code> drifts with time
+    on its own (<code>f<sub>t</sub></code>), plus the process's drift carried through the slope
+    (<code>a·f<sub>x</sub></code>), plus the curvature correction (<code>½ b²·f<sub>xx</sub></code>) ]
+    times <code>dt</code>, plus a random part of size <code>b·f<sub>x</sub></code> times <code>dW</code>."
+    Here <code>f<sub>t</sub></code>, <code>f<sub>x</sub></code>, <code>f<sub>xx</sub></code> are just
+    "how <code>f</code> changes with time," "…with <code>X</code>," and "how that slope itself bends."
+  </div>
+  <p>
+    Two facts from 013 we will use again and again:
+  </p>
+  <ul>
+    <li>The <code>dW</code> part <strong>averages to zero</strong> — any <code>∫ … dW</code> is a
+      martingale, a fair game with no built-in trend. So <em>all</em> the average drift lives in the
+      <code>dt</code> bracket.</li>
+    <li>The curvature term <code>½ b² f<sub>xx</sub></code> is <strong>zero when <code>f</code> is a
+      straight line in <code>X</code></strong> (because then <code>f<sub>xx</sub> = 0</code>). Hold onto
+      this — it is exactly why the Ornstein–Uhlenbeck solve below is clean.</li>
+  </ul>
+
+  <h2>The one trick for solving an SDE</h2>
+  <p>
+    Here is the whole idea, in one sentence, and it is the sentence to remember from this lesson:
+  </p>
+  <div class="callout">
+    <strong>The trick.</strong> To solve an SDE for <code>X</code>, find a function of <code>X</code>
+    whose Itô expansion has <em>no <code>X</code> left on the right-hand side</em> — only <code>t</code>
+    and <code>dW</code>. Once the right side is free of <code>X</code>, you can just add up (integrate)
+    the steps directly, because there is nothing left that depends on where you are.
+  </div>
+  <p>
+    Why does that help? An SDE like <code>dX = a(X)dt + b(X)dW</code> is hard because the push and the
+    shove depend on the current <code>X</code> — a feedback loop. If we can find a cleverly chosen
+    function <code>Y = f(t, X)</code> whose change <code>dY</code> has the <code>X</code> cancelled out,
+    then <code>Y</code> is easy: its steps no longer refer to themselves, so summing them is ordinary
+    integration. We solve for <code>Y</code>, then undo <code>f</code> to get <code>X</code>. The only art
+    is choosing <code>f</code>. For our two SDEs the right choices are famous: <code>log S</code> for the
+    stock, and <code>e<sup>θt</sup>X</code> for the mean-reverter.
+  </p>
+
+  <h2>Worked solve 1: geometric Brownian motion (the stock)</h2>
+  <p>
+    The standard model of a stock price says its <em>percentage</em> moves are Brownian — a fixed average
+    growth plus a random wiggle proportional to the current price (so the price cannot go negative). This
+    is <strong>geometric Brownian motion</strong> (GBM):
+  </p>
+  <div class="formula">dS = μS·dt + σS·dW &nbsp;&nbsp;(drift <code>a = μS</code>, diffusion <code>b = σS</code>)</div>
+  <div class="aloud">
+    <strong>Say it in words.</strong> "Over the next step, the price <code>S</code> moves by: average
+    growth rate <code>μ</code> times the current price times the step, plus volatility <code>σ</code>
+    times the current price times a random kick." Both terms scale with <code>S</code>, which is why a
+    \$500 stock and a \$5 stock can have the same <em>percentage</em> behaviour.
+  </div>
+  <p>
+    Apply the trick: which function of <code>S</code> kills the <code>S</code> on the right? The answer is
+    <code>log S</code> (the natural logarithm), because dividing by <code>S</code> is exactly what its
+    slope does. Let <code>f(S) = log S</code>. Re-warm the calculus: the slope of <code>log S</code> is
+    <code>f<sub>x</sub> = 1/S</code>, and the slope of <code>1/S</code> is <code>f<sub>xx</sub> =
+    −1/S²</code>; there is no direct time dependence, so <code>f<sub>t</sub> = 0</code>. Feed these into
+    Itô's lemma, slow lane, one line at a time:
+  </p>
+  <div class="step">
+    <strong>Drift bracket.</strong> <code>f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub>
+    = 0 + (μS)·(1/S) + ½·(σS)²·(−1/S²)</code>. Now cancel the <code>S</code>'s:
+    <code>μS/S = μ</code>, and <code>½·σ²S²·(−1/S²) = −½σ²</code>. So the drift is
+    <strong><code>μ − ½σ²</code></strong> — free of <code>S</code>. ✔ The trick worked.
+  </div>
+  <div class="step">
+    <strong>Random part.</strong> <code>b·f<sub>x</sub> = (σS)·(1/S) = σ</code> — also free of
+    <code>S</code>. So the <code>dW</code> term is just <code>σ·dW</code>.
+  </div>
+  <div class="formula">d(log S) = (μ − ½σ²)·dt + σ·dW</div>
+  <p>
+    The right-hand side has no <code>S</code> in it — only constants and <code>dW</code>. So we can add up
+    the steps from <code>0</code> to <code>t</code> directly. The <code>dt</code> pieces add to
+    <code>(μ − ½σ²)·t</code>; the <code>σ dW</code> pieces add to <code>σ·W<sub>t</sub></code> (that is
+    just what "sum of the shocks" means, since here the position <code>σ</code> is constant). So:
+  </p>
+  <div class="formula">
+    log S<sub>t</sub> − log S<sub>0</sub> = (μ − ½σ²)·t + σ·W<sub>t</sub>
+    &nbsp;⟹&nbsp; <strong>S<sub>t</sub> = S<sub>0</sub>·exp( (μ − ½σ²)·t + σ·W<sub>t</sub> )</strong>
+  </div>
+  <p>
+    That closed form <em>is</em> the solved GBM SDE. It is the formula every Monte-Carlo stock simulator
+    uses — and the <code>−½σ²</code> in the exponent is the Itô correction you derived last lesson. Drop
+    it and your simulated prices drift too high. The picture below is the same volatility-drag widget from
+    Lesson 013, here as a reminder that the <em>mean</em> price grows at <code>μ</code> while the
+    <em>typical</em> (median) path grows only at <code>μ − ½σ²</code>.
+  </p>
+  <div id="gbm"></div>
+  <p class="viz-cap">
+    <strong>The solved stock SDE.</strong> Faint lines are simulated <code>S<sub>t</sub></code> paths from
+    the closed form. The <span style="color:#0d5c4b;font-weight:600">solid mean</span> grows at
+    <code>μ</code>; the <span style="color:#b23a48;font-weight:600">dashed median</span> grows at
+    <code>μ − ½σ²</code>. Slide <em>σ</em>: more volatility, bigger gap — the drag <code>½σ²</code>.
+  </p>
+  <p class="takeaway">
+    Takeaway: GBM solves to <code>S<sub>t</sub> = S<sub>0</sub>·exp((μ − ½σ²)t + σW<sub>t</sub>)</code>,
+    found by applying Itô to <code>log S</code> — the function that cancels the <code>S</code>.
+  </p>
+
+  <h2>Predict before you read on</h2>
+  <p>
+    Now the new model. A stock <em>wanders</em>: nothing pulls it back to where it started, and on average
+    it grows forever. But many quantities are different — they get <em>pulled back</em> toward a normal
+    level whenever they stray. The gap between two related stocks, an interest rate, a commodity's
+    inventory-driven price: push them away and a force drags them home. Before we write the equation,
+    predict what such a process does in the long run.
+  </p>
+  <div id="predict1"></div>
+
+  <h2>The Ornstein–Uhlenbeck process (mean reversion)</h2>
+  <p>
+    Picture a rubber band, or a spring. Tie one end to a fixed post at level <code>m</code> and the other
+    to your quantity <code>X</code>. Whenever <code>X</code> is above <code>m</code>, the band pulls it
+    down; whenever it is below, the band pulls it up; and the pull is stronger the further away it is.
+    Meanwhile the world keeps giving it random shoves. That is the <strong>Ornstein–Uhlenbeck (OU)
+    process</strong> — the simplest "pulled-back-to-normal," or <strong>mean-reverting</strong>, random
+    process. Its SDE:
+  </p>
+  <div class="formula">dX = θ(m − X)·dt + σ·dW</div>
+  <div class="aloud">
+    <strong>Say it in words.</strong> "Over the next step, <code>X</code> moves by: the pull strength
+    <code>θ</code> times how far it is <em>below</em> the target (<code>m − X</code>) times the step —
+    plus a random shove of size <code>σ</code>." Three plain-English knobs:
+    <ul style="margin:0.4rem 0 0">
+      <li><strong><code>m</code> — the target level</strong> ("where the post is"): the value it is pulled
+        toward. Traders call it the <em>long-run mean</em>.</li>
+      <li><strong><code>θ</code> — the pull strength</strong> ("how stiff the spring is"; read "theta"):
+        big <code>θ</code> snaps back fast, small <code>θ</code> drifts home lazily.</li>
+      <li><strong><code>σ</code> — the shove size</strong> ("how hard the world buffets it"): the random
+        volatility.</li>
+    </ul>
+  </div>
+  <p>
+    Look at the drift term <code>θ(m − X)</code> and notice how it produces the rubber-band behaviour, no
+    algebra needed. If <code>X &gt; m</code> then <code>m − X</code> is negative, so the drift is negative
+    — it pushes <code>X</code> <em>down</em>, back toward <code>m</code>. If <code>X &lt; m</code> then
+    <code>m − X</code> is positive and the drift pushes <code>X</code> <em>up</em>. Right at
+    <code>X = m</code> the drift is zero — no pull, just the random shoves. That single sign flip is the
+    whole of mean reversion.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers.</strong> Take <code>θ = 2</code>, <code>m = 100</code>, and suppose right
+    now <code>X = 80</code> (below target). The steady pull this instant is
+    <code>θ(m − X) = 2·(100 − 80) = +40</code> per unit time — a strong upward tug. If instead
+    <code>X = 130</code> (above target), the pull is <code>2·(100 − 130) = −60</code> per unit time —
+    downward, and stronger, because it strayed further. The rubber band always points home, and pulls
+    harder the further out you are.
+  </div>
+  <p>
+    Watch it happen. Below, many OU paths start at <code>X<sub>0</sub> = 80</code> and are pulled toward
+    <code>m = 100</code>. The slider is the pull strength <code>θ</code>.
+  </p>
+  <div id="ou"></div>
+  <p class="viz-cap">
+    <strong>Mean reversion, live.</strong> Faint lines are OU paths from <code>X<sub>0</sub> = 80</code>;
+    the <span style="color:#0d5c4b;font-weight:600">solid curve is the average</span>, bending up toward
+    <code>m = 100</code>; the <span style="color:#9a6b1f;font-weight:600">dashed band</span> is the
+    long-run spread <code>m ± √(σ²/2θ)</code>. Slide <em>θ</em> up: the average snaps to <code>m</code>
+    faster <em>and</em> the band tightens — a stiffer spring reverts quicker and holds closer.
+  </p>
+
+  <h2>Worked solve 2: solving OU (the integrating-factor trick)</h2>
+  <p>
+    Can we get a closed form for OU too? Yes — same trick, different function. The <code>X</code> we want
+    to cancel sits inside the drift <code>θ(m − X)</code>. The classic move (borrowed straight from how
+    you solve the non-random version of this ODE) is to multiply by a growing factor
+    <code>e<sup>θt</sup></code> — an <strong>integrating factor</strong> — chosen so the awkward
+    <code>−θX</code> term cancels. So try the function
+  </p>
+  <div class="formula">f(t, X) = e<sup>θt</sup>·X</div>
+  <p>
+    Re-warm its derivatives. As a function of <code>X</code> it is a <em>straight line</em> (just
+    <code>X</code> times something), so: <code>f<sub>x</sub> = e<sup>θt</sup></code> and
+    <code>f<sub>xx</sub> = 0</code>. As a function of time, <code>f<sub>t</sub> =
+    θe<sup>θt</sup>·X</code>. Because <code>f<sub>xx</sub> = 0</code>, the whole Itô correction vanishes —
+    <em>this</em> is where last lesson's "linear function ⇒ no correction" fact pays off. Now feed Itô's
+    lemma with the OU coefficients <code>a = θ(m − X)</code> and <code>b = σ</code>, one line at a time:
+  </p>
+  <div class="step">
+    <strong>Write the drift bracket.</strong>
+    <code>f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub></code>
+    <code>= θe<sup>θt</sup>X + θ(m − X)·e<sup>θt</sup> + ½·σ²·0</code>.
+  </div>
+  <div class="step">
+    <strong>Expand the middle term.</strong> <code>θ(m − X)e<sup>θt</sup> = θm·e<sup>θt</sup> −
+    θX·e<sup>θt</sup></code>. Substitute back:
+    <code>θe<sup>θt</sup>X + θm·e<sup>θt</sup> − θX·e<sup>θt</sup></code>.
+  </div>
+  <div class="step">
+    <strong>Cancel.</strong> The first and third terms are <code>+θe<sup>θt</sup>X</code> and
+    <code>−θe<sup>θt</sup>X</code> — they cancel exactly. The <code>X</code> is gone. ✔ What survives is
+    just <code>θm·e<sup>θt</sup></code>.
+  </div>
+  <div class="step">
+    <strong>Random part.</strong> <code>b·f<sub>x</sub> = σ·e<sup>θt</sup></code>. So altogether:
+  </div>
+  <div class="formula">d( e<sup>θt</sup>X ) = θm·e<sup>θt</sup>·dt + σ·e<sup>θt</sup>·dW</div>
+  <p>
+    The right side has no <code>X</code> — only <code>t</code> and <code>dW</code>. Add up the steps from
+    <code>0</code> to <code>t</code>. The <code>dt</code> piece: <code>θm·∫<sub>0</sub><sup>t</sup>
+    e<sup>θs</sup>ds = θm·(e<sup>θt</sup> − 1)/θ = m(e<sup>θt</sup> − 1)</code> (ordinary calculus:
+    the integral of <code>e<sup>θs</sup></code> is <code>e<sup>θs</sup>/θ</code>). The <code>dW</code>
+    piece stays as an Itô integral, <code>σ∫<sub>0</sub><sup>t</sup>e<sup>θs</sup>dW<sub>s</sub></code>.
+    And the left side added up is <code>e<sup>θt</sup>X<sub>t</sub> − e<sup>0</sup>X<sub>0</sub> =
+    e<sup>θt</sup>X<sub>t</sub> − X<sub>0</sub></code>. Put it together and divide both sides by
+    <code>e<sup>θt</sup></code>:
+  </p>
+  <div class="formula">
+    <strong>X<sub>t</sub> = X<sub>0</sub>·e<sup>−θt</sup> + m·(1 − e<sup>−θt</sup>) +
+    σ·∫<sub>0</sub><sup>t</sup> e<sup>−θ(t−s)</sup> dW<sub>s</sub></strong>
+  </div>
+  <p class="takeaway">
+    Takeaway: OU solves to three pieces — a fading memory of the start
+    <code>X<sub>0</sub>e<sup>−θt</sup></code>, a pull toward the target <code>m(1 − e<sup>−θt</sup>)</code>,
+    and a running noise term with mean zero. Found by applying Itô to the straight-line function
+    <code>e<sup>θt</sup>X</code> (so no correction term).
+  </p>
+
+  <h2>Reading the OU solution (what those three pieces mean)</h2>
+  <p>
+    A formula you cannot read is useless, so let us read each piece in plain words, then get its average
+    and its spread.
+  </p>
+  <ul>
+    <li><strong><code>X<sub>0</sub>·e<sup>−θt</sup></code> — the fading memory.</strong> The starting
+      value's influence shrinks toward zero as time passes. Bigger <code>θ</code> (stiffer spring) forgets
+      the start faster.</li>
+    <li><strong><code>m·(1 − e<sup>−θt</sup>)</code> — the pull home.</strong> Starts at <code>0</code>
+      and climbs to <code>m</code>. So early on the process still remembers <code>X<sub>0</sub></code>;
+      late on it has been dragged to <code>m</code>.</li>
+    <li><strong><code>σ·∫e<sup>−θ(t−s)</sup>dW</code> — the noise.</strong> An Itô integral, so its
+      average is <strong>zero</strong> (a martingale, Lesson 013). It is what makes each path jiggle
+      around the average instead of tracing it exactly.</li>
+  </ul>
+  <p>
+    <strong>The average.</strong> Because the noise term averages to zero, the mean of <code>X<sub>t</sub></code>
+    is just the first two pieces:
+  </p>
+  <div class="formula">E[X<sub>t</sub>] = X<sub>0</sub>·e<sup>−θt</sup> + m·(1 − e<sup>−θt</sup>)</div>
+  <p>
+    As <code>t</code> grows, <code>e<sup>−θt</sup> → 0</code>, so <code>E[X<sub>t</sub>] → m</code>: on
+    average it ends up exactly at the target. That is your predicted answer confirmed.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers.</strong> <code>θ = 2</code>, <code>m = 100</code>,
+    <code>X<sub>0</sub> = 80</code>. At <code>t = 1</code>: <code>e<sup>−2</sup> = 0.135</code>, so
+    <code>E[X<sub>1</sub>] = 80·0.135 + 100·(1 − 0.135) = 10.8 + 86.5 = 97.3</code>. Already almost home.
+    The gap to <code>m</code> shrinks by half every <strong>half-life = ln 2 / θ = 0.693 / 2 =
+    0.35</strong> units of time. (Read "half-life" like radioactive decay: the time for the remaining gap
+    to <code>m</code> to halve.)
+  </div>
+  <p>
+    <strong>The spread.</strong> How far do paths jiggle from that average? The variance comes from the
+    noise term. We need one tool from Lesson 013, re-warmed: the variance of an Itô integral
+    <code>∫ g(s) dW<sub>s</sub></code> is <code>∫ g(s)² ds</code> — the "<strong>Itô isometry</strong>."
+    The plain reason: the shocks on different steps are independent (Lesson 012), and variances of
+    independent things <em>add</em>; each little step contributes <code>g(s)²·(variance of dW) =
+    g(s)²·ds</code>. Applying it with <code>g(s) = σe<sup>−θ(t−s)</sup></code>:
+  </p>
+  <div class="formula">
+    Var(X<sub>t</sub>) = σ²·∫<sub>0</sub><sup>t</sup> e<sup>−2θ(t−s)</sup> ds =
+    (σ² / 2θ)·(1 − e<sup>−2θt</sup>) &nbsp;⟶&nbsp; σ² / 2θ &nbsp;(as t grows)
+  </div>
+  <p>
+    So after a while OU settles into a steady bell-curve wobble: <strong>normal, centred at
+    <code>m</code>, with variance <code>σ²/2θ</code></strong>. This never-changing long-run distribution
+    is called the <strong>stationary distribution</strong> ("stationary" = it stops changing with time).
+    Notice the tug-of-war in <code>σ²/2θ</code>: more shoving (<code>σ</code>) widens the wobble; a
+    stiffer spring (<code>θ</code>) narrows it. That is the dashed band in the widget above.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers.</strong> <code>σ = 10</code>, <code>θ = 2</code>: long-run variance
+    <code>σ²/2θ = 100/4 = 25</code>, so the long-run <em>standard deviation</em> is
+    <code>√25 = 5</code>. The process ends up bouncing around <code>100 ± 5</code>. Double the pull to
+    <code>θ = 4</code> and the spread shrinks to <code>√(100/8) = 3.5</code>: a stiffer spring holds it
+    closer to home.
+  </div>
+
+  <h2>Why mean reversion is a big deal for your mission</h2>
+  <p>
+    OU is not an academic toy — it is one of the most-used models on a systematic desk, and it maps
+    straight onto the alpha you are training to find.
+  </p>
+  <ul>
+    <li><strong>Pairs trading / statistical arbitrage.</strong> Take two similar stocks (say two oil
+      majors). Their price <em>gap</em> — the "spread" — tends to wander away and then snap back. Model
+      that spread as OU: when it is far below <code>m</code>, the model says "it is pulled up" — so you
+      buy the cheap one and short the rich one and wait for reversion. <code>θ</code> tells you how fast
+      to expect the payoff; <code>σ²/2θ</code> tells you how wide the swings (and losses) can get before
+      it reverts.</li>
+    <li><strong>Interest-rate models.</strong> The Vasicek model of the short rate is literally an OU
+      process: rates get pulled toward a long-run level. You will meet it again in the rates track.</li>
+    <li><strong>Anything that "normalises."</strong> Volatility, inventory, order-book imbalance — many
+      quantities revert. OU is the first, simplest tool for all of them, and the half-life
+      <code>ln2/θ</code> is the number you quote to say "how long until it comes back."</li>
+  </ul>
+
+  <h2>When does an SDE even have a solution? (existence &amp; uniqueness, in words)</h2>
+  <p>
+    We wrote down SDEs and solved two of them. But should we take for granted that an SDE <em>has</em> a
+    solution at all — and only one? Not always. This is the "existence and uniqueness" question, and you
+    only need the intuition, not the proof (the theorem is in Øksendal, today's reading). Two conditions
+    on the drift <code>a</code> and diffusion <code>b</code> guarantee a single, sensible solution for all
+    time. Both have plain-English meanings.
+  </p>
+  <div class="step">
+    <strong>Condition 1 — bounded steepness ("Lipschitz").</strong> The coefficients must not change
+    <em>infinitely fast</em> as <code>X</code> changes: there is some finite ceiling <code>K</code> on how
+    steeply <code>a</code> and <code>b</code> can respond to a change in <code>X</code>
+    (<code>|a(x) − a(y)| ≤ K|x − y|</code>, and likewise for <code>b</code>). Why it matters: if two paths
+    start a hair apart, bounded steepness keeps them from instantly flying apart — so the path is pinned
+    down <em>uniquely</em> by its noise.
+  </div>
+  <div class="step">
+    <strong>Condition 2 — no faster-than-linear growth.</strong> The coefficients must not grow faster
+    than a straight line in <code>X</code>: <code>|a(x)| ≤ C(1 + |x|)</code>, and likewise for
+    <code>b</code>. Why it matters: if the drift rockets up faster than <code>X</code> itself, the process
+    can accelerate so hard it reaches <em>infinity in a finite time</em> — it "blows up," and no solution
+    exists past that instant.
+  </div>
+  <p>
+    See condition 2 fail. Forget randomness for a second (the drift alone causes the trouble). Compare two
+    non-random rules from the same start <code>x<sub>0</sub></code>: a linear-growth drift
+    <code>dx/dt = x</code> (solution <code>x<sub>0</sub>e<sup>t</sup></code> — big, but finite forever)
+    versus a super-linear drift <code>dx/dt = x²</code>. The second solves to
+    <code>x(t) = x<sub>0</sub>/(1 − x<sub>0</sub>t)</code>, which shoots to infinity at
+    <code>t* = 1/x<sub>0</sub></code> — a wall in finite time.
+  </p>
+  <div id="explosion"></div>
+  <p class="viz-cap">
+    <strong>Why the drift can't grow too fast.</strong> Same start <code>x<sub>0</sub></code>, two drifts.
+    <span style="color:#0d5c4b;font-weight:600">Linear growth <code>dx/dt = x</code></span> stays finite.
+    <span style="color:#b23a48;font-weight:600">Super-linear <code>dx/dt = x²</code></span> hits infinity
+    at the dashed wall <code>t* = 1/x<sub>0</sub></code>. Slide <em>x<sub>0</sub></em> up and the wall
+    marches left — bigger starts blow up sooner. Faster-than-linear growth ⇒ no global solution; that is
+    what condition 2 forbids.
+  </p>
+  <div class="callout">
+    <strong>The reassuring part.</strong> Both SDEs in this lesson pass both tests. GBM's coefficients
+    <code>μS</code> and <code>σS</code> are straight lines in <code>S</code> (steepness capped at
+    <code>μ</code> and <code>σ</code>; growth exactly linear). OU's <code>θ(m − X)</code> and
+    <code>σ</code> are likewise linear (in fact OU's pull gets <em>stronger</em> as it strays, which only
+    helps). So both are globally well-posed — one solution, for all time. The conditions are not red tape;
+    they are the fine print that tells you your model will not silently explode.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers.</strong> <code>dx/dt = x²</code> from <code>x<sub>0</sub> = 2</code> blows
+    up at <code>t* = 1/2 = 0.5</code>. From <code>x<sub>0</sub> = 0.5</code> it lasts until
+    <code>t* = 1/0.5 = 2</code>. Meanwhile <code>dx/dt = x</code> from <code>x<sub>0</sub> = 2</code>
+    reaches only <code>2e<sup>2</sup> ≈ 14.8</code> at <code>t = 2</code> — large, but perfectly finite.
+    Same start, wildly different fate, purely because one drift grows too fast.
+  </div>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>What this buys you</h2>
+  <ul>
+    <li><strong>The simulation engine for everything ahead.</strong> Every pricing lab (Monte-Carlo
+      options, Lesson 020) simulates GBM with the solved form — the <code>−½σ²</code> included. Every
+      mean-reversion strategy simulates OU. You now know where both formulas come from.</li>
+    <li><strong>The bridge to pricing.</strong> Lesson 015 (Girsanov) changes the drift <code>μ</code> to
+      the risk-free rate <code>r</code> to get "risk-neutral" prices; Lesson 016 turns the GBM SDE into
+      the Black–Scholes PDE by hedging away the <code>dW</code>. Both start from the SDE on this page.</li>
+    <li><strong>Direct alpha.</strong> Fitting an OU process to a spread — estimating <code>θ</code>,
+      <code>m</code>, <code>σ</code> — is the core of a pairs-trading signal. That is exactly the lab.</li>
+  </ul>
+  <div class="callout">
+    <strong>The honest warning (failure mode first, as always).</strong> A solved SDE is exact
+    <em>for its model</em>, and both models here lie in the familiar ways. GBM inherits all of Brownian
+    motion's flaws from Lesson <a href="0004-returns-stylized-facts.html">004</a>: constant volatility
+    (real vol clusters), Gaussian shocks (real tails are fat), no jumps (real prices gap). OU assumes the
+    pull strength <code>θ</code> and level <code>m</code> are <em>constant and known</em> — but in a real
+    spread they drift, and a "mean-reverting" pair can quietly stop reverting right when you have bet on
+    it (the relationship breaks). Estimating <code>θ</code> from a short, noisy sample is famously biased
+    toward "reverts faster than it really does." Treat the math as exact machinery; never confuse "exact
+    given the model" with "true."
+  </div>
+
+  <div class="trap">
+    <strong>Trap — the six ways this material bites.</strong>
+    <strong>(1) Forgetting the <code>−½σ²</code> when simulating GBM.</strong> Using
+    <code>S<sub>0</sub>e<sup>μt+σW</sup></code> (no correction) makes prices drift too high; the solved
+    SDE carries <code>μ − ½σ²</code>.
+    <strong>(2) Reading <code>θ(m − X)</code> backwards.</strong> The pull is toward <code>m</code>: when
+    <code>X</code> is below <code>m</code> the drift is <em>positive</em> (up). Flip the sign and you have
+    an anti-reverting, exploding process.
+    <strong>(3) Confusing the two spreads of OU.</strong> The mean marches to <code>m</code>; the
+    <em>wobble</em> settles to <code>σ²/2θ</code>. They are different questions — where it centres vs how
+    wide it bounces.
+    <strong>(4) Expecting the noise term to add drift.</strong> <code>σ∫e<sup>−θ(t−s)</sup>dW</code> is an
+    Itô integral: mean zero. All the average behaviour is in the first two pieces.
+    <strong>(5) Adding an Itô correction to the OU solve.</strong> <code>e<sup>θt</sup>X</code> is linear
+    in <code>X</code> (<code>f<sub>xx</sub>=0</code>), so there is <em>no</em> <code>½b²f<sub>xx</sub></code>
+    term — unlike the GBM/<code>log</code> solve. Match the correction to the curvature.
+    <strong>(6) Assuming every SDE has a nice solution.</strong> Most do not; a faster-than-linear drift
+    can blow up in finite time. GBM and OU are the lucky, solvable, globally-well-posed cases.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+  <div id="quiz5"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“Why can we solve GBM and OU by hand but almost nothing else?”</dt>
+    <dd>
+      Because for these two there is a known function that cancels the <code>X</code> on the right —
+      <code>log S</code> for GBM, <code>e<sup>θt</sup>X</code> for OU — turning the self-referential SDE
+      into a plain integral. Most SDEs have no such lucky function, so the right side keeps depending on
+      <code>X</code> and you cannot integrate in closed form. For those you simulate (step the recipe
+      forward) or solve numerically. The two we can do by hand are exactly the two that carry most of the
+      finance you will use, which is why they are worth memorising.
+    </dd>
+    <dt>“The OU noise term still has <code>X</code>-free integrand <code>e<sup>−θ(t−s)</sup></code> —
+      isn't that cheating the ‘no <code>X</code> on the right' rule?”</dt>
+    <dd>
+      No — the rule is that the right side must be free of <code>X</code>, and it is: the integrand
+      <code>e<sup>−θ(t−s)</sup></code> depends only on time, not on the current <code>X</code>. That is
+      precisely why we can leave it as a (well-defined) Itô integral and still read off the mean (zero)
+      and the variance (Itô isometry). If the integrand had contained <code>X</code>, we would be stuck.
+    </dd>
+    <dt>“What exactly is an ‘integrating factor,' and how would I ever guess <code>e<sup>θt</sup></code>?”</dt>
+    <dd>
+      It is the same device from ordinary (non-random) differential equations: to solve
+      <code>dx/dt + θx = θm</code> you multiply through by <code>e<sup>θt</sup></code> so the left side
+      becomes the neat derivative of <code>e<sup>θt</sup>x</code>. You "guess" it because the drift has a
+      <code>−θX</code> term, and <code>e<sup>θt</sup></code> is exactly what turns <code>−θX</code> into a
+      cancellation. The SDE version is identical, with the bonus that <code>e<sup>θt</sup>X</code> is
+      linear in <code>X</code> so Itô adds no correction. If you know the ODE trick, you know the SDE
+      trick.
+    </dd>
+    <dt>“Do quants really fit OU processes, or is this exam material?”</dt>
+    <dd>
+      Really. Estimating <code>(θ, m, σ)</code> for a spread is a standard first pass at a pairs-trade
+      signal, and the half-life <code>ln2/θ</code> is a number PMs ask for directly ("how long is this
+      trade?"). The catch — a genuine interview and desk topic — is that <code>θ</code> estimated from
+      short, noisy data is biased high (it looks like it reverts faster than it does), and a pair can stop
+      reverting entirely. Knowing the model <em>and</em> its failure modes is the whole point.
+    </dd>
+    <dt>“Why does existence/uniqueness get only intuition here, not a proof?”</dt>
+    <dd>
+      Because the proof (a fixed-point / Picard-iteration argument, like the ODE version) is a page of
+      analysis that does not change how you <em>use</em> SDEs, whereas the intuition — bounded steepness ⇒
+      one path; linear-growth ⇒ no blow-up — is what actually protects you from writing a model that
+      silently explodes. The full statement and proof are in Øksendal Ch. 5 (today's reading) if you want
+      the rigour; the two conditions and the <code>x²</code> blow-up picture are what to carry around.
+    </dd>
+  </dl>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    <strong>Øksendal, <em>Stochastic Differential Equations</em>, Ch. 5</strong> (see
+    <a href="../RESOURCES.md">RESOURCES.md</a>) — the cleanest treatment of SDEs, the existence/uniqueness
+    theorem (§5.2, the two conditions above), and the OU/GBM examples solved exactly as here. Read §5.1
+    (what an SDE means) and §5.2 (existence &amp; uniqueness). For the two solved examples,
+    <strong>Shreve II §4.4–4.5 and §6.5</strong> is the finance-flavoured companion (GBM in §4.4, the
+    Vasicek/OU rate model later).
+  </p>
+  <p>
+    If Øksendal is terse, Shreve II §4.4 walks the GBM solve at the pace of this lesson, and any pairs-
+    trading note (e.g. the OU spread model) shows the estimation side you will do in the lab.
+  </p>
+  <p>
+    <strong>Reference sheet (keep this one):</strong>
+    <a href="../reference/sdes.html">SDEs: GBM &amp; Ornstein–Uhlenbeck — the working rules</a>.
+    Printable; the page Lessons 015–020 link to instead of re-reading this.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0014-ornstein-uhlenbeck.ipynb"><code>labs/0014-ornstein-uhlenbeck.ipynb</code></a> —
+    simulate an OU process, then <em>fit</em> it: recover <code>(θ, m, σ)</code> from a simulated path by
+    a one-step linear regression, measure the half-life, confirm the stationary spread
+    <code>σ²/2θ</code>, and see the small-sample bias in <code>θ</code> with your own numbers. A unit is
+    done only when its lab runs.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) What single term turns an ODE into
+    an SDE, and what does "solving" an SDE mean? (2) State the one trick for solving an SDE in a sentence.
+    (3) Solve GBM: which function do you apply Itô to, and what is <code>S<sub>t</sub></code>? (4) Write
+    the OU SDE and say in words what <code>θ</code>, <code>m</code>, <code>σ</code> do. (5) Why does the
+    OU solve carry <em>no</em> Itô correction, but the GBM solve does? (6) What are the long-run mean and
+    variance of OU, and what is the half-life? (7) Name the two existence/uniqueness conditions in plain
+    words and give one drift that violates the second. Re-read anything shaky before the lab.
+  </div>
+
+  <div class="ask-teacher">
+    Stuck on the integrating-factor cancellation, want the Itô isometry drilled, or curious how OU becomes
+    a pairs-trade signal? Ask your teacher. Paste your teach-back for grading — and if you can define these
+    terms cold, they go into <a href="../GLOSSARY.md">GLOSSARY.md</a>.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>Stochastic differential equation (SDE)</strong> — <code>dX = a·dt + b·dW</code>: a rule
+      for how a random quantity nudges forward each step; drift <code>a</code> + random shove
+      <code>b·dW</code>.</li>
+    <li><strong>Drift / diffusion</strong> — the steady-pull coefficient <code>a</code> and the
+      random-shove size <code>b</code>.</li>
+    <li><strong>Solving an SDE</strong> — finding a function of <code>X</code> whose Itô expansion is free
+      of <code>X</code> on the right, then integrating; gives a closed form for <code>X<sub>t</sub></code>.</li>
+    <li><strong>Geometric Brownian motion (GBM)</strong> — <code>dS = μS dt + σS dW</code>, solved to
+      <code>S<sub>t</sub> = S<sub>0</sub>e<sup>(μ−½σ²)t + σW<sub>t</sub></sup></code> via
+      Itô on <code>log S</code>.</li>
+    <li><strong>Ornstein–Uhlenbeck (OU) / mean reversion</strong> — <code>dX = θ(m − X)dt + σ dW</code>: a
+      spring pulling <code>X</code> toward level <code>m</code> with strength <code>θ</code>.</li>
+    <li><strong>Integrating factor</strong> — the multiplier <code>e<sup>θt</sup></code> that cancels the
+      <code>−θX</code> term and lets you integrate the OU SDE.</li>
+    <li><strong>Long-run mean / stationary distribution</strong> — OU settles to
+      <code>N(m, σ²/2θ)</code>: centred at <code>m</code>, variance <code>σ²/2θ</code>.</li>
+    <li><strong>Half-life of reversion</strong> — <code>ln2/θ</code>: the time for the gap to <code>m</code>
+      to halve.</li>
+    <li><strong>Itô isometry</strong> — the variance of <code>∫ g dW</code> is <code>∫ g² ds</code>
+      (independent shocks, variances add).</li>
+    <li><strong>Existence &amp; uniqueness</strong> — bounded steepness (Lipschitz) ⇒ one path; no
+      faster-than-linear growth ⇒ no finite-time blow-up.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    Lesson 013 gave you Itô's lemma; today you pointed it at two SDEs and <em>solved</em> them.
+    The pattern is one sentence: <strong>find the function that cancels the <code>X</code>, then
+    integrate</strong> — <code>log S</code> for the wandering stock (GBM), <code>e<sup>θt</sup>X</code>
+    for the mean-reverting spread (OU). You can now read GBM's <code>−½σ²</code> and OU's long-run
+    <code>N(m, σ²/2θ)</code> off their solved forms, and you know the plain-English fine print
+    (bounded steepness, linear growth) that keeps a model from blowing up.
+  </p>
+  <p>
+    Next, Lesson 015 (Girsanov) tilts the drift of an SDE to build the "risk-neutral" world and finally
+    justifies the <code>p* = ½</code> price from Lesson 011. Lesson 016 hedges the <code>dW</code> out of
+    the GBM SDE to get the <strong>Black–Scholes PDE</strong>. By Lesson 020 you price a European option
+    three independent ways — and each one starts from an SDE like the ones you solved today. Run the lab
+    first: simulate OU, then fit it, and watch <code>θ</code>, <code>m</code>, <code>σ</code> come back
+    out of the noise.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0013-ito-lemma.html">← Lesson 013 (The Itô integral &amp; Itô's lemma)</a></li>
+      <li><a href="../reference/sdes.html">Reference: SDEs — GBM &amp; Ornstein–Uhlenbeck</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 015 — Change of measure (Girsanov) →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/ito-viz.js"></script>
+<script src="../assets/sde-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 14, count: 4 });
+
+  Ito.mountGBM(document.getElementById("gbm"), { sigmaPct: 20 });
+  SDE.mountOU(document.getElementById("ou"), { theta: 2.0 });
+  SDE.mountExplosion(document.getElementById("explosion"), { x0: 0.8 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "An Ornstein\u2013Uhlenbeck process dX = \u03b8(m \u2212 X)dt + \u03c3 dW starts at X\u2080 = 80 with target m = 100. Left running for a long time, it:",
+    options: [
+      { label: "settles around m = 100 with a fixed-width wobble", value: "settle" },
+      { label: "keeps growing without bound, like a stock does", value: "grow" },
+      { label: "returns to exactly 80 and stays pinned there", value: "return" },
+      { label: "drifts down to 0 as the pull drains it away", value: "zero" }
+    ],
+    correct: "settle",
+    reveal: "It settles around m = 100. The drift \u03b8(m \u2212 X) pulls X toward m from either side, so the AVERAGE climbs to m (E[X_t] = X\u2080e^{\u2212\u03b8t} + m(1\u2212e^{\u2212\u03b8t}) \u2192 m). It never pins to a single value, though: the random shoves keep it wobbling in a fixed band of width \u221a(\u03c3\u00b2/2\u03b8) \u2014 the stationary distribution N(m, \u03c3\u00b2/2\u03b8)."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: what is the one trick for solving an SDE, how does it solve OU, and why does OU mean-revert while the noise term adds no drift?",
+    points: [
+      "An SDE is dX = a dt + b dW; solving = closed form for X_t or a simulation",
+      "The trick: find f(t,X) whose It\u00f4 expansion has no X left on the right, then integrate",
+      "For OU use f = e^{\u03b8t} X (linear in X, so f_xx = 0 \u21d2 NO It\u00f4 correction)",
+      "It\u00f4 gives d(e^{\u03b8t}X) = \u03b8m e^{\u03b8t} dt + \u03c3 e^{\u03b8t} dW \u2014 the \u00b1\u03b8e^{\u03b8t}X cancel",
+      "Integrate + divide by e^{\u03b8t}: X_t = X\u2080e^{\u2212\u03b8t} + m(1\u2212e^{\u2212\u03b8t}) + \u03c3\u222be^{\u2212\u03b8(t\u2212s)}dW",
+      "Drift \u03b8(m\u2212X) points toward m from both sides \u21d2 mean reversion; E[X_t]\u2192m",
+      "The \u222b\u2026dW noise is an It\u00f4 integral \u21d2 mean 0 (a martingale) \u21d2 adds no drift",
+      "Long-run: N(m, \u03c3\u00b2/2\u03b8); half-life of the pull is ln2/\u03b8"
+    ],
+    model: "An SDE dX = a dt + b dW is an ordinary rule of motion plus a random shove b dW; 'solving' it means either a closed-form formula for X_t in terms of W_t, or a step-by-step simulation. The one trick: find a function f(t,X) whose It\u00f4 expansion leaves no X on the right-hand side \u2014 only t and dW \u2014 because then the steps no longer refer to where you are, and you can integrate directly. For GBM dS = \u03bcS dt + \u03c3S dW the right f is log S: It\u00f4 gives d(log S) = (\u03bc\u2212\u00bd\u03c3\u00b2)dt + \u03c3 dW (S cancels), so S_t = S\u2080 exp((\u03bc\u2212\u00bd\u03c3\u00b2)t + \u03c3W_t). For OU dX = \u03b8(m\u2212X)dt + \u03c3 dW the right f is the integrating factor e^{\u03b8t}X. It is linear in X, so f_xx = 0 and It\u00f4 adds no correction term; It\u00f4 gives d(e^{\u03b8t}X) = \u03b8m e^{\u03b8t} dt + \u03c3 e^{\u03b8t} dW because the +\u03b8e^{\u03b8t}X and \u2212\u03b8e^{\u03b8t}X cancel. Integrating from 0 to t and dividing by e^{\u03b8t} gives X_t = X\u2080e^{\u2212\u03b8t} + m(1\u2212e^{\u2212\u03b8t}) + \u03c3\u222b\u2080\u1d57 e^{\u2212\u03b8(t\u2212s)} dW_s. The drift \u03b8(m\u2212X) pulls X up when it is below m and down when above, so the mean reverts to m (E[X_t] = X\u2080e^{\u2212\u03b8t} + m(1\u2212e^{\u2212\u03b8t}) \u2192 m). The noise term is an It\u00f4 integral, whose mean is zero, so it adds no drift \u2014 it only sets the spread, which by the It\u00f4 isometry is \u03c3\u00b2/2\u03b8 in the long run. So OU settles into N(m, \u03c3\u00b2/2\u03b8), with the gap to m halving every ln2/\u03b8 units of time."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "What single feature makes dX = a\u00b7dt + b\u00b7dW a stochastic (not ordinary) differential equation?",
+    options: [
+      { label: "the random shove b\u00b7dW on every step", value: "a" },
+      { label: "the steady drift term a\u00b7dt it has", value: "b" },
+      { label: "that a and b may depend on time", value: "c" },
+      { label: "the fact that X starts from X\u2080", value: "d" }
+    ],
+    correct: "a",
+    explain: "The b\u00b7dW term is a fresh random draw each step (mean 0, variance dt). Remove it and you have an ordinary differential equation with one determined solution."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "GBM dS = \u03bcS dt + \u03c3S dW is solved by applying It\u00f4 to log S because log S:",
+    options: [
+      { label: "leaves no S on the right to integrate", value: "a" },
+      { label: "is the only positive function of S", value: "b" },
+      { label: "removes the random dW term entirely", value: "c" },
+      { label: "has a zero second derivative in S", value: "d" }
+    ],
+    correct: "a",
+    explain: "d(log S) = (\u03bc\u2212\u00bd\u03c3\u00b2)dt + \u03c3 dW \u2014 the S cancels everywhere, so the right side is free of S and integrates to S_t = S\u2080 e^{(\u03bc\u2212\u00bd\u03c3\u00b2)t+\u03c3W_t}."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Solving OU uses f = e^{\u03b8t}X. Why is there NO \u00bd b\u00b2 f_xx correction in this solve?",
+    options: [
+      { label: "f is linear in X, so f_xx = 0", value: "a" },
+      { label: "the diffusion b = \u03c3 is a constant", value: "b" },
+      { label: "OU has no random dW term at all", value: "c" },
+      { label: "the drift \u03b8(m\u2212X) already cancels it", value: "d" }
+    ],
+    correct: "a",
+    explain: "e^{\u03b8t}X is a straight line in X, so f_xx = 0 and the It\u00f4 correction \u00bd b\u00b2 f_xx vanishes. (Contrast the GBM solve, where log S curves, f_xx = \u22121/S\u00b2, and the \u2212\u00bd\u03c3\u00b2 appears.)"
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "For OU dX = \u03b8(m\u2212X)dt + \u03c3 dW, as time grows the process settles to:",
+    options: [
+      { label: "a wobble around m, variance \u03c3\u00b2/2\u03b8", value: "a" },
+      { label: "the exact value m, with no wobble", value: "b" },
+      { label: "its start X\u2080, variance \u03c3\u00b2/2\u03b8", value: "c" },
+      { label: "a wobble around 0, variance \u03c3\u00b2\u03b8/2", value: "d" }
+    ],
+    correct: "a",
+    explain: "The mean \u2192 m and the variance \u2192 \u03c3\u00b2/2\u03b8, so OU has stationary distribution N(m, \u03c3\u00b2/2\u03b8): centred at m with a fixed-width wobble set by shove size over pull strength."
+  });
+
+  Quiz.mount(document.getElementById("quiz5"), {
+    question: "An SDE is guaranteed one solution for all time when its drift and diffusion:",
+    options: [
+      { label: "have bounded slope and grow at most linearly", value: "a" },
+      { label: "are always positive and never touch zero", value: "b" },
+      { label: "grow faster than linear so they self-correct", value: "c" },
+      { label: "depend only on time and never on X itself", value: "d" }
+    ],
+    correct: "a",
+    explain: "Bounded steepness (Lipschitz) pins the path down uniquely; no faster-than-linear growth stops finite-time blow-up (e.g. dx/dt = x\u00b2 explodes at t*=1/x\u2080). GBM and OU satisfy both."
+  });
+</script>
+</body>
+</html>

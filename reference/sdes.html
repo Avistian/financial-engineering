@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — SDEs: GBM &amp; Ornstein–Uhlenbeck</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    code { font-size: 0.85em; }
+  </style>
+</head>
+<body>
+<article>
+  <h1>Stochastic Differential Equations: GBM &amp; Ornstein–Uhlenbeck</h1>
+  <p class="subtitle">Reference · print-friendly cheat sheet · Units 014–020 (Year 1 Q2)</p>
+
+  <p>
+    How random quantities evolve, and how to solve the two that solve by hand. Taught in
+    <a href="../lessons/0014-sdes.html">Lesson 014</a>; sources Øksendal Ch. 5 and Shreve II §4.4–4.5.
+    Builds on Itô's lemma from <a href="ito-lemma.html">Lesson 013</a>.
+  </p>
+
+  <h2>What an SDE is</h2>
+  <div class="formula">dX = a(X, t)·dt + b(X, t)·dW</div>
+  <p>
+    <strong>Drift</strong> <code>a</code> = steady pull; <strong>diffusion</strong> <code>b</code> = size
+    of the random shove. It is an ODE plus a fresh random kick <code>b·dW</code> each step (mean
+    <code>0</code>, variance <code>dt</code>). "Solving" = a closed form for <code>X<sub>t</sub></code>, or
+    a simulation <code>X<sub>next</sub> = X<sub>now</sub> + a·dt + b·√dt·Z</code> with <code>Z ~ N(0,1)</code>.
+  </p>
+
+  <div class="callout">
+    <strong>The one trick.</strong> To solve an SDE, apply Itô to a function <code>f(t,X)</code> chosen so
+    the right-hand side has <em>no <code>X</code> left</em> — only <code>t</code> and <code>dW</code> — then
+    integrate. <code>log S</code> for GBM; <code>e<sup>θt</sup>X</code> for OU.
+  </div>
+
+  <h2>Geometric Brownian motion (the stock)</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>SDE</td><td><code>dS = μS·dt + σS·dW</code></td></tr>
+      <tr><td>Solve via</td><td>Itô on <code>f = log S</code> ⇒ <code>d(log S) = (μ−½σ²)dt + σ dW</code></td></tr>
+      <tr><td><strong>Solution</strong></td><td><code>S<sub>t</sub> = S<sub>0</sub>·exp((μ − ½σ²)t + σW<sub>t</sub>)</code></td></tr>
+      <tr><td>Mean</td><td><code>E[S<sub>t</sub>] = S<sub>0</sub>e<sup>μt</sup></code> (grows at <code>μ</code>)</td></tr>
+      <tr><td>Median (typical)</td><td><code>S<sub>0</sub>e<sup>(μ−½σ²)t</sup></code> (grows at <code>μ − ½σ²</code>)</td></tr>
+    </tbody>
+  </table>
+  <p>The <code>−½σ²</code> is the Itô correction (log curves down). Leave it out of a simulator and prices drift too high.</p>
+
+  <h2>Ornstein–Uhlenbeck (mean reversion)</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>SDE</td><td><code>dX = θ(m − X)·dt + σ·dW</code></td></tr>
+      <tr><td>Knobs</td><td><code>m</code> = target level · <code>θ</code> = pull strength · <code>σ</code> = shove size</td></tr>
+      <tr><td>Solve via</td><td>Itô on <code>f = e<sup>θt</sup>X</code> (linear ⇒ <em>no</em> correction) ⇒ <code>d(e<sup>θt</sup>X) = θm e<sup>θt</sup>dt + σe<sup>θt</sup>dW</code></td></tr>
+      <tr><td><strong>Solution</strong></td><td><code>X<sub>t</sub> = X<sub>0</sub>e<sup>−θt</sup> + m(1 − e<sup>−θt</sup>) + σ∫<sub>0</sub><sup>t</sup>e<sup>−θ(t−s)</sup>dW<sub>s</sub></code></td></tr>
+      <tr><td>Mean</td><td><code>E[X<sub>t</sub>] = X<sub>0</sub>e<sup>−θt</sup> + m(1 − e<sup>−θt</sup>) → m</code></td></tr>
+      <tr><td>Variance</td><td><code>(σ²/2θ)(1 − e<sup>−2θt</sup>) → σ²/2θ</code></td></tr>
+      <tr><td>Stationary law</td><td><code>N(m, σ²/2θ)</code></td></tr>
+      <tr><td>Half-life</td><td><code>ln 2 / θ</code> (time for the gap to <code>m</code> to halve)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Drift sign is the reversion: <code>X &lt; m</code> ⇒ pull up; <code>X &gt; m</code> ⇒ pull down.
+    Uses of OU: pairs-trading spreads, Vasicek interest rates, any quantity that normalises.
+  </p>
+
+  <h2>Itô isometry (variance of a stochastic integral)</h2>
+  <div class="formula">Var( ∫<sub>0</sub><sup>t</sup> g(s) dW<sub>s</sub> ) = ∫<sub>0</sub><sup>t</sup> g(s)² ds</div>
+  <p>Independent shocks, so variances add. This is how the OU variance <code>σ²/2θ</code> is computed.</p>
+
+  <h2>Existence &amp; uniqueness (intuition)</h2>
+  <table>
+    <thead><tr><th>Condition</th><th>Plain meaning</th><th>Guarantees</th></tr></thead>
+    <tbody>
+      <tr><td>Lipschitz <code>|a(x)−a(y)| ≤ K|x−y|</code></td><td>bounded steepness — coefficients don't change infinitely fast</td><td><strong>uniqueness</strong> (close paths stay close)</td></tr>
+      <tr><td>Linear growth <code>|a(x)| ≤ C(1+|x|)</code></td><td>drift/diffusion grow no faster than a straight line</td><td><strong>existence for all t</strong> (no finite-time blow-up)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Counter-example: <code>dx/dt = x²</code> blows up at <code>t* = 1/x<sub>0</sub></code> (super-linear ⇒
+    no global solution). GBM (<code>μS, σS</code>) and OU (<code>θ(m−X), σ</code>) are linear in the state,
+    so both are globally well-posed.
+  </p>
+
+  <div class="trap">
+    <strong>Traps.</strong> (1) Dropping <code>−½σ²</code> when simulating GBM — prices drift too high.
+    (2) Reading <code>θ(m−X)</code> backwards — pull is <em>toward</em> <code>m</code>. (3) Confusing the
+    mean (→ <code>m</code>) with the wobble (→ <code>σ²/2θ</code>). (4) Expecting the <code>∫…dW</code>
+    noise term to add drift — it is a martingale, mean 0. (5) Adding an Itô correction to the OU solve —
+    <code>e<sup>θt</sup>X</code> is linear, <code>f<sub>xx</sub>=0</code>, no correction. (6) Assuming any
+    SDE has a nice/global solution — a faster-than-linear drift can explode.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="../lessons/0014-sdes.html">Lesson 014</a></li>
+      <li><a href="../labs/0014-ornstein-uhlenbeck.ipynb">Lab 014</a></li>
+      <li><a href="ito-lemma.html">Reference: the Itô integral &amp; Itô's lemma</a></li>
+      <li><a href="brownian-motion.html">Reference: Brownian motion &amp; quadratic variation</a></li>
+      <li><a href="curriculum.html">Curriculum</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

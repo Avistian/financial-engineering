@@ -59,6 +59,7 @@ const files = [
   "assets/projection-viz.js",
   "assets/bm-viz.js",
   "assets/ito-viz.js",
+  "assets/sde-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -341,6 +342,63 @@ trap("Ito GBM numbers: median drift = mu - 1/2 sigma^2 decreases with sigma; mea
   }
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "5"; i.dispatch("input"); i.value = "80"; i.dispatch("input"); });
+});
+
+trap("SDE OU geometry stays inside the canvas (every theta)", () => {
+  for (let s = 5; s <= 100; s += 5) {
+    const canvases = withRecordedCanvas(() => {
+      window.SDE.mountOU(makeEl("div"), { theta: s / 10 });
+    });
+    assertInBounds(canvases[0], "SDEou[theta=" + (s / 10) + "]");
+  }
+});
+
+trap("SDE explosion geometry stays inside the canvas (every x0)", () => {
+  for (let s = 20; s <= 200; s += 10) {
+    const canvases = withRecordedCanvas(() => {
+      window.SDE.mountExplosion(makeEl("div"), { x0: s / 100 });
+    });
+    assertInBounds(canvases[0], "SDEexpl[x0=" + (s / 100) + "]");
+  }
+});
+
+trap("SDE OU numbers: mean -> m, stationary std shrinks with theta, half-life = ln2/theta", () => {
+  const el = makeEl("div");
+  const w = window.SDE.mountOU(el, { theta: 2 });
+  const near = (a, b, tol) => Math.abs(a - b) < (tol || 1e-9);
+  // mean pulls from X0=80 toward m=100; at t=1 it sits strictly between the two
+  if (!(w.endMean(2) > w.X0 && w.endMean(2) < w.m)) throw new Error("OU mean must sit between X0 and m, got " + w.endMean(2));
+  // stronger pull => mean is closer to m by t=1, and the stationary band is tighter
+  let prevMean = -1e9, prevStd = 1e9;
+  for (let th = 0.5; th <= 10; th += 0.5) {
+    const em = w.endMean(th), sd = w.statStd(th);
+    if (!(em > prevMean)) throw new Error("endMean must increase toward m as theta grows at theta=" + th);
+    if (!(sd < prevStd)) throw new Error("stationary std must decrease as theta grows at theta=" + th);
+    if (!near(w.halfLife(th), Math.log(2) / th)) throw new Error("halfLife wrong at theta=" + th);
+    prevMean = em; prevStd = sd;
+  }
+  // stationary variance identity sigma^2 / (2 theta) with sigma=10
+  if (!near(w.statStd(2), Math.sqrt(100 / 4))) throw new Error("statStd(2) should be sqrt(sigma^2/2theta) = 2.5, got " + w.statStd(2));
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "5"; i.dispatch("input"); i.value = "100"; i.dispatch("input"); });
+});
+
+trap("SDE explosion numbers: blow-up time t* = 1/x0 decreases as x0 grows", () => {
+  const el = makeEl("div");
+  const w = window.SDE.mountExplosion(el, { x0: 0.8 });
+  const near = (a, b) => Math.abs(a - b) < 1e-9;
+  if (!near(w.blowupTime(0.5), 2.0)) throw new Error("blowupTime(0.5) should be 2, got " + w.blowupTime(0.5));
+  if (!near(w.blowupTime(2.0), 0.5)) throw new Error("blowupTime(2.0) should be 0.5, got " + w.blowupTime(2.0));
+  let prev = 1e9;
+  for (let s = 20; s <= 200; s += 10) {
+    const ts = w.blowupTime(s / 100);
+    if (!(ts < prev)) throw new Error("blow-up time must decrease as x0 grows at x0=" + (s / 100));
+    prev = ts;
+  }
+  // the linear-growth solution stays finite over the whole window
+  if (!(w.linearAt(2.0, w.T) < 1e3)) throw new Error("linear-growth drift must stay finite over [0,T]");
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "20"; i.dispatch("input"); i.value = "200"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

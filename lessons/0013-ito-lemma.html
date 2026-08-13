@@ -15,6 +15,13 @@
     .step strong { color: var(--accent); }
     .takeaway { font-family: var(--font-sans); font-size: 0.85rem; color: var(--accent);
                 font-weight: 600; margin: 0.6rem 0 1.1rem; }
+    /* "even more basic" scaffolds (2026-08-13): say-it-in-words + do-it-with-numbers */
+    .aloud { background: #eef4f8; border-left: 3px solid #7fa8c9; border-radius: 4px;
+             padding: 0.6rem 0.8rem; margin: 0.7rem 0; font-size: 0.9rem; }
+    .aloud strong { color: #2c5f86; }
+    .numplay { background: #fbf7ec; border: 1px dashed var(--gold); border-radius: 6px;
+               padding: 0.7rem 0.9rem; margin: 0.9rem 0; font-size: 0.9rem; }
+    .numplay strong { color: var(--gold); }
   </style>
 </head>
 <body>
@@ -165,6 +172,13 @@
     motion:
   </div>
   <div class="formula"><strong>df = f′(W)·dW + ½ f″(W)·dt</strong></div>
+  <div class="aloud">
+    <strong>Say it in words.</strong> "How much <code>f</code> changes = its slope <code>f′</code> times
+    the random step <code>dW</code> (the ordinary chain-rule part), plus <em>half its curvature</em>
+    <code>f″</code> times the length of the step <code>dt</code> (the brand-new part)." The only
+    difference from first-year calculus is that second piece — and it appears purely because the squared
+    wiggle <code>(dW)²</code> refuses to vanish.
+  </div>
   <p>
     Two pieces, each with a plain meaning. <code>f′(W)·dW</code> is the <strong>random part</strong> (its
     proper name is the <em>diffusion</em> term): a position <code>f′(W)</code> riding the next Brownian
@@ -190,6 +204,14 @@
     curvature is <code>f″(x) = 2</code> (constant). Drop these into Itô's lemma with input <code>W</code>:
   </p>
   <div class="formula">d(W²) = f′(W)·dW + ½ f″(W)·dt = 2W·dW + ½·2·dt = <strong>2W·dW + dt</strong></div>
+  <div class="numplay">
+    <strong>With real numbers.</strong> Suppose right now <code>W = 3</code>, and take a tiny step
+    <code>dt = 0.01</code> (so a typical wiggle is <code>dW ≈ √0.01 = 0.1</code>). The random part is
+    <code>2W·dW = 2·3·0.1 = 0.6</code> — sometimes <code>+0.6</code>, sometimes <code>−0.6</code>,
+    averaging to <strong>0</strong>. The new part is <code>+dt = +0.01</code> — always positive, never
+    cancels. Over many steps those tiny <code>+0.01</code>'s pile up into a real upward drift, while the
+    <code>±0.6</code>'s wash out. That surviving pile-up is the whole point.
+  </div>
   <p>
     Compare the naive answer. A first-year student applies the ordinary chain rule and writes
     <code>d(W²) = 2W·dW</code>, full stop. They are missing the <code>+ dt</code> — a steady drift of
@@ -279,6 +301,13 @@
   </div>
   <div class="formula">
     <strong>df = ( f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub> ) dt &nbsp;+&nbsp; b·f<sub>x</sub>·dW</strong>
+  </div>
+  <div class="aloud">
+    <strong>Say it in words.</strong> "How <code>f</code> changes = [ its own drift with time
+    (<code>f<sub>t</sub></code>) + the process's push carried through the slope (<code>a·f<sub>x</sub></code>)
+    + the curvature correction (<code>½ b²·f<sub>xx</sub></code>) ] times the step <code>dt</code>, plus a
+    random kick of size <code>b·f<sub>x</sub></code> times <code>dW</code>." Same shape as the simple
+    version, just with the process's own drift <code>a</code> and shove-size <code>b</code> mixed in.
   </div>
   <p>
     This is Itô's lemma in full. Read the two brackets. The <code>dW</code> part,
@@ -572,7 +601,7 @@
     <ul>
       <li><a href="0012-brownian-motion.html">← Lesson 012 (Random walks &amp; Brownian motion)</a></li>
       <li><a href="../reference/ito-lemma.html">Reference: the Itô integral &amp; Itô's lemma</a></li>
-      <li><a href="../reference/curriculum.html">Next: Unit 014 — SDEs: GBM &amp; Ornstein–Uhlenbeck →</a></li>
+      <li><a href="0014-sdes.html">Next: Lesson 014 — SDEs: GBM &amp; Ornstein–Uhlenbeck →</a></li>
       <li><a href="../index.html">Home</a></li>
     </ul>
   </nav>
