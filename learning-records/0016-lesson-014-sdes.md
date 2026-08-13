@@ -11,8 +11,8 @@ matched exactly: "Simulate & fit an OU process."
 The learner reported **difficulty understanding Lessons 012 and 013** and asked to make lessons even more
 basic while keeping the math. Read as *clarity, not length* — the symbols were never grounded hard enough.
 Response, now a **standing decision** (see `NOTES.md` 2026-08-13 and `lesson-pedagogy` skill "Even more
-basic"): every load-bearing equation gets a **say-it-in-words box (`.aloud`)** reading it aloud symbol by
-symbol, and abstract results get a **with-real-numbers box (`.numplay`)** that plugs in small numbers and
+basic"): every load-bearing equation gets an **in-plain-words note (`.plain`, tagged "In plain words")**
+restating it symbol by symbol, and abstract results get a **with-real-numbers box (`.numplay`)** that plugs in small numbers and
 computes a step by hand. Applied throughout 014; **retro-fitted to 013** (three boxes: the simple lemma,
 a `d(W²)` numeric play, the general lemma) since the learner said they will revisit it.
 
@@ -77,7 +77,7 @@ existence/uniqueness conditions, six traps). Builder kept as `scripts/_gen_lab_0
 3. **The θ small-sample bias is the lab punchline.** Make sure the learner internalises that short fits
    overstate reversion — it is a real pairs-trade failure mode and an interview topic.
 4. **Did the "even more basic" turn land?** This is the key open question. Ask the learner directly whether
-   the `.aloud` / `.numplay` boxes in 013 (revisit) and 014 made the difference. If yes, keep them
+   the `.plain` / `.numplay` boxes in 013 (revisit) and 014 made the difference. If yes, keep them
    mandatory on 015–020 (Girsanov and the BS PDE are the next density spikes). If still unclear, the next
    lever is probably *splitting* a lesson, not more boxes.
 5. **015 must reuse the martingale/measure spine.** Girsanov changes the drift of an SDE; introduce it as

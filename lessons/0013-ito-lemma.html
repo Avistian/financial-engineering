@@ -15,10 +15,13 @@
     .step strong { color: var(--accent); }
     .takeaway { font-family: var(--font-sans); font-size: 0.85rem; color: var(--accent);
                 font-weight: 600; margin: 0.6rem 0 1.1rem; }
-    /* "even more basic" scaffolds (2026-08-13): say-it-in-words + do-it-with-numbers */
-    .aloud { background: #eef4f8; border-left: 3px solid #7fa8c9; border-radius: 4px;
-             padding: 0.6rem 0.8rem; margin: 0.7rem 0; font-size: 0.9rem; }
-    .aloud strong { color: #2c5f86; }
+    /* "even more basic" scaffolds (2026-08-13): plain-words reading + with-numbers */
+    .plain { background: var(--bg-soft); border-left: 3px solid var(--accent);
+             border-radius: 0 4px 4px 0; padding: 0.55rem 0.85rem; margin: 0.7rem 0;
+             font-size: 0.9rem; }
+    .plain .tag { font-family: var(--font-sans); font-size: 0.68rem; font-weight: 700;
+                  text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent);
+                  display: block; margin-bottom: 0.2rem; }
     .numplay { background: #fbf7ec; border: 1px dashed var(--gold); border-radius: 6px;
                padding: 0.7rem 0.9rem; margin: 0.9rem 0; font-size: 0.9rem; }
     .numplay strong { color: var(--gold); }
@@ -172,8 +175,8 @@
     motion:
   </div>
   <div class="formula"><strong>df = f′(W)·dW + ½ f″(W)·dt</strong></div>
-  <div class="aloud">
-    <strong>Say it in words.</strong> "How much <code>f</code> changes = its slope <code>f′</code> times
+  <div class="plain">
+    <span class="tag">In plain words</span> "How much <code>f</code> changes = its slope <code>f′</code> times
     the random step <code>dW</code> (the ordinary chain-rule part), plus <em>half its curvature</em>
     <code>f″</code> times the length of the step <code>dt</code> (the brand-new part)." The only
     difference from first-year calculus is that second piece — and it appears purely because the squared
@@ -302,8 +305,8 @@
   <div class="formula">
     <strong>df = ( f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub> ) dt &nbsp;+&nbsp; b·f<sub>x</sub>·dW</strong>
   </div>
-  <div class="aloud">
-    <strong>Say it in words.</strong> "How <code>f</code> changes = [ its own drift with time
+  <div class="plain">
+    <span class="tag">In plain words</span> "How <code>f</code> changes = [ its own drift with time
     (<code>f<sub>t</sub></code>) + the process's push carried through the slope (<code>a·f<sub>x</sub></code>)
     + the curvature correction (<code>½ b²·f<sub>xx</sub></code>) ] times the step <code>dt</code>, plus a
     random kick of size <code>b·f<sub>x</sub></code> times <code>dW</code>." Same shape as the simple

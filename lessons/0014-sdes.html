@@ -15,10 +15,13 @@
     .step strong { color: var(--accent); }
     .takeaway { font-family: var(--font-sans); font-size: 0.85rem; color: var(--accent);
                 font-weight: 600; margin: 0.6rem 0 1.1rem; }
-    /* "even more basic" scaffolds (2026-08-13): say-it-in-words + do-it-with-numbers */
-    .aloud { background: #eef4f8; border-left: 3px solid #7fa8c9; border-radius: 4px;
-             padding: 0.6rem 0.8rem; margin: 0.7rem 0; font-size: 0.9rem; }
-    .aloud strong { color: #2c5f86; }
+    /* "even more basic" scaffolds (2026-08-13): plain-words reading + with-numbers */
+    .plain { background: var(--bg-soft); border-left: 3px solid var(--accent);
+             border-radius: 0 4px 4px 0; padding: 0.55rem 0.85rem; margin: 0.7rem 0;
+             font-size: 0.9rem; }
+    .plain .tag { font-family: var(--font-sans); font-size: 0.68rem; font-weight: 700;
+                  text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent);
+                  display: block; margin-bottom: 0.2rem; }
     .numplay { background: #fbf7ec; border: 1px dashed var(--gold); border-radius: 6px;
                padding: 0.7rem 0.9rem; margin: 0.9rem 0; font-size: 0.9rem; }
     .numplay strong { color: var(--gold); }
@@ -36,9 +39,9 @@
 
   <div class="callout">
     <strong>Read this first — how this lesson is paced.</strong> You told me Lessons 012 and 013 were
-    hard to follow. So this one goes slower and more concrete: every new equation gets a
-    <span style="background:#eef4f8;padding:0 .2em;border-radius:3px">say-it-in-words</span> box that
-    reads the symbols aloud like a sentence, and a
+    hard to follow. So this one goes slower and more concrete: every new equation gets an
+    <span style="background:var(--bg-soft);border-left:3px solid var(--accent);padding:0 .3em">In&nbsp;plain&nbsp;words</span>
+    note that restates it as one sentence, and a
     <span style="background:#fbf7ec;padding:0 .2em;border-radius:3px">with-real-numbers</span> box that
     plugs in actual numbers so nothing stays abstract. Nothing here needs anything past Itô's lemma from
     Lesson <a href="0013-ito-lemma.html">013</a> — and we re-state that in one line before we use it.
@@ -78,8 +81,8 @@
     <code>W</code> of Lesson 012. We write the general one-dimensional SDE as
   </p>
   <div class="formula">dX = a(X, t)·dt &nbsp;+&nbsp; b(X, t)·dW</div>
-  <div class="aloud">
-    <strong>Say it in words.</strong> "Over the next tiny step, <code>X</code> moves by two things added
+  <div class="plain">
+    <span class="tag">In plain words</span> "Over the next tiny step, <code>X</code> moves by two things added
     together: a <em>steady push</em> <code>a·dt</code> — the direction it is pulled, times the length of
     the step — plus a <em>random shove</em> <code>b·dW</code> — a fresh coin-flip-sized kick whose typical
     size is <code>b</code>." The steady push <code>a</code> is called the <strong>drift</strong>; the
@@ -116,8 +119,8 @@
   <div class="formula">
     df = ( f<sub>t</sub> + a·f<sub>x</sub> + ½ b²·f<sub>xx</sub> ) dt &nbsp;+&nbsp; b·f<sub>x</sub>·dW
   </div>
-  <div class="aloud">
-    <strong>Say it in words.</strong> "How <code>f</code> changes = [ how <code>f</code> drifts with time
+  <div class="plain">
+    <span class="tag">In plain words</span> "How <code>f</code> changes = [ how <code>f</code> drifts with time
     on its own (<code>f<sub>t</sub></code>), plus the process's drift carried through the slope
     (<code>a·f<sub>x</sub></code>), plus the curvature correction (<code>½ b²·f<sub>xx</sub></code>) ]
     times <code>dt</code>, plus a random part of size <code>b·f<sub>x</sub></code> times <code>dW</code>."
@@ -163,8 +166,8 @@
     is <strong>geometric Brownian motion</strong> (GBM):
   </p>
   <div class="formula">dS = μS·dt + σS·dW &nbsp;&nbsp;(drift <code>a = μS</code>, diffusion <code>b = σS</code>)</div>
-  <div class="aloud">
-    <strong>Say it in words.</strong> "Over the next step, the price <code>S</code> moves by: average
+  <div class="plain">
+    <span class="tag">In plain words</span> "Over the next step, the price <code>S</code> moves by: average
     growth rate <code>μ</code> times the current price times the step, plus volatility <code>σ</code>
     times the current price times a random kick." Both terms scale with <code>S</code>, which is why a
     \$500 stock and a \$5 stock can have the same <em>percentage</em> behaviour.
@@ -237,8 +240,8 @@
     process. Its SDE:
   </p>
   <div class="formula">dX = θ(m − X)·dt + σ·dW</div>
-  <div class="aloud">
-    <strong>Say it in words.</strong> "Over the next step, <code>X</code> moves by: the pull strength
+  <div class="plain">
+    <span class="tag">In plain words</span> "Over the next step, <code>X</code> moves by: the pull strength
     <code>θ</code> times how far it is <em>below</em> the target (<code>m − X</code>) times the step —
     plus a random shove of size <code>σ</code>." Three plain-English knobs:
     <ul style="margin:0.4rem 0 0">

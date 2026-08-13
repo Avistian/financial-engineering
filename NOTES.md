@@ -99,8 +99,9 @@
   "even more basic (still in math terms though)." So this is *not* a request to drop the math — it is a
   request for the math to be **grounded harder** before it is used. Clarity, not length, is the lever.
 - **Two required devices on every math-heavy lesson (retro-fit where the learner revisits):**
-  1. **Say-it-in-words box (`.aloud`)** right after every load-bearing equation — the equation read aloud
-     as one plain sentence, symbol by symbol, no new notation.
+  1. **In-plain-words note (`.plain`, tagged "In plain words")** right after every load-bearing equation —
+     the equation restated as one plain sentence, symbol by symbol, no new notation. (The learner disliked
+     the earlier "say it aloud" framing — 2026-08-13 — so the label reads "In plain words," not "aloud.")
   2. **With-real-numbers box (`.numplay`)** — plug in actual small numbers and compute a step by hand so
      the formula *does something* concrete before it is trusted abstractly.
 - Both are lesson-local CSS classes (copy from Lesson 014's `<style>`). First applied in **Lesson 014**;
@@ -112,7 +113,7 @@
 ## Length A/B — provisional resolution (2026-08-13)
 - The learner did not pick a KB target; instead they said 012/013 were hard to *understand*. Reading that
   as "the problem was clarity, not length," I am treating length as **"as long as the scaffolding needs"**
-  and pouring the extra budget into `.aloud` / `.numplay` grounding rather than more prose. Lesson 014
+  and pouring the extra budget into `.plain` / `.numplay` grounding rather than more prose. Lesson 014
   landed ~ the 012/013 size band but denser with worked micro-examples. If the learner still finds a
   lesson long *and* unclear, split it; if unclear but fine on length, add more grounding boxes. Keep
   asking only if a future lesson feels genuinely too long in one sitting.
@@ -133,7 +134,7 @@
 - Decide on a compute setup for PyTorch labs (units 073–080) — local GPU vs Colab/cloud.
 - **Length A/B — provisionally resolved (2026-08-13):** the learner's real signal was *clarity*, not
   length (012/013 hard to understand). Treating length as "as long as the scaffolding needs" and spending
-  the budget on `.aloud`/`.numplay` grounding. See the standing decision above. Only re-open if a future
+  the budget on `.plain`/`.numplay` grounding. See the standing decision above. Only re-open if a future
   lesson feels too long *in one sitting*.
 - **The `−½σ²` sign must be automatic before Lesson 016 (Black–Scholes PDE).** 014 shipped and re-used it
   in the GBM solve; 016's PDE carries it again. Grade the 013/014 teach-backs cold: the `d(log S)`
