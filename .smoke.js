@@ -60,6 +60,7 @@ const files = [
   "assets/bm-viz.js",
   "assets/ito-viz.js",
   "assets/sde-viz.js",
+  "assets/rnpricing-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -399,6 +400,114 @@ trap("SDE explosion numbers: blow-up time t* = 1/x0 decreases as x0 grows", () =
   if (!(w.linearAt(2.0, w.T) < 1e3)) throw new Error("linear-growth drift must stay finite over [0,T]");
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "20"; i.dispatch("input"); i.value = "200"; i.dispatch("input"); });
+});
+
+trap("RN replication geometry stays inside the canvas (every p)", () => {
+  for (let p = 0; p <= 100; p += 5) {
+    const canvases = withRecordedCanvas(() => {
+      window.RN.mountReplication(makeEl("div"), { p: p / 100 });
+    });
+    assertInBounds(canvases[0], "RNrep[p=" + (p / 100) + "]");
+  }
+});
+
+trap("RN Girsanov-weights geometry stays inside the canvas (every mu)", () => {
+  for (let m = 0; m <= 20; m += 2) {
+    const canvases = withRecordedCanvas(() => {
+      window.RN.mountWeights(makeEl("div"), { mu: m / 100 });
+    });
+    assertInBounds(canvases[0], "RNweights[mu=" + (m / 100) + "]");
+  }
+});
+
+trap("RN convergence geometry stays inside the canvas (every n)", () => {
+  for (let n = 1; n <= 120; n += 7) {
+    const canvases = withRecordedCanvas(() => {
+      window.RN.mountConvergence(makeEl("div"), { n: n });
+    });
+    assertInBounds(canvases[0], "RNconv[n=" + n + "]");
+  }
+});
+
+trap("RN replication numbers: the price is 5 for EVERY p; only p* agrees with the average", () => {
+  const el = makeEl("div");
+  const w = window.RN.mountReplication(el, { p: 0.7 });
+  const near = (a, b, tol) => Math.abs(a - b) < (tol || 1e-9);
+  if (!near(w.delta, 0.5)) throw new Error("hedge ratio should be (10-0)/(110-90) = 0.5, got " + w.delta);
+  if (!near(w.bond, -45)) throw new Error("cash leg should be -45 (borrow), got " + w.bond);
+  if (!near(w.price, 5)) throw new Error("replication cost should be 5, got " + w.price);
+  if (!near(w.pStar, 0.5)) throw new Error("p* = (1-0.9)/(1.1-0.9) = 0.5, got " + w.pStar);
+  // the forecast-based price moves with p, the replication price does not
+  if (!near(w.expPrice(w.pStar), w.price)) throw new Error("expPrice(p*) must equal the replication price");
+  if (!near(w.expPrice(0.7), 7)) throw new Error("expPrice(0.7) should be 7, got " + w.expPrice(0.7));
+  let prev = -1e9;
+  for (let p = 0; p <= 1.0001; p += 0.05) {
+    const e = w.expPrice(p);
+    if (!(e > prev)) throw new Error("expected-payoff price must rise with p at p=" + p);
+    prev = e;
+  }
+  // with 2% interest the risk-neutral weight moves to 0.6 though beliefs never changed
+  const w2 = window.RN.mountReplication(makeEl("div"), { R: 1.02 });
+  if (!near(w2.pStar, 0.6, 1e-9)) throw new Error("p* at R=1.02 should be 0.6, got " + w2.pStar);
+  if (!near(w2.price, 6 / 1.02, 1e-9)) throw new Error("price at R=1.02 should be 6/1.02, got " + w2.price);
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "100"; i.dispatch("input"); });
+});
+
+trap("RN Girsanov numbers: theta = (mu-r)/sigma; the weighted mean sits on S0 e^{rt} for every mu", () => {
+  const el = makeEl("div");
+  const w = window.RN.mountWeights(el, { mu: 0.15 });
+  const near = (a, b, tol) => Math.abs(a - b) < (tol || 1e-9);
+  if (!near(w.theta(0.15), 0.5)) throw new Error("theta(0.15) should be (0.15-0.05)/0.2 = 0.5, got " + w.theta(0.15));
+  if (!near(w.theta(0.05), 0)) throw new Error("a stock earning r needs no shift: theta(r) = 0");
+  // re-weighting moves the average onto the cash-rate curve, at EVERY time and every mu
+  for (let m = 0; m <= 20; m += 2) {
+    const mu = m / 100;
+    if (!near(w.meanP(mu), w.S0 * Math.exp(mu * w.T), 1e-9)) throw new Error("P-mean must be S0 e^{mu T} at mu=" + mu);
+    for (let i = 0; i <= w.NSTEPS; i += 10) {
+      const t = i / w.NSTEPS * w.T;
+      const target = w.S0 * Math.exp(w.r * t);
+      if (!near(w.weightedMeanAt(mu, i), target, 0.25)) {
+        throw new Error("Q-weighted mean must track S0 e^{rt} (mu=" + mu + ", t=" + t.toFixed(2) +
+          "): got " + w.weightedMeanAt(mu, i).toFixed(3) + " vs " + target.toFixed(3));
+      }
+    }
+  }
+  // higher mu ⇒ bigger shift ⇒ a path that ended HIGH is discounted harder under Q
+  let prevW = 1e9;
+  for (let m = 0; m <= 20; m += 2) {
+    const wt = w.weightOf(1.0, m / 100);
+    if (!(wt < prevW)) throw new Error("weight of an up-path must fall as mu (hence theta) grows at mu=" + (m / 100));
+    prevW = wt;
+  }
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "20"; i.dispatch("input"); });
+});
+
+trap("RN convergence numbers: CRR tree -> Black-Scholes 10.4506 as n grows", () => {
+  const el = makeEl("div");
+  const w = window.RN.mountConvergence(el, { n: 8 });
+  const near = (a, b, tol) => Math.abs(a - b) < (tol || 1e-9);
+  // the closed form for S=K=100, r=5%, sigma=20%, T=1 (d1 = 0.35, d2 = 0.15)
+  if (!near(w.d1, 0.35, 1e-12)) throw new Error("d1 should be 0.35, got " + w.d1);
+  if (!near(w.d2, 0.15, 1e-12)) throw new Error("d2 should be 0.15, got " + w.d2);
+  if (!near(w.bs, 10.4506, 1e-3)) throw new Error("Black-Scholes price should be ~10.4506, got " + w.bs);
+  if (!near(window.RN._normCdf(0), 0.5, 1e-8)) throw new Error("normCdf(0) must be 0.5");
+  if (!near(window.RN._normCdf(1.96), 0.9750021, 1e-6)) throw new Error("normCdf(1.96) must be ~0.9750021");
+  // a one-step tree is a crude caricature; a fine tree is not
+  if (!(Math.abs(w.binom(1) - w.bs) > 1) ) throw new Error("a 1-step tree should be far from BS");
+  if (!(Math.abs(w.binom(400) - w.bs) < 0.02)) throw new Error("a 400-step tree should be within 0.02 of BS, got " + w.binom(400));
+  // convergence: same-parity step counts close in monotonically (the odd/even zig-zag)
+  [1, 2].forEach(parity => {
+    let prevGap = 1e9;
+    for (let n = 8 + parity; n <= 120; n += 2) {
+      const gap = Math.abs(w.binom(n) - w.bs);
+      if (!(gap < prevGap)) throw new Error("gap to BS must shrink along parity " + parity + " at n=" + n);
+      prevGap = gap;
+    }
+  });
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "1"; i.dispatch("input"); i.value = "120"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

@@ -734,6 +734,68 @@
       ],
       correct: "a",
       explain: "Bounded steepness (Lipschitz) makes the path unique; no faster-than-linear growth prevents finite-time blow-up (dx/dt=x\u00b2 explodes at t*=1/x\u2080). GBM and OU satisfy both."
+    },
+
+    // ---- L015: risk-neutral pricing & Girsanov ----
+    {
+      id: "l015-replication", lesson: 15, quarter: "Q2", concept: "replication", misconception: true,
+      question: "On a one-period binomial tree, the arbitrage-free option price depends on the real-world probability p:",
+      options: [
+        { label: "not at all \u2014 replication ignores p", value: "a" },
+        { label: "yes \u2014 a likelier payoff costs more", value: "b" },
+        { label: "only through the discount factor R", value: "c" },
+        { label: "only when the option ends in money", value: "d" }
+      ],
+      correct: "a",
+      explain: "The price is the cost of the portfolio (\u0394 shares + B cash) that matches the payoff in BOTH states. Solving those two equations never uses p, so the price cannot depend on it."
+    },
+    {
+      id: "l015-pstar", lesson: 15, quarter: "Q2", concept: "risk-neutral-prob",
+      question: "The risk-neutral weight p* = (R \u2212 d)/(u \u2212 d) is the probability under which:",
+      options: [
+        { label: "the discounted stock is a martingale", value: "a" },
+        { label: "up and down moves are equally likely", value: "b" },
+        { label: "the option's payoff becomes riskless", value: "c" },
+        { label: "nobody demands any premium for risk", value: "d" }
+      ],
+      correct: "a",
+      explain: "Discounting by R and averaging the stock with p* returns exactly today's price \u2014 a fair game. Every asset then appears to grow at the risk-free rate, which is what 'risk-neutral' names."
+    },
+    {
+      id: "l015-girsanov", lesson: 15, quarter: "Q2", concept: "girsanov", misconception: true,
+      question: "Applying Girsanov's change of measure to dS = \u03bcS dt + \u03c3S dW changes:",
+      options: [
+        { label: "the drift only, never the volatility", value: "a" },
+        { label: "the volatility only, never the drift", value: "b" },
+        { label: "both the drift and the volatility \u03c3", value: "c" },
+        { label: "neither one \u2014 only the discount rate", value: "d" }
+      ],
+      correct: "a",
+      explain: "dW = dW\u0303 \u2212 \u03b8dt gives dS = (\u03bc\u2212\u03c3\u03b8)S dt + \u03c3S dW\u0303. \u03c3 cannot move: quadratic variation [W]_t = t is a path-by-path fact, and equivalent measures must agree on those."
+    },
+    {
+      id: "l015-mpr", lesson: 15, quarter: "Q2", concept: "market-price-risk",
+      question: "The market price of risk \u03b8, the shift that turns the real drift \u03bc into the rate r, equals:",
+      options: [
+        { label: "(\u03bc \u2212 r)/\u03c3 \u2014 the Sharpe ratio", value: "a" },
+        { label: "(\u03bc \u2212 r)\u00b7\u03c3 \u2014 a scaled premium", value: "b" },
+        { label: "\u03bc/\u03c3 \u2014 the plain reward ratio", value: "c" },
+        { label: "(r \u2212 \u03bc)/\u03c3 \u2014 the reverse ratio", value: "d" }
+      ],
+      correct: "a",
+      explain: "Setting \u03bc \u2212 \u03c3\u03b8 = r gives \u03b8 = (\u03bc\u2212r)/\u03c3: extra return over cash per unit of volatility \u2014 the asset's Sharpe ratio, and exactly the size of the Brownian shift."
+    },
+    {
+      id: "l015-qnotp", lesson: 15, quarter: "Q2", concept: "q-vs-p", misconception: true,
+      question: "In C = S\u2080N(d\u2081) \u2212 Ke^{\u2212rT}N(d\u2082), the number N(d\u2082) is the probability of exercise:",
+      options: [
+        { label: "under Q, the risk-neutral weights", value: "a" },
+        { label: "under P, the true real-world odds", value: "b" },
+        { label: "under either measure \u2014 they agree", value: "c" },
+        { label: "under neither \u2014 it is the delta \u0394", value: "d" }
+      ],
+      correct: "a",
+      explain: "N(d\u2082) = Q(S_T > K). The real-world chance uses \u03bc in place of r and is generally different \u2014 74% vs 56% in the lesson's example. Quoting one for the other is a professional-grade error."
     }
   ];
 })(window);

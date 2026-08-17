@@ -1,5 +1,5 @@
 {
-  "version": 11,
+  "version": 12,
   "lessons": [
     {
       "id": 1,
@@ -146,6 +146,16 @@
       "checkpoint": false,
       "labPath": "labs/0014-ornstein-uhlenbeck.ipynb",
       "title": "Stochastic Differential Equations: GBM & Ornstein–Uhlenbeck",
+      "published": true
+    },
+    {
+      "id": 15,
+      "slug": "0015-risk-neutral-pricing-girsanov",
+      "year": 1,
+      "quarter": 2,
+      "checkpoint": false,
+      "labPath": "labs/0015-risk-neutral-pricing.ipynb",
+      "title": "Risk-Neutral Pricing & the Girsanov Theorem",
       "published": true
     }
   ]

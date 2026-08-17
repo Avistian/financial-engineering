@@ -696,6 +696,34 @@ dl.objections dd {
 }
 .ito-slider, .gbm-slider { flex: 1; }
 
+/* SDE widgets (Lesson 014): the OU mean-reversion plot and the blow-up plot.
+   Risk-neutral pricing widgets (Lesson 015): replication, Girsanov weights, tree → BS. */
+.ou-viz, .expl-viz, .rep-viz, .rnw-viz, .conv-viz { margin: 1.25rem 0; }
+.ou-canvas, .expl-canvas, .rep-canvas, .rnw-canvas, .conv-canvas {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fffdf8;
+}
+.ou-readout, .expl-readout, .rep-readout, .rnw-readout, .conv-readout {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  min-height: 3.4rem;
+}
+.ou-readout strong, .expl-readout strong, .rep-readout strong,
+.rnw-readout strong, .conv-readout strong { color: var(--ink); }
+.ou-note, .expl-note, .rep-note, .rnw-note, .conv-note { color: var(--accent); font-weight: 600; }
+.ou-controls, .expl-controls, .rep-controls, .rnw-controls, .conv-controls {
+  display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;
+}
+.ou-slider-label, .expl-slider-label, .rep-slider-label,
+.rnw-slider-label, .conv-slider-label {
+  font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted);
+  white-space: nowrap; min-width: 8.5rem;
+}
+.ou-slider, .expl-slider, .rep-slider, .rnw-slider, .conv-slider { flex: 1; }
+
 /* Small tables of tree outcomes: keep them readable on a phone */
 table.tight { font-size: 0.8rem; }
 table.tight td, table.tight th { padding: 0.3rem 0.4rem; }

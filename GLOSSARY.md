@@ -68,3 +68,14 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Half-life of reversion (ln2/θ) | — | — | 014 |
 | Itô isometry | — | — | 014 |
 | Existence & uniqueness (Lipschitz / linear growth) | — | — | 014 |
+| Arbitrage | — | — | 015 |
+| Replicating portfolio / hedge ratio Δ | — | — | 015 |
+| Risk-neutral probability p* | — | — | 015 |
+| Change of measure / Radon–Nikodym derivative Z | — | — | 015 |
+| Equivalent measures | — | — | 015 |
+| Girsanov's theorem | — | — | 015 |
+| Market price of risk θ = (μ−r)/σ | — | — | 015 |
+| Risk-neutral pricing formula | — | — | 015 |
+| Black–Scholes formula (N(d₁), N(d₂)) | — | — | 015 |
+| Martingale representation theorem | — | — | 015 |
+| FTAP 1 / FTAP 2 (existence / uniqueness of Q) | — | — | 015 |

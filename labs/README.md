@@ -113,6 +113,15 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
   mean `X₀e^{−θt}+m(1−e^{−θt})`, the stationary variance `σ²/2θ`, and the half-life `ln2/θ`; **recover**
   `(θ, m, σ)` from one long path by regressing `ΔX` on `X`; then expose the small-sample trap — fitting `θ`
   on short windows overestimates it, so a spread looks like it reverts faster than it does (Lesson 014).
+- `0015-risk-neutral-pricing.ipynb` — *price by replication, then change measure*: build the hedging
+  portfolio on a one-period tree and watch its cost ignore the real-world probability; derive the
+  risk-neutral weight `p* = (R−d)/(u−d)` and confirm it makes the discounted stock a martingale;
+  reproduce Lesson 011's `7.475` by rolling a three-period tree backwards; price the Black–Scholes call
+  (`10.4506`) and watch a CRR tree converge to it; price the same call by Monte-Carlo under `Q` — and
+  see what drifting at `μ` instead of `r` does (+73%); then perform the measure change explicitly,
+  re-weighting *real-world* paths by the Girsanov factor `Z = e^{−θW_T−½θ²T}` to recover the identical
+  price; finally show `N(d₂) = 56%` is a pricing weight, not the `74%` real-world chance of exercise
+  (Lesson 015).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 
