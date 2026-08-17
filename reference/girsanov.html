@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — Risk-Neutral Pricing &amp; Girsanov</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    code { font-size: 0.85em; }
+  </style>
+</head>
+<body>
+<article>
+  <h1>Risk-Neutral Pricing &amp; the Girsanov Theorem</h1>
+  <p class="subtitle">Reference · print-friendly cheat sheet · Units 015–020 (Year 1 Q2)</p>
+
+  <p>
+    Why a price is a hedging cost, and how re-weighting the probabilities turns that cost into an
+    average. Taught in <a href="../lessons/0015-risk-neutral-pricing-girsanov.html">Lesson 015</a>;
+    source Shreve II Ch. 5. Builds on <a href="sdes.html">Lesson 014</a> (the solved GBM) and
+    <a href="conditional-expectation.html">Lesson 011</a> (martingales, conditional expectation).
+  </p>
+
+  <h2>The one-period binomial (where everything is visible)</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Formula</th><th>Plain meaning</th></tr></thead>
+    <tbody>
+      <tr><td>States</td><td><code>S<sub>0</sub> → uS<sub>0</sub></code> or <code>dS<sub>0</sub></code>; cash × <code>R = e<sup>rΔt</sup></code></td><td>up factor, down factor, growth of cash</td></tr>
+      <tr><td>Hedge ratio</td><td><code>Δ = (C<sub>u</sub> − C<sub>d</sub>)/(S<sub>u</sub> − S<sub>d</sub>)</code></td><td>shares that move like one option</td></tr>
+      <tr><td>Cash leg</td><td><code>B = (C<sub>d</sub> − Δ·S<sub>d</sub>)/R</code></td><td>borrow/lend to complete the recipe</td></tr>
+      <tr><td><strong>Price</strong></td><td><code>ΔS<sub>0</sub> + B = (1/R)[p*C<sub>u</sub> + (1−p*)C<sub>d</sub>]</code></td><td>cost of replication = discounted <code>p*</code>-average</td></tr>
+      <tr><td><strong>p*</strong></td><td><code>p* = (R − d)/(u − d)</code></td><td>risk-neutral weight; <em>not</em> a forecast</td></tr>
+      <tr><td>No arbitrage</td><td><code>d &lt; R &lt; u</code> ⟺ <code>0 &lt; p* &lt; 1</code></td><td>free money exists exactly when p* is not a probability</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Worked numbers: <code>S<sub>0</sub>=100, u=1.1, d=0.9, K=100</code>. Zero rates ⇒ <code>Δ=0.5</code>,
+    <code>B=−45</code>, price <code>5</code>, <code>p*=0.5</code>. With <code>R=1.02</code> ⇒
+    <code>p*=0.6</code>, price <code>6/1.02 = 5.88</code>. Lesson 011's three-period tree gives
+    <code>7.475</code> because <code>p*=(1−0.9)/(1.1−0.9)=½</code> there.
+  </p>
+
+  <h2>Change of measure</h2>
+  <div class="formula">Z = dQ/dP &nbsp;&nbsp;⟹&nbsp;&nbsp; E<sub>Q</sub>[X] = E<sub>P</sub>[Z·X], &nbsp; E<sub>P</sub>[Z] = 1</div>
+  <p>
+    Same outcomes, different weights. <code>Z(ω)</code> is how much more (or less) <code>Q</code> counts
+    outcome <code>ω</code>. <strong>Equivalence:</strong> <code>Z &gt; 0</code> everywhere — a measure
+    change may re-weight outcomes but never create or destroy them.
+  </p>
+
+  <h2>Girsanov (constant market price of risk)</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Weight (RN derivative)</td><td><code>Z<sub>T</sub> = exp(−θW<sub>T</sub> − ½θ²T)</code>, and <code>E<sub>P</sub>[Z<sub>T</sub>] = 1</code></td></tr>
+      <tr><td>New Brownian motion</td><td><code>W̃<sub>t</sub> = W<sub>t</sub> + θt</code> is a BM under <code>Q</code></td></tr>
+      <tr><td><strong>Market price of risk</strong></td><td><code>θ = (μ − r)/σ</code> (the asset's Sharpe ratio)</td></tr>
+      <tr><td>Stock under <code>P</code></td><td><code>dS = μS dt + σS dW</code></td></tr>
+      <tr><td>Stock under <code>Q</code></td><td><code>dS = rS dt + σS dW̃</code>, i.e. <code>S<sub>T</sub> = S<sub>0</sub>e<sup>(r−½σ²)T + σW̃<sub>T</sub></sup></code></td></tr>
+      <tr><td>Discounted stock</td><td><code>d(e<sup>−rt</sup>S) = σe<sup>−rt</sup>S dW̃</code> ⇒ a <code>Q</code>-martingale</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Why only the drift moves: completing the square in the Gaussian density shows <code>W<sub>T</sub></code>
+    goes from <code>N(0,T)</code> to <code>N(−θT, T)</code> — centre shifts, width does not. Volatility is
+    fixed by the quadratic variation <code>[W]<sub>t</sub> = t</code>, a path-by-path fact that equivalent
+    measures must agree on.
+  </p>
+
+  <h2>Pricing</h2>
+  <div class="formula">V<sub>t</sub> = E<sub>Q</sub>[ e<sup>−r(T−t)</sup>V<sub>T</sub> | ℱ<sub>t</sub> ]</div>
+  <p>
+    Equivalently: discounted prices are <code>Q</code>-martingales. Replication in continuous time is
+    guaranteed by the <strong>martingale representation theorem</strong> (Shreve II §5.3): every
+    <code>Q</code>-martingale on this Brownian motion is an Itô integral, i.e. the profit of a trading
+    strategy.
+  </p>
+
+  <h2>Black–Scholes (the expectation, evaluated)</h2>
+  <div class="formula">
+    C = S<sub>0</sub>N(d<sub>1</sub>) − Ke<sup>−rT</sup>N(d<sub>2</sub>),
+    &nbsp; d<sub>1</sub> = [ln(S<sub>0</sub>/K) + (r + ½σ²)T]/(σ√T), &nbsp; d<sub>2</sub> = d<sub>1</sub> − σ√T
+  </div>
+  <table>
+    <thead><tr><th>Quantity</th><th>Meaning</th><th>Example (S=K=100, r=5%, σ=20%, T=1)</th></tr></thead>
+    <tbody>
+      <tr><td><code>N(d<sub>2</sub>)</code></td><td><code>Q</code>-probability of exercise</td><td><code>N(0.15) = 0.560</code></td></tr>
+      <tr><td><code>N(d<sub>1</sub>)</code></td><td>share received, value-weighted (also the hedge ratio <code>Δ</code>)</td><td><code>N(0.35) = 0.637</code></td></tr>
+      <tr><td>Call price</td><td><code>S<sub>0</sub>N(d<sub>1</sub>) − Ke<sup>−rT</sup>N(d<sub>2</sub>)</code></td><td><strong>10.451</strong></td></tr>
+      <tr><td>Real-world exercise prob.</td><td><code>N((μ−½σ²)√T/σ)</code> — uses <code>μ</code>, not <code>r</code></td><td><code>N(0.65) = 0.742</code> (μ=15%)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    CRR tree → Black–Scholes: <code>u = e<sup>σ√Δt</sup></code>, <code>d = 1/u</code>,
+    <code>p* = (e<sup>rΔt</sup> − d)/(u − d)</code>; the price oscillates (odd/even <code>n</code>) and
+    converges roughly like <code>1/n</code>.
+  </p>
+
+  <h2>The two fundamental theorems</h2>
+  <table>
+    <thead><tr><th>Theorem</th><th>Statement</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>FTAP 1</td><td>no arbitrage ⟺ an equivalent martingale measure <code>Q</code> exists</td><td>can't find a <code>Q</code> ⇒ your model has free money (a bug)</td></tr>
+      <tr><td>FTAP 2</td><td>completeness (everything replicable) ⟺ <code>Q</code> is unique</td><td>jumps / stochastic vol ⇒ many <code>Q</code>'s ⇒ a range of prices, resolved by calibration</td></tr>
+    </tbody>
+  </table>
+
+  <div class="trap">
+    <strong>Traps.</strong> (1) Reading <code>Q</code>-probabilities as forecasts (<code>N(d<sub>2</sub>)</code>
+    = 56% vs a real-world 74%). (2) Believing Girsanov can move <code>σ</code> — it cannot.
+    (3) Simulating with <code>μ</code> instead of <code>r</code> in a pricer. (4) Forgetting the
+    <code>e<sup>−rT</sup></code>. (5) Thinking "risk-neutral" describes investors — the premium lives in
+    <code>θ</code>. (6) Assuming <code>Q</code> exists/is unique (FTAP 1 / FTAP 2). (7) Breaking
+    equivalence: <code>Z &gt; 0</code>, so no measure change can make a possible crash impossible.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="../lessons/0015-risk-neutral-pricing-girsanov.html">Lesson 015</a></li>
+      <li><a href="../labs/0015-risk-neutral-pricing.ipynb">Lab 015</a></li>
+      <li><a href="sdes.html">Reference: SDEs — GBM &amp; Ornstein–Uhlenbeck</a></li>
+      <li><a href="ito-lemma.html">Reference: the Itô integral &amp; Itô's lemma</a></li>
+      <li><a href="conditional-expectation.html">Reference: filtrations &amp; conditional expectation</a></li>
+      <li><a href="curriculum.html">Curriculum</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

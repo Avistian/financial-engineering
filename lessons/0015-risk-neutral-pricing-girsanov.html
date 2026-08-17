@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 015 — Risk-Neutral Pricing &amp; the Girsanov Theorem</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    td.num { font-family: var(--font-mono); text-align: right; }
+    .viz-cap { font-family: var(--font-sans); font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0; }
+    .step { margin: 0.9rem 0 0.9rem 0; padding-left: 0.9rem; border-left: 3px solid var(--border); }
+    .step strong { color: var(--accent); }
+    .takeaway { font-family: var(--font-sans); font-size: 0.85rem; color: var(--accent);
+                font-weight: 600; margin: 0.6rem 0 1.1rem; }
+    /* "even more basic" scaffolds (2026-08-13): plain-words reading + with-numbers */
+    .plain { background: var(--bg-soft); border-left: 3px solid var(--accent);
+             border-radius: 0 4px 4px 0; padding: 0.55rem 0.85rem; margin: 0.7rem 0;
+             font-size: 0.9rem; }
+    .plain .tag { font-family: var(--font-sans); font-size: 0.68rem; font-weight: 700;
+                  text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent);
+                  display: block; margin-bottom: 0.2rem; }
+    .numplay { background: #fbf7ec; border: 1px dashed var(--gold); border-radius: 6px;
+               padding: 0.7rem 0.9rem; margin: 0.9rem 0; font-size: 0.9rem; }
+    .numplay strong { color: var(--gold); }
+    .numplay table { margin: 0.5rem 0 0; font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q2</p>
+  <h1>Risk-Neutral Pricing &amp; the Girsanov Theorem</h1>
+  <p class="subtitle">Lesson 015 · Why a price is a hedging cost, and how changing the probabilities makes it an average · ~65 min</p>
+
+  <h2>Warm up</h2>
+  <div id="warmup"></div>
+
+  <div class="callout">
+    <strong>Read this first — how this lesson is paced.</strong> Same scaffolding as Lesson
+    <a href="0014-sdes.html">014</a>: every load-bearing equation gets an
+    <span style="background:var(--bg-soft);border-left:3px solid var(--accent);padding:0 .3em">In&nbsp;plain&nbsp;words</span>
+    note that restates it as one sentence, and a
+    <span style="background:#fbf7ec;padding:0 .2em;border-radius:3px">with-real-numbers</span> box that
+    plugs in actual numbers. Everything is built from things you already own: a two-outcome tree you can
+    do on paper (Lesson <a href="0011-filtrations-conditional-expectation.html">011</a>), Itô's lemma
+    (<a href="0013-ito-lemma.html">013</a>), and the solved stock SDE (<a href="0014-sdes.html">014</a>).
+    The only genuinely new object is a <em>second probability measure</em> living on the same outcomes.
+  </div>
+
+  <p>
+    You now own a model of how a stock moves — geometric Brownian motion, <code>dS = μS dt + σS dW</code>,
+    solved last lesson. Today you finally use it for the thing the whole quarter has been building
+    toward: <strong>putting a price on a contract whose payoff depends on that stock</strong>.
+  </p>
+  <p>
+    The contract we will price throughout is a <strong>European call option</strong>. Plain picture: a
+    ticket that lets you buy one share at a fixed price <code>K</code> (the <strong>strike</strong>) on one
+    fixed future date <code>T</code> — and lets you tear the ticket up if you do not want to. If the share
+    is worth 130 and your ticket lets you buy at 100, you use it and pocket 30. If the share is worth 80,
+    the ticket is worthless and you walk away. So its value on the final date is
+    <code>max(S<sub>T</sub> − K, 0)</code>, written <code>(S<sub>T</sub> − K)⁺</code> — "whatever is left
+    over above the strike, but never negative." ("European" just means you may only use it on the final
+    date, not before. "Call" means it lets you <em>buy</em>; a <em>put</em> lets you sell.)
+  </p>
+  <p>
+    The obvious guess for its price today is "the average of what it will pay, discounted back to today."
+    That guess is <strong>wrong</strong>, and the reason it is wrong opens up the single most important
+    idea in derivative pricing. Here is the map for the hour. First, why the average payoff is not the
+    price, on a two-outcome example you can do in your head. Then the thing that <em>is</em> the price:
+    the cost of a <strong>hedging recipe</strong> that manufactures the option out of stock and cash.
+    Then the surprise: that cost can be rewritten as an average after all — provided you use a different
+    set of probabilities, the <strong>risk-neutral</strong> ones. Then <strong>Girsanov's theorem</strong>,
+    which does the same trick in continuous time by re-weighting Brownian paths, and hands you the famous
+    <strong>Black–Scholes</strong> price as a single expectation. We finish on the honest warnings — the
+    biggest of which is that these new probabilities are <em>not</em> forecasts.
+  </p>
+
+  <h2>Why "average payoff" is not the price</h2>
+  <p>
+    Strip the world down to one period and two outcomes — the same tree you built by hand in Lesson
+    <a href="0011-filtrations-conditional-expectation.html">011</a>. A share trades at
+    <code>S<sub>0</sub> = 100</code> today. By the next date it is either <strong>up</strong> at
+    <code>110</code> or <strong>down</strong> at <code>90</code>. Cash earns nothing for now
+    (<code>r = 0</code>, an interest rate of zero — we add interest in a moment). Consider a call struck
+    at <code>K = 100</code>: it pays <code>10</code> in the up state and <code>0</code> in the down state.
+  </p>
+  <p>
+    Suppose the real-world probability of the up move is <code>p = 0.7</code>. The "obvious" price is the
+    average payoff: <code>0.7 × 10 + 0.3 × 0 = 7</code>. Hold that number; we are about to show that
+    anybody who sells you this option for <code>7</code> has handed you a gift, and that the real answer
+    is <code>5</code> — <em>whatever</em> <code>p</code> happens to be.
+  </p>
+  <p>
+    Two objections to "average payoff" you can feel already, without any math:
+  </p>
+  <ul>
+    <li><strong>You do not get the average; you get one outcome.</strong> Averages are what you earn over
+      many independent repetitions. This contract happens once. Whoever sells it carries real risk, and
+      risk normally has a price.</li>
+    <li><strong>Nobody agrees on <code>p</code>.</strong> If the price depended on the real-world
+      probability, every trader with a different opinion would quote a different price, and the market
+      could never settle on one. Yet option markets quote tight prices all day. Something is pinning the
+      price that is <em>not</em> anybody's forecast.</li>
+  </ul>
+  <p class="takeaway">
+    Takeaway: "expected payoff, discounted" is a forecast, not a price. We need something that a
+    disagreeing crowd would still all agree on.
+  </p>
+
+  <h2>Predict before you read on</h2>
+  <p>
+    Before the reveal, commit to an answer. Same tree: <code>100 → 110</code> or <code>90</code>, call
+    struck at <code>100</code>, zero interest. Suppose sentiment flips overnight and everybody now agrees
+    the up move is far more likely than it was.
+  </p>
+  <div id="predict1"></div>
+
+  <h2>Replication: a price is a hedging cost</h2>
+  <p>
+    Here is the move that makes derivative pricing a science instead of an opinion poll. Instead of
+    forecasting the option's payoff, <strong>build it</strong> out of things that already have prices —
+    shares and cash. If a recipe of shares-plus-cash pays exactly what the option pays in
+    <em>every</em> state of the world, then the option and the recipe are the same asset with two names,
+    so they must cost the same today. That recipe is called a <strong>replicating portfolio</strong>
+    (plain words: a shopping list of stock and cash that manufactures the option), and this whole
+    argument is called <strong>replication</strong>.
+  </p>
+  <p>
+    Let us build it, slowly. Our recipe holds <code>Δ</code> shares (read "delta" — just a number of
+    shares, it can be a fraction) and <code>B</code> in cash. Two unknowns, and — conveniently — two
+    states to match.
+  </p>
+  <div class="step">
+    <strong>Step 1 — write what the recipe is worth in each state.</strong> With zero interest, cash just
+    stays <code>B</code>. Up state: the shares are worth <code>110Δ</code>, so the recipe is worth
+    <code>110Δ + B</code>. Down state: <code>90Δ + B</code>.
+  </div>
+  <div class="step">
+    <strong>Step 2 — demand it match the option in both states.</strong> The option pays <code>10</code>
+    up and <code>0</code> down, so we need <em>both</em> of
+    <code>110Δ + B = 10</code> and <code>90Δ + B = 0</code>. Two straight-line equations, two unknowns.
+  </div>
+  <div class="step">
+    <strong>Step 3 — subtract to kill the cash.</strong> Subtracting the second equation from the first
+    removes <code>B</code> (it appears identically in both): <code>(110 − 90)Δ = 10 − 0</code>, so
+    <code>20Δ = 10</code> and <strong><code>Δ = 0.5</code></strong>. Half a share.
+  </div>
+  <div class="step">
+    <strong>Step 4 — back out the cash.</strong> Put <code>Δ = 0.5</code> into the down equation:
+    <code>90(0.5) + B = 0</code> ⟹ <code>45 + B = 0</code> ⟹ <strong><code>B = −45</code></strong>. A
+    negative cash position means you <em>borrowed</em> 45. (Sanity check in the up state:
+    <code>110(0.5) − 45 = 55 − 45 = 10</code> ✔ — it really does pay the option in both states.)
+  </div>
+  <div class="step">
+    <strong>Step 5 — read off today's cost.</strong> Buying half a share costs <code>50</code>; borrowing
+    <code>45</code> gives you <code>45</code> back. Net cost today:
+    <code>0.5 × 100 − 45 = <strong>5</strong></code>.
+  </div>
+  <div class="formula">Price of the call = cost of the replicating recipe = <strong>5</strong></div>
+  <div class="plain">
+    <span class="tag">In plain words</span> "Half a share, funded by borrowing 45, turns into exactly the
+    option's payoff in both possible futures. Manufacturing the option costs 5 today, so the option is
+    worth 5 today." Nowhere did the probability <code>p</code> appear — not once in Steps 1–5.
+  </div>
+  <p>
+    Why must the price equal that cost? Because otherwise there is an <strong>arbitrage</strong> — plain
+    words: a trade that costs you nothing today, can never lose, and might make money. Free money, in
+    other words. Markets do not leave it lying around for long, so any price that permits it is not a real
+    price.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers — the free money.</strong> Suppose the option really did trade at the
+    "average payoff" price of <code>7</code>. Sell one option: <strong>+7</strong> in your pocket. With
+    <code>5</code> of it, build the recipe (buy 0.5 shares for 50, borrow 45). You keep
+    <strong>+2</strong> right now. At expiry: if the stock is at 110 your recipe is worth 10 and you owe
+    the option buyer exactly 10 — they cancel. If the stock is at 90 your recipe is worth 0 and you owe
+    0 — they cancel again. You are left with <code>+2</code>, risk-free, in every state. That is the
+    arbitrage, and it is why <code>7</code> cannot be the price. The only price that leaves no free
+    money is <strong>5</strong>.
+  </div>
+  <p>
+    Slide the real-world probability below and watch the two candidate prices behave completely
+    differently.
+  </p>
+  <div id="replication"></div>
+  <p class="viz-cap">
+    <strong>The price ignores the forecast.</strong> The
+    <span style="color:#0d5c4b;font-weight:600">flat green line</span> is the replication cost — the
+    arbitrage-free price. The <span style="color:#b23a48;font-weight:600">rising red line</span> is
+    "discounted expected payoff under <em>p</em>," the forecast-based guess. Slide <em>p</em>: the
+    forecast moves, the price does not. They agree at exactly one probability — the dashed
+    <span style="color:#9a6b1f;font-weight:600">p*</span>, which is the whole point of the next section.
+  </p>
+  <p class="takeaway">
+    Takeaway: the arbitrage-free price is the cost of the hedging recipe that reproduces the payoff. It is
+    a manufacturing cost, not a forecast — which is why traders who disagree about the future still agree
+    on the price.
+  </p>
+
+  <h2>The probability hiding in the algebra</h2>
+  <p>
+    So far, so probability-free. Now the surprise. Redo the five steps with letters instead of numbers,
+    and a strange thing falls out: the answer <em>can</em> be written as an expected payoff after all —
+    just not under the real probabilities.
+  </p>
+  <p>
+    General one-period setup, and every symbol defined as it appears: the share starts at
+    <code>S<sub>0</sub></code> and moves to <code>uS<sub>0</sub></code> (up factor <code>u</code>, e.g.
+    <code>1.1</code>) or <code>dS<sub>0</sub></code> (down factor <code>d</code>, e.g. <code>0.9</code>).
+    The contract pays <code>C<sub>u</sub></code> in the up state and <code>C<sub>d</sub></code> in the
+    down state. Cash multiplies by <code>R</code> over the period — the <strong>growth factor</strong> of
+    the risk-free account, <code>R = e<sup>rΔt</sup></code>, so <code>R = 1</code> means zero interest and
+    <code>R = 1.02</code> means 2% over the period. Steps 3–5 from before, in letters:
+  </p>
+  <div class="step">
+    <strong>The hedge ratio.</strong> Same subtraction as Step 3:
+    <code>Δ = (C<sub>u</sub> − C<sub>d</sub>) / (uS<sub>0</sub> − dS<sub>0</sub>)</code>. In words:
+    the spread of the option's payoffs divided by the spread of the share's, i.e. how many shares move
+    like one option.
+  </div>
+  <div class="step">
+    <strong>The cash leg.</strong> Matching the down state, the recipe's cash must be worth
+    <code>C<sub>d</sub> − Δ·dS<sub>0</sub></code> at the end, so today it is that amount divided by the
+    growth factor: <code>B = (C<sub>d</sub> − Δ·dS<sub>0</sub>) / R</code>. (Dividing by <code>R</code> is
+    <strong>discounting</strong> — converting a future amount into the smaller amount you would need
+    today to grow into it.)
+  </div>
+  <div class="step">
+    <strong>The price, then algebra.</strong> Price <code>= ΔS<sub>0</sub> + B</code>. Substitute
+    <code>B</code> and pull out <code>1/R</code>:
+    <code>= (1/R)·[ R·ΔS<sub>0</sub> + C<sub>d</sub> − Δ·dS<sub>0</sub> ]
+    = (1/R)·[ ΔS<sub>0</sub>(R − d) + C<sub>d</sub> ]</code>. Legal because every term is just being
+    regrouped — no assumption used.
+  </div>
+  <div class="step">
+    <strong>Cancel the share price.</strong> From the hedge ratio,
+    <code>ΔS<sub>0</sub> = (C<sub>u</sub> − C<sub>d</sub>)/(u − d)</code> (the <code>S<sub>0</sub></code>
+    divides out top and bottom). Substituting:
+    <code>Price = (1/R)·[ (C<sub>u</sub> − C<sub>d</sub>)·(R − d)/(u − d) + C<sub>d</sub> ]</code>.
+  </div>
+  <div class="step">
+    <strong>Name the ugly fraction.</strong> Write
+    <code>p* = (R − d)/(u − d)</code>. Then the bracket is
+    <code>p*(C<sub>u</sub> − C<sub>d</sub>) + C<sub>d</sub> = p*C<sub>u</sub> + (1 − p*)C<sub>d</sub></code>
+    — which is <em>exactly the shape of an average</em> with weights <code>p*</code> and
+    <code>1 − p*</code>.
+  </div>
+  <div class="formula">
+    Price = (1/R)·[ p*·C<sub>u</sub> + (1 − p*)·C<sub>d</sub> ],
+    &nbsp;&nbsp; p* = (R − d)/(u − d)
+  </div>
+  <div class="plain">
+    <span class="tag">In plain words</span> "The price equals the payoff averaged with the weights
+    <code>p*</code> and <code>1 − p*</code>, then discounted back one period." The weights came out of
+    <em>algebra on a hedging recipe</em>, not out of anyone's forecast. They are numbers manufactured from
+    the three things you can look up — the up factor, the down factor, and the interest rate.
+  </div>
+  <p>
+    These weights <code>p*</code> and <code>1 − p*</code> behave like probabilities: they add to one, and
+    they are both between 0 and 1 precisely when <code>d &lt; R &lt; u</code> — which is itself the
+    no-arbitrage condition. (If <code>R ≥ u</code>, cash beats the share in every state, so you would
+    short the share and hold cash for free money; if <code>R ≤ d</code>, the share beats cash in every
+    state, so you would borrow and buy. Either way, free money.) So: <strong>a market with no arbitrage
+    is exactly a market where these weights are a valid probability</strong>. That is not a coincidence;
+    it is a theorem we will name at the end.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers.</strong> <code>u = 1.1</code>, <code>d = 0.9</code>.
+    <em>Zero rates</em> (<code>R = 1</code>): <code>p* = (1 − 0.9)/(1.1 − 0.9) = 0.1/0.2 = <strong>0.5</strong></code>,
+    so the price is <code>0.5 × 10 + 0.5 × 0 = <strong>5</strong></code> — matching the recipe's cost
+    exactly, as it must. <em>With 2% interest</em> (<code>R = 1.02</code>):
+    <code>p* = (1.02 − 0.9)/0.2 = 0.12/0.2 = <strong>0.6</strong></code>, and the price is
+    <code>(0.6 × 10)/1.02 = 6/1.02 = <strong>5.88</strong></code>. Note <code>p*</code> moved from 0.5 to
+    0.6 with <em>no change whatsoever</em> in anybody's beliefs about the stock — only the interest rate
+    changed. A weight that moves when the interest rate moves and ignores sentiment is clearly not a
+    forecast.
+  </div>
+
+  <h2>Why "risk-neutral"? Because the stock becomes a fair game</h2>
+  <p>
+    <code>p*</code> is called the <strong>risk-neutral probability</strong>. Here is the property that
+    earns it the name. Price the <em>share itself</em> with those weights and discount:
+  </p>
+  <div class="numplay">
+    <strong>With real numbers.</strong> Take <code>R = 1.02</code>, so <code>p* = 0.6</code>. Then
+    <code>(1/1.02)·[0.6 × 110 + 0.4 × 90] = (1/1.02)·[66 + 36] = 102/1.02 = <strong>100</strong></code> —
+    today's share price, exactly. Try the real-world <code>p = 0.7</code> instead:
+    <code>(1/1.02)·[0.7 × 110 + 0.3 × 90] = (77 + 27)/1.02 = 101.96</code> — not 100. Only
+    <code>p*</code> reproduces today's price.
+  </div>
+  <p>
+    Say that in the language of Lesson <a href="0011-filtrations-conditional-expectation.html">011</a>:
+    under the weights <code>p*</code>, the <strong>discounted</strong> share price is a
+    <strong>martingale</strong> — a fair game, a process whose best forecast of tomorrow is exactly where
+    it stands today. (Re-warm: <code>X</code> is a martingale when
+    <code>E[X<sub>next</sub> | what you know now] = X<sub>now</sub></code>; the classic example is your
+    running total in a fair coin-flip game.) Discounted, because cash grows on its own and we want to
+    compare like with like: <code>S/R</code> strips out that automatic growth.
+  </p>
+  <p>
+    That is the meaning of "risk-neutral." In the <em>real</em> world investors demand extra expected
+    return for holding a risky share — a <strong>risk premium</strong> (plain words: the extra average
+    return you insist on before you will hold something that can lose money). Under <code>p*</code>, that
+    extra return is gone: every asset is priced as if it grows at the boring risk-free rate. It is the set
+    of weights that a hypothetical crowd who <em>did not care about risk at all</em> would use. Nobody
+    thinks such a crowd exists. It is a calculating device — the change of variables that turns a hedging
+    problem into an averaging problem.
+  </p>
+
+  <h2>Paying off Lesson 011's IOU: the 7.475</h2>
+  <p>
+    In Lesson <a href="0011-filtrations-conditional-expectation.html">011</a> you computed the price of a
+    three-period call as <code>7.475</code> using conditional expectation, and I owed you an explanation
+    of why the weighting was <code>½</code> and not the real-world probability. Now you can see it. That
+    tree had <code>u = 1.1</code>, <code>d = 0.9</code>, and zero interest, so
+  </p>
+  <div class="formula">p* = (R − d)/(u − d) = (1 − 0.9)/(1.1 − 0.9) = ½</div>
+  <p>
+    The <code>½</code> was never an assumption that up and down are equally likely. It was
+    <code>(R − d)/(u − d)</code> evaluated at those particular numbers — a coincidence of the arithmetic.
+    Change the up factor to <code>u = 1.2</code> and the risk-neutral weight becomes
+    <code>(1 − 0.9)/(1.2 − 0.9) = 1/3</code>, even though nothing about the real world changed. And the
+    multi-period version needs nothing new: at each node you replicate for one step, which is the same
+    two-equation algebra, so you roll the tree backwards taking <code>p*</code>-weighted averages —
+    exactly the backward averaging you already did. Your <code>7.475</code> was a risk-neutral price all
+    along; you just had not been told the name.
+  </p>
+  <p class="takeaway">
+    Takeaway: <code>p* = (R − d)/(u − d)</code>. Under it, the discounted stock is a martingale, and every
+    derivative's price is its discounted <code>p*</code>-average payoff. Real-world probabilities never
+    enter.
+  </p>
+
+  <h2>What "changing the measure" actually means</h2>
+  <p>
+    We have quietly done something that deserves a proper name and a careful definition, because the
+    continuous-time version is the heart of the lesson. We used <em>two different probability
+    assignments on the same set of outcomes</em>. Lesson 011 built the vocabulary for exactly this:
+    a <strong>probability measure</strong> is the function that assigns weights to events, and it is a
+    separate object from the outcomes themselves. So we can swap it.
+  </p>
+  <div class="callout">
+    <strong>The picture to hold.</strong> A change of measure does <em>not</em> change what can happen.
+    The list of possible futures is untouched; each future just gets a different weight. Think of a bag of
+    tickets, one per outcome. Changing the measure does not add, remove, or edit a single ticket — it only
+    changes how many copies of each are in the bag.
+  </div>
+  <p>
+    The bookkeeping device for "how many copies now versus before" is one random number per outcome: the
+    ratio of the new weight to the old. It has a heavyweight name, the <strong>Radon–Nikodym
+    derivative</strong>, written <code>Z = dQ/dP</code>. Ignore the name; it is a re-weighting factor.
+  </p>
+  <div class="formula">Z(ω) = Q(ω) / P(ω) &nbsp;&nbsp;⟹&nbsp;&nbsp; E<sub>Q</sub>[X] = E<sub>P</sub>[ Z·X ]</div>
+  <div class="plain">
+    <span class="tag">In plain words</span> "<code>Z</code> at an outcome is how much more (or less) the
+    new probability <code>Q</code> counts that outcome than the old probability <code>P</code> did. And
+    an average under the new probabilities is the same as an average under the old ones, if you first
+    multiply each value by its re-weighting factor." <code>E<sub>Q</sub></code> means "average using the
+    <code>Q</code> weights"; the subscript is not decoration — from here on, an expectation without a
+    named measure is meaningless.
+  </div>
+  <div class="numplay">
+    <strong>With real numbers.</strong> Two outcomes. Real world: <code>P(up) = 0.7</code>,
+    <code>P(down) = 0.3</code>. Risk-neutral: <code>Q(up) = Q(down) = 0.5</code>. Then
+    <code>Z(up) = 0.5/0.7 = 0.714</code> (the up outcome counts about 29% <em>less</em> under Q) and
+    <code>Z(down) = 0.5/0.3 = 1.667</code> (the down outcome counts 67% <em>more</em>). Check the
+    re-weighting factors average to one, as they must if <code>Q</code> is to be a probability:
+    <code>E<sub>P</sub>[Z] = 0.7(0.714) + 0.3(1.667) = 0.5 + 0.5 = 1</code> ✔. And check the pricing
+    identity on the call payoff <code>X = (10, 0)</code>:
+    <code>E<sub>Q</sub>[X] = 0.5(10) = 5</code>, while
+    <code>E<sub>P</sub>[Z·X] = 0.7 × 0.714 × 10 = 5</code> ✔. Same number, two routes.
+  </div>
+  <p>
+    One condition matters enough to state now, because it will come back as a trap. <code>P</code> and
+    <code>Q</code> must be <strong>equivalent</strong>: they must agree on what is <em>impossible</em>.
+    Formally, they assign probability zero to the same events; concretely, <code>Z</code> must be strictly
+    positive everywhere — you may re-weight a ticket, but you may not shred it, and you may not print a
+    ticket that was not in the bag. Otherwise you would be changing the set of possible futures, and a
+    price built on a future that cannot happen is worthless. (If <code>Q</code> could set the probability
+    of a crash to zero, "no arbitrage" would stop meaning anything.)
+  </p>
+
+  <h2>Girsanov: the same trick, on Brownian paths</h2>
+  <p>
+    Now the continuous-time version. Under the real-world measure <code>P</code>, our stock follows
+    <code>dS = μS dt + σS dW</code>: it drifts up at rate <code>μ</code> and is shoved around by a
+    Brownian motion <code>W</code>. We want a new measure <code>Q</code> under which the drift is the
+    risk-free rate <code>r</code> instead, because — as the binomial showed — that is the measure in which
+    discounted prices are fair games and prices become averages.
+  </p>
+  <p>
+    In the two-outcome world we just re-weighted two tickets. Here there are infinitely many tickets: one
+    per Brownian path. <strong>Girsanov's theorem</strong> is the recipe for that re-weighting. Its
+    statement, with every symbol defined:
+  </p>
+  <div class="callout">
+    <strong>Girsanov (constant-shift version).</strong> Let <code>W</code> be a Brownian motion under
+    <code>P</code> on <code>[0, T]</code>, and pick any number <code>θ</code> ("theta" — the size of the
+    shift you want). Define the re-weighting factor
+    <code>Z<sub>T</sub> = exp(−θW<sub>T</sub> − ½θ²T)</code> and let <code>Q</code> be the measure that
+    weights each path by it. Then <code>Q</code> is a genuine probability measure equivalent to
+    <code>P</code>, and the shifted process
+    <code>W̃<sub>t</sub> = W<sub>t</sub> + θt</code> is a <strong>Brownian motion under
+    <code>Q</code></strong>.
+  </div>
+  <div class="plain">
+    <span class="tag">In plain words</span> "Weight each path by an exponential of where its Brownian
+    shock ended: paths that finished high count for less, paths that finished low count for more (when
+    <code>θ</code> is positive). Under those new weights, the old Brownian motion plus a steady slope
+    <code>θt</code> is itself a perfectly ordinary Brownian motion." The <code>−½θ²T</code> is not a
+    modelling choice — it is exactly the amount that makes the new weights average to one, i.e. makes
+    <code>Q</code> a probability rather than something that sums to more or less than 100%.
+  </div>
+  <p>
+    Two things deserve checking rather than accepting, and both are one line with tools you already have.
+  </p>
+  <div class="step">
+    <strong>Check 1 — the weights really do average to one.</strong> Re-warm from Lesson
+    <a href="0013-ito-lemma.html">013</a> (your lab confirmed it numerically):
+    <code>E[e<sup>aW<sub>T</sub></sup>] = e<sup>½a²T</sup></code> for any constant <code>a</code>, because
+    <code>W<sub>T</sub></code> is normal with mean 0 and variance <code>T</code>. Apply it with
+    <code>a = −θ</code>:
+    <code>E<sub>P</sub>[Z<sub>T</sub>] = E<sub>P</sub>[e<sup>−θW<sub>T</sub></sup>]·e<sup>−½θ²T</sup>
+    = e<sup>½θ²T</sup>·e<sup>−½θ²T</sup> = 1</code> ✔. That is the entire job of the
+    <code>−½θ²</code> term.
+  </div>
+  <div class="step">
+    <strong>Check 2 — the shift really is all that happens.</strong> Under <code>P</code>,
+    <code>W<sub>T</sub></code> has the bell-curve density
+    <code>φ(w) = (1/√(2πT))·e<sup>−w²/(2T)</sup></code>. Under <code>Q</code> its density is that,
+    multiplied by the re-weighting factor. Collect the exponents:
+    <code>−θw − ½θ²T − w²/(2T)</code>. Factor out <code>−1/(2T)</code>:
+    <code>−(1/2T)·[ w² + 2θTw + θ²T² ]</code>. The bracket is a perfect square —
+    <code>(w + θT)²</code> — which is the schoolbook trick of <em>completing the square</em>
+    (<code>x² + 2bx + b² = (x + b)²</code>, here with <code>b = θT</code>). So the <code>Q</code>-density
+    of <code>W<sub>T</sub></code> is <code>(1/√(2πT))·e<sup>−(w + θT)²/(2T)</sup></code>: still a bell
+    curve, still of width <code>√T</code>, but centred at <code>−θT</code> instead of <code>0</code>.
+    Shifting it back — that is exactly <code>W̃ = W + θt</code> — recentres it at zero. <strong>The mean
+    moved; the width did not.</strong> ✔
+  </div>
+  <div class="numplay">
+    <strong>With real numbers.</strong> Take <code>θ = 0.5</code> and <code>T = 1</code>, so
+    <code>Z = exp(−0.5·W<sub>1</sub> − 0.125)</code>. A path whose Brownian shock ended at
+    <code>W<sub>1</sub> = +1</code> gets weight <code>e<sup>−0.625</sup> = 0.54</code> — it counts about
+    half as much as before. A path that ended at <code>W<sub>1</sub> = −1</code> gets
+    <code>e<sup>+0.375</sup> = 1.46</code> — nearly one and a half times as much. A path that ended at
+    <code>0</code> gets <code>e<sup>−0.125</sup> = 0.88</code>. Averaged over all paths these come to
+    exactly <code>1</code>, and the effect is to slide the whole bell curve of
+    <code>W<sub>1</sub></code> down by <code>θT = 0.5</code> without changing its width.
+  </div>
+
+  <h2>The market price of risk: how big a shift do we need?</h2>
+  <p>
+    Girsanov gives us a shift of any size we like. Which size turns the real drift <code>μ</code> into the
+    risk-free rate <code>r</code>? Substitute and see. From <code>W̃ = W + θt</code> we get
+    <code>dW̃ = dW + θ dt</code>, so <code>dW = dW̃ − θ dt</code>. Feed that into the stock's SDE:
+  </p>
+  <div class="step">
+    <strong>Substitute.</strong> <code>dS = μS dt + σS dW = μS dt + σS(dW̃ − θ dt)</code>.
+  </div>
+  <div class="step">
+    <strong>Collect the <code>dt</code> terms.</strong>
+    <code>dS = (μ − σθ)S dt + σS dW̃</code>. The random part is untouched: still <code>σS</code>,
+    just measured against the new Brownian motion.
+  </div>
+  <div class="step">
+    <strong>Demand the drift be <code>r</code>.</strong> Set <code>μ − σθ = r</code> and solve:
+    <code>σθ = μ − r</code>, hence <code>θ = (μ − r)/σ</code>.
+  </div>
+  <div class="formula">
+    θ = (μ − r) / σ &nbsp;&nbsp;⟹&nbsp;&nbsp; dS = rS·dt + σS·dW̃ &nbsp;(under Q)
+  </div>
+  <div class="plain">
+    <span class="tag">In plain words</span> "The shift you need is the stock's extra return over cash,
+    divided by its volatility — that is, the extra reward per unit of risk. Apply it and the stock's
+    average growth becomes the cash rate, while its wobble stays exactly <code>σ</code>."
+  </div>
+  <p>
+    That quantity <code>θ = (μ − r)/σ</code> has a name you should hold onto: the <strong>market price of
+    risk</strong>, also called the <strong>Sharpe ratio</strong> of the asset. Read it literally: the
+    numerator <code>μ − r</code> is how much more you expect to earn than by leaving the money in cash
+    (the risk premium); the denominator <code>σ</code> is how much you get shoved around while earning it.
+    The ratio is <em>reward per unit of risk</em> — and it is the single most quoted number in your future
+    job, because a strategy's Sharpe ratio is exactly this quantity computed on the strategy's returns.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers.</strong> A stock with expected return <code>μ = 15%</code>, volatility
+    <code>σ = 20%</code>, cash at <code>r = 5%</code>: <code>θ = (0.15 − 0.05)/0.20 = <strong>0.5</strong></code>.
+    So the risk-neutral world is reached by sliding the Brownian motion by half a unit per year. Under
+    <code>Q</code> the same stock grows at 5%, not 15% — the 10% risk premium has been re-weighted away.
+    A more exciting stock with <code>μ = 25%</code> and the same volatility needs a bigger shift,
+    <code>θ = 1.0</code>. A stock that earns exactly the cash rate needs no shift at all
+    (<code>θ = 0</code>): it is <em>already</em> risk-neutral.
+  </div>
+  <p>
+    And because Girsanov only re-weights, the picture below is the honest one: nobody moves the paths. The
+    slider changes the real-world drift <code>μ</code>; watch the weights redistribute so the weighted
+    average always lands on the cash-rate curve.
+  </p>
+  <div id="weights"></div>
+  <p class="viz-cap">
+    <strong>Same paths, different weights.</strong> Faint lines are simulated stock paths — identical at
+    every slider position. Each is drawn <em>darker and thicker when the risk-neutral measure counts it
+    more</em> (weight <code>Z = e<sup>−θW−½θ²t</sup></code>). The
+    <span style="color:#0d5c4b;font-weight:600">solid curve</span> is the ordinary average, growing at
+    <code>μ</code>; the <span style="color:#b23a48;font-weight:600">dashed curve</span> is the
+    <em>weighted</em> average, which sits on <code>S<sub>0</sub>e<sup>rt</sup></code> for every
+    <code>μ</code> you choose. Slide <em>μ</em> up: the paths do not budge; only who counts changes.
+  </p>
+  <p>
+    Finally, the solved form. Under <code>Q</code> the stock is still a geometric Brownian motion, so
+    Lesson <a href="0014-sdes.html">014</a>'s solve applies verbatim with <code>μ</code> replaced by
+    <code>r</code> and <code>W</code> replaced by <code>W̃</code>:
+  </p>
+  <div class="formula">
+    S<sub>T</sub> = S<sub>0</sub>·exp( (r − ½σ²)T + σW̃<sub>T</sub> ) &nbsp;(under Q)
+  </div>
+  <div class="plain">
+    <span class="tag">In plain words</span> "In the risk-neutral world the stock still compounds and still
+    wiggles by <code>σ</code>, but its average growth rate is the cash rate <code>r</code> — and it still
+    carries the <code>−½σ²</code> volatility drag from Lesson 013, because that term comes from the
+    curvature of the logarithm, which no change of measure can touch."
+  </div>
+  <p class="takeaway">
+    Takeaway: Girsanov shifts a Brownian motion by <code>θt</code> by re-weighting paths. Choosing
+    <code>θ = (μ − r)/σ</code> — the market price of risk — turns the stock's drift into <code>r</code>
+    and leaves <code>σ</code> alone.
+  </p>
+
+  <h2>Why the volatility survives but the drift does not</h2>
+  <p>
+    This deserves its own section, because it is the deepest idea in the lesson and it will shape how you
+    think about research for years.
+  </p>
+  <p>
+    A change of measure can move the drift anywhere it likes. It <em>cannot touch the volatility</em>.
+    Here is the reason, and you already proved the key fact in Lesson
+    <a href="0012-brownian-motion.html">012</a>: the <strong>quadratic variation</strong> of Brownian
+    motion is <code>[W]<sub>t</sub> = t</code> — add up the squared wiggles on a fine grid and you get
+    <code>t</code>, not approximately but in the limit, <em>on essentially every path</em>. It is a
+    property of the path itself, not of an average across paths.
+  </p>
+  <p>
+    Now recall the equivalence requirement: <code>P</code> and <code>Q</code> agree about what is
+    impossible. A statement that is true on all paths except a set of probability zero under
+    <code>P</code> is therefore also true on all paths except a set of probability zero under
+    <code>Q</code>. Quadratic variation is such a statement. So it is the same under both measures — and
+    since the stock's squared wiggles accumulate at rate <code>σ²S²</code>, the volatility you would
+    measure from a single price path is the same in both worlds.
+  </p>
+  <div class="plain">
+    <span class="tag">In plain words</span> "Volatility is something you can read off one path by
+    measuring how much it jiggles. Re-weighting which paths count cannot change how much a given path
+    jiggles — so volatility is not up for negotiation. Drift, by contrast, is only visible by averaging
+    across many possible futures, and that is exactly what re-weighting changes."
+  </div>
+  <p>
+    That asymmetry is not a curiosity — it is the statistical shape of your entire future job:
+  </p>
+  <div class="numplay">
+    <strong>With real numbers — why drift is the hard one.</strong> Estimating volatility gets better the
+    more finely you sample: a year of daily data gives roughly 252 observations of the wiggle, a year of
+    minute bars gives about 100,000, and the estimate tightens with each. Estimating the drift does
+    <em>not</em> work that way. The uncertainty in an estimate of <code>μ</code> from a single price
+    history is <code>σ/√T</code>, where <code>T</code> is the <em>calendar length</em> of the history —
+    sampling more often within the same window does not help at all, because the extra observations add
+    the same drift signal and the same noise in proportion. With <code>σ = 20%</code>, to pin the drift
+    down to <code>±1%</code> you would need <code>T = (0.20/0.01)² = <strong>400 years</strong></code> of
+    data. This is why Q1 was all statistical hygiene, why a "great" backtest is usually noise, and why
+    quant researchers who claim to know expected returns to the basis point are selling something.
+  </div>
+
+  <h2>The risk-neutral pricing formula</h2>
+  <p>
+    Put the pieces together. In the binomial, replication forced the price to be a discounted average
+    under <code>p*</code>. The same logic runs in continuous time, and gives the formula the rest of the
+    quarter uses:
+  </p>
+  <div class="formula">
+    V<sub>t</sub> = E<sub>Q</sub>[ e<sup>−r(T−t)</sup>·V<sub>T</sub> &nbsp;|&nbsp; ℱ<sub>t</sub> ]
+  </div>
+  <div class="plain">
+    <span class="tag">In plain words</span> "The value today of a contract that pays
+    <code>V<sub>T</sub></code> at time <code>T</code> is: average that payoff using the risk-neutral
+    weights, given everything known so far, then shrink it back to today's money by the risk-free
+    discount factor." <code>ℱ<sub>t</sub></code> is the information available at time <code>t</code> — the
+    filtration from Lesson <a href="0011-filtrations-conditional-expectation.html">011</a> — so this is a
+    conditional expectation, the exact object you computed on a tree.
+  </div>
+  <p>
+    Equivalently, and more memorably: <strong>under <code>Q</code>, every discounted price is a
+    martingale</strong>. You can verify that for the stock itself in three lines with Itô, and it is a
+    clean re-use of Lesson 013's "linear function ⇒ no correction" rule. Let
+    <code>f(t, S) = e<sup>−rt</sup>S</code> — the discounted price.
+  </p>
+  <div class="step">
+    <strong>Derivatives of <code>f</code>.</strong> <code>f<sub>t</sub> = −re<sup>−rt</sup>S</code>
+    (differentiate the exponential in <code>t</code>), <code>f<sub>s</sub> = e<sup>−rt</sup></code>, and
+    <code>f<sub>ss</sub> = 0</code> because <code>f</code> is a straight line in <code>S</code>.
+  </div>
+  <div class="step">
+    <strong>Itô's lemma with the <code>Q</code>-coefficients</strong> (<code>a = rS</code>,
+    <code>b = σS</code>): the drift bracket is
+    <code>f<sub>t</sub> + a·f<sub>s</sub> + ½b²·f<sub>ss</sub> = −re<sup>−rt</sup>S + rS·e<sup>−rt</sup> + 0
+    = 0</code>. The two terms are equal and opposite — they cancel exactly.
+  </div>
+  <div class="step">
+    <strong>What is left.</strong> <code>d(e<sup>−rt</sup>S) = σe<sup>−rt</sup>S·dW̃</code> — pure
+    <code>dW̃</code>, no <code>dt</code>. An integral of <code>… dW̃</code> is a martingale (Lesson 013),
+    so the discounted stock price is a fair game under <code>Q</code>. ✔
+  </div>
+  <p>
+    One honest gap, named rather than hidden. In the binomial, "the price equals the discounted
+    <code>Q</code>-average" followed from a replicating recipe you could write down. In continuous time
+    you need to know that a replicating strategy still exists — that any <code>Q</code>-martingale built
+    on this Brownian motion can be written as an Itô integral, i.e. as the running profit of some
+    stock-and-cash trading strategy. That is the <strong>martingale representation theorem</strong>
+    (Shreve II §5.3): the continuous-time guarantee that "you can always build it," which is what licenses
+    the pricing formula. We use it; Lesson 017 makes the hedging strategy concrete when you actually
+    delta-hedge an option and watch the profit and loss.
+  </p>
+
+  <h2>Black–Scholes as a single expectation</h2>
+  <p>
+    Now cash in. Price a European call under <code>Q</code>, where
+    <code>S<sub>T</sub> = S<sub>0</sub>exp((r − ½σ²)T + σW̃<sub>T</sub>)</code> and
+    <code>W̃<sub>T</sub></code> is normal with mean 0 and variance <code>T</code>:
+  </p>
+  <div class="formula">
+    C = E<sub>Q</sub>[ e<sup>−rT</sup>·(S<sub>T</sub> − K)⁺ ]
+    = S<sub>0</sub>·N(d<sub>1</sub>) − K·e<sup>−rT</sup>·N(d<sub>2</sub>)
+  </div>
+  <div class="formula">
+    d<sub>1</sub> = [ ln(S<sub>0</sub>/K) + (r + ½σ²)T ] / (σ√T),
+    &nbsp;&nbsp; d<sub>2</sub> = d<sub>1</sub> − σ√T
+  </div>
+  <p>
+    That is the <strong>Black–Scholes formula</strong>, and notice what just happened: it is not a new
+    theory. It is <em>one integral</em> — the average of a hockey-stick payoff against a bell curve —
+    written out. <code>N(·)</code> is the standard normal cumulative distribution function from Lesson
+    <a href="0005-probability-refresher.html">005</a>: <code>N(x)</code> is the probability that a
+    standard bell-curve draw lands below <code>x</code>. The algebra that turns the integral into these
+    two terms is a page of completing-the-square (you do it numerically in the lab, and Lesson 016
+    re-derives the same price from a differential equation instead).
+  </p>
+  <div class="plain">
+    <span class="tag">In plain words</span> "The call is worth the share you might receive, minus the cash
+    you might have to pay for it — each counted only in the worlds where the deal actually happens.
+    <code>N(d<sub>2</sub>)</code> is the risk-neutral chance you end up exercising, so
+    <code>K·e<sup>−rT</sup>·N(d<sub>2</sub>)</code> is the discounted strike you expect to pay.
+    <code>S<sub>0</sub>·N(d<sub>1</sub>)</code> is the value of the share you expect to receive —
+    weighted a little more heavily than a plain probability, because the worlds where you exercise are
+    also the worlds where the share is worth more."
+  </div>
+  <div class="numplay">
+    <strong>With real numbers.</strong> <code>S<sub>0</sub> = 100</code>, <code>K = 100</code>,
+    <code>r = 5%</code>, <code>σ = 20%</code>, <code>T = 1</code> year. Then
+    <code>ln(100/100) = 0</code>, so <code>d<sub>1</sub> = (0 + (0.05 + 0.02)·1)/(0.2·1) = 0.35</code> and
+    <code>d<sub>2</sub> = 0.35 − 0.2 = 0.15</code>. From the normal table
+    <code>N(0.35) = 0.6368</code>, <code>N(0.15) = 0.5596</code>, and
+    <code>e<sup>−0.05</sup> = 0.9512</code>. So
+    <code>C = 100(0.6368) − 100(0.9512)(0.5596) = 63.68 − 53.23 = <strong>10.45</strong></code>. A
+    one-year at-the-money call on a 20%-volatility stock costs about a tenth of the share price. Commit
+    that magnitude to memory; it is a standard interview sanity check.
+  </div>
+  <p>
+    And the promised continuity: the binomial tree you priced by hand <em>is</em> Black–Scholes, at a
+    coarse resolution. Chop the year into <code>n</code> steps with up factor
+    <code>u = e<sup>σ√Δt</sup></code> and <code>d = 1/u</code> (so the tree has the right volatility), use
+    <code>p* = (e<sup>rΔt</sup> − d)/(u − d)</code>, and let <code>n</code> grow.
+  </p>
+  <div id="convergence"></div>
+  <p class="viz-cap">
+    <strong>The tree becomes the formula.</strong> Each
+    <span style="color:#b23a48;font-weight:600">red dot</span> is the price from an
+    <code>n</code>-step risk-neutral tree; the
+    <span style="color:#0d5c4b;font-weight:600">dashed line</span> is the Black–Scholes value
+    <code>10.451</code>. Slide <em>n</em>: one step gives <code>12.16</code> (a two-outcome caricature of
+    the world), and the dots zig-zag — odd and even step counts straddle the answer differently — while
+    closing in. This is the whole lesson in one picture: same risk-neutral logic, finer grid.
+  </p>
+
+  <h2>Explain it back</h2>
+  <div id="teachback1"></div>
+
+  <h2>The two fundamental theorems (in plain words)</h2>
+  <p>
+    Everything above is a special case of two results that carry an intimidating name — the
+    <strong>fundamental theorems of asset pricing</strong> — and a very simple meaning.
+  </p>
+  <table>
+    <thead><tr><th>Theorem</th><th>Statement</th><th>What it means for you</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>FTAP 1</strong></td>
+        <td>There is no arbitrage <em>if and only if</em> there exists at least one equivalent measure
+          <code>Q</code> under which discounted prices are martingales.</td>
+        <td>"No free money" and "a risk-neutral measure exists" are the same statement. If you cannot find
+          a <code>Q</code>, your model contains free money — a bug, not an edge.</td>
+      </tr>
+      <tr>
+        <td><strong>FTAP 2</strong></td>
+        <td>The market is <em>complete</em> — every payoff can be replicated by trading — <em>if and only
+          if</em> that measure <code>Q</code> is unique.</td>
+        <td>One <code>Q</code> ⇒ one price, forced. Many <code>Q</code>'s ⇒ a <em>range</em> of
+          arbitrage-free prices, and the market picks one for reasons beyond no-arbitrage.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Our binomial and Black–Scholes worlds are complete: two states and two instruments, or one Brownian
+    motion and one stock — enough building blocks to manufacture anything. Reality is not so tidy. Add
+    jumps (Lesson 018) or make volatility itself random and there are more sources of risk than there are
+    things to trade with, so replication fails, many <code>Q</code>'s survive, and no-arbitrage alone
+    no longer pins a single price. Practitioners then <em>choose</em> a <code>Q</code> by calibrating to
+    the options that already trade. Worth knowing early: much of what looks like "pricing theory" on a
+    desk is really the choice of which <code>Q</code> to believe.
+  </p>
+
+  <h2>What this buys you</h2>
+  <ul>
+    <li><strong>Every pricer you will write.</strong> Monte-Carlo option pricing is one line of this
+      lesson: simulate <code>S<sub>T</sub></code> under <code>Q</code> (drift <code>r</code>, not
+      <code>μ</code>), average the payoff, discount. That is Lesson 019 and the Lesson 020 checkpoint.</li>
+    <li><strong>Reading the market backwards.</strong> Because <code>σ</code> is the one parameter that
+      survives the measure change, the market's option prices can be inverted for it — the
+      <strong>implied volatility</strong> you will meet in the volatility track. Prices do not tell you
+      the drift, and now you know precisely why they can't.</li>
+    <li><strong>A permanent guard rail.</strong> Real-world <code>P</code> for forecasting and research;
+      risk-neutral <code>Q</code> for pricing and hedging. Mixing them up produces confident nonsense —
+      the failure mode below.</li>
+    <li><strong>The Sharpe ratio, understood.</strong> <code>θ = (μ − r)/σ</code> is not just a scorecard
+      for strategies; it is literally the size of the shift between the real world and the pricing
+      world.</li>
+  </ul>
+  <div class="callout">
+    <strong>The honest warning (failure mode first, as always).</strong> Risk-neutral pricing is exact
+    <em>given the model</em>, and the model is a fiction in the familiar ways. It assumes you can hedge
+    continuously, at no cost, in any size, with constant volatility and no jumps. Every one of those is
+    false: hedging is discrete and costs money, volatility clusters and moves (Lesson
+    <a href="0004-returns-stylized-facts.html">004</a>), and prices gap. The formula's answer is exactly
+    right for a world we do not live in. That is still enormously useful — it is the reference point every
+    trading desk quotes against — but "exact given the model" is never "true."
+  </div>
+
+  <div class="trap">
+    <strong>Trap — the seven ways this material bites.</strong>
+    <strong>(1) Reading risk-neutral probabilities as forecasts.</strong> With
+    <code>μ = 15%</code>, <code>σ = 20%</code>, <code>r = 5%</code>, our one-year call has
+    <code>N(d<sub>2</sub>) = 56%</code> risk-neutral chance of finishing in the money, but the
+    <em>real-world</em> chance is <code>N(0.65) = 74%</code>. Both are correct answers to different
+    questions. Quoting a "risk-neutral probability of default" as if it were a default forecast is the
+    same error, and it is made professionally, often.
+    <strong>(2) Believing Girsanov can change volatility.</strong> It cannot — quadratic variation is a
+    path-by-path fact and equivalent measures agree on path-by-path facts. Only the drift moves.
+    <strong>(3) Simulating with <code>μ</code> instead of <code>r</code>.</strong> The single most common
+    pricing bug: a Monte-Carlo pricer fed the real-world drift returns a number that is not a price. The
+    lab makes you produce the wrong answer on purpose so you recognise it.
+    <strong>(4) Forgetting to discount.</strong> <code>E<sub>Q</sub>[V<sub>T</sub>]</code> is a future
+    average, not a price; the price is <code>e<sup>−rT</sup>E<sub>Q</sub>[V<sub>T</sub>]</code>.
+    <strong>(5) Thinking "risk-neutral" describes investors.</strong> Nobody is risk-neutral. The risk
+    premium has not vanished — it has been absorbed into <code>θ</code>, and it still governs what you
+    actually earn.
+    <strong>(6) Assuming <code>Q</code> exists and is unique.</strong> Existence is no-arbitrage (FTAP 1),
+    uniqueness is completeness (FTAP 2). With jumps or stochastic volatility, many <code>Q</code>'s
+    survive and no-arbitrage alone will not give you one price.
+    <strong>(7) Breaking equivalence.</strong> A change of measure may re-weight outcomes but never
+    create or destroy them (<code>Z &gt; 0</code> everywhere). Any argument that "under <code>Q</code>
+    the crash cannot happen" has left pricing theory behind.
+  </div>
+
+  <h2>Check your understanding</h2>
+  <div id="quiz1"></div>
+  <div id="quiz2"></div>
+  <div id="quiz3"></div>
+  <div id="quiz4"></div>
+  <div id="quiz5"></div>
+
+  <h2>Common questions (and honest answers)</h2>
+  <dl class="objections">
+    <dt>“If the real probability doesn't matter, does that mean my forecast is worthless?”</dt>
+    <dd>
+      No — it means your forecast is worthless <em>for pricing a replicable derivative</em>, which is a
+      narrow claim. The real-world measure <code>P</code> is exactly where your job lives: expected
+      returns, Sharpe ratios, portfolio construction, and every backtest are <code>P</code>-world
+      questions. What this lesson says is that the option's price is pinned by the hedging cost, so a
+      view on <code>p</code> shows up in your <em>profit</em>, not in the quote. If you think the stock
+      will rise, buy the stock (or the option, and hedge) — but do not expect the option's fair value to
+      agree with you.
+    </dd>
+    <dt>“Where did the risk premium go? It feels like it was smuggled out.”</dt>
+    <dd>
+      It went into <code>θ</code>, and it is still there in the real world. The reason it can be
+      re-weighted away for pricing purposes is that the hedged portfolio does not earn it: if you hold the
+      option and short <code>Δ</code> shares, you have removed exactly the exposure that the risk premium
+      pays you for. What is left is a riskless position, and a riskless position can only earn <code>r</code>
+      without creating free money. So the premium is absent from the price for the same reason it is
+      absent from a bank deposit.
+    </dd>
+    <dt>“Why must the volatility be the same under both measures — could a different <code>Q</code> not
+      just scale it?”</dt>
+    <dd>
+      Because <code>σ</code> is determined by each path individually, through the quadratic variation
+      <code>[W]<sub>t</sub> = t</code>, and equivalent measures cannot disagree about a property that
+      holds on almost every path. A measure change that scaled volatility would have to make paths with
+      the old wiggle-rate impossible and paths with a new one possible — i.e. it would not be equivalent,
+      and would break the no-arbitrage machinery it was meant to support. Practically: if your calibrated
+      "risk-neutral volatility" differs from realised volatility, that is a statement about your model or
+      about a volatility risk premium, never about Girsanov.
+    </dd>
+    <dt>“The martingale representation theorem was waved at rather than proved. How much should that
+      bother me?”</dt>
+    <dd>
+      Enough to know exactly what it buys and where to find it, not enough to stall. It is the
+      continuous-time replacement for "solve two equations for <code>Δ</code> and <code>B</code>": it
+      guarantees the hedging strategy exists, so the discounted-expectation formula really is a price and
+      not just a number. The statement and proof are Shreve II §5.3. Lesson 017 makes it operational —
+      you compute the hedge ratio <code>Δ</code>, run it discretely, and see the leftover profit and loss
+      that the theorem promises would vanish in the continuous limit.
+    </dd>
+    <dt>“Why bother with the binomial at all, if Black–Scholes is a formula?”</dt>
+    <dd>
+      Three reasons. It is where the logic is <em>visible</em> — you can see the replication and the
+      <code>p*</code> with a pencil. It generalises where the formula does not: American options (early
+      exercise) and exotic payoffs are routinely priced on trees precisely because you can inspect the
+      value at every node. And it is the cleanest demonstration that Black–Scholes is not an extra
+      assumption but a limit — which is what the convergence picture and the lab make concrete.
+    </dd>
+    <dt>“Is <code>θ</code> the same for every stock, or does each have its own?”</dt>
+    <dd>
+      In this one-stock, one-Brownian-motion world there is exactly one <code>θ</code>, and it is forced.
+      With several assets driven by shared risk factors, no-arbitrage forces every asset exposed to a
+      given factor to carry the <em>same</em> market price of risk for that factor — otherwise you could
+      go long the generous one and short the stingy one and pocket the difference risklessly. That
+      constraint is the continuous-time ancestor of factor models: assets differ in how much factor risk
+      they carry, not in the price paid per unit of it. You will meet it again in the factor-model track.
+    </dd>
+  </dl>
+
+  <h2>Primary reading (today)</h2>
+  <p>
+    <strong>Shreve II, Ch. 5 (§5.1–5.4)</strong> (see <a href="../RESOURCES.md">RESOURCES.md</a>) — the
+    canonical treatment: the Radon–Nikodym derivative process (§5.2), the Girsanov theorem (§5.2.2), the
+    martingale representation theorem (§5.3), and risk-neutral pricing with the market price of risk
+    (§5.4). Read §5.2 slowly and §5.4 twice. For the discrete warm-up — replication and <code>p*</code> on
+    a tree, exactly as derived above — <strong>Shreve I, Ch. 1–2</strong> is the gentler entrance, and
+    <strong>Baxter &amp; Rennie §3.3</strong> gives the same change-of-measure story with far less
+    formalism if Shreve's notation gets in the way.
+  </p>
+  <p>
+    <strong>Reference sheet (keep this one):</strong>
+    <a href="../reference/girsanov.html">Risk-neutral pricing &amp; Girsanov — the working rules</a>.
+    Printable; the page Lessons 016–020 link to instead of re-reading this.
+  </p>
+  <p>
+    <strong>Lab (this unit):</strong>
+    <a href="../labs/0015-risk-neutral-pricing.ipynb"><code>labs/0015-risk-neutral-pricing.ipynb</code></a> —
+    build the replicating portfolio and show the price ignores <code>p</code>; compute <code>p*</code> and
+    verify the discounted stock is a martingale; reproduce Lesson 011's <code>7.475</code> on a
+    three-period tree; take the tree to its Black–Scholes limit; price the same call by Monte-Carlo under
+    <code>Q</code>; do the measure change explicitly with Girsanov weights <code>Z</code> on
+    <em>real-world</em> paths and watch it give the identical price; then produce the two classic errors on
+    purpose — drifting at <code>μ</code> instead of <code>r</code>, and confusing
+    <code>N(d<sub>2</sub>)</code> with a real-world probability. A unit is done only when its lab runs.
+  </p>
+
+  <div class="reflect">
+    <strong>Reflection (5 min, no peeking).</strong> From memory: (1) Why is "discounted expected payoff"
+    not the price of an option? (2) Set up the two replication equations for a one-period tree and solve
+    for <code>Δ</code> and <code>B</code>. (3) Write <code>p*</code> and say why it is between 0 and 1
+    exactly when there is no arbitrage. (4) What does a Radon–Nikodym derivative <code>Z</code> do, and
+    why must it be strictly positive? (5) State Girsanov: what is <code>Z<sub>T</sub></code>, what is
+    <code>W̃</code>, and what is the role of the <code>−½θ²T</code>? (6) Derive
+    <code>θ = (μ − r)/σ</code> from <code>dS = μS dt + σS dW</code>. (7) Why can a measure change move the
+    drift but never the volatility? (8) Write the risk-neutral pricing formula and say what each symbol
+    means. Re-read anything shaky before the lab.
+  </div>
+
+  <div class="ask-teacher">
+    Stuck on the completing-the-square step, unsure why the hedged portfolio earns only <code>r</code>, or
+    want the martingale representation theorem unpacked? Ask your teacher. Paste your teach-back for
+    grading — and if you can define these terms cold, they go into
+    <a href="../GLOSSARY.md">GLOSSARY.md</a>.
+  </div>
+
+  <h2>Vocabulary you now own</h2>
+  <ul>
+    <li><strong>European call / put</strong> — a ticket to buy (call) or sell (put) one share at a fixed
+      strike <code>K</code> on a fixed date <code>T</code>; the call pays
+      <code>(S<sub>T</sub> − K)⁺</code>.</li>
+    <li><strong>Arbitrage</strong> — a trade costing nothing today that can never lose and might win. Any
+      price permitting one is not a price.</li>
+    <li><strong>Replicating portfolio / replication</strong> — a recipe of shares and cash that reproduces
+      a payoff in every state; its cost <em>is</em> the arbitrage-free price.</li>
+    <li><strong>Hedge ratio <code>Δ</code></strong> — shares per option in the recipe,
+      <code>(C<sub>u</sub> − C<sub>d</sub>)/(S<sub>u</sub> − S<sub>d</sub>)</code>.</li>
+    <li><strong>Risk-neutral probability <code>p*</code></strong> — <code>(R − d)/(u − d)</code>; the
+      weights under which the discounted stock is a martingale. Not a forecast.</li>
+    <li><strong>Change of measure</strong> — same outcomes, different weights; formalised by the
+      <strong>Radon–Nikodym derivative</strong> <code>Z = dQ/dP</code> with
+      <code>E<sub>Q</sub>[X] = E<sub>P</sub>[ZX]</code>.</li>
+    <li><strong>Equivalent measures</strong> — <code>P</code> and <code>Q</code> agree on what is
+      impossible (<code>Z &gt; 0</code> everywhere).</li>
+    <li><strong>Girsanov's theorem</strong> — weighting paths by
+      <code>Z<sub>T</sub> = e<sup>−θW<sub>T</sub> − ½θ²T</sup></code> makes
+      <code>W̃<sub>t</sub> = W<sub>t</sub> + θt</code> a Brownian motion under <code>Q</code>.</li>
+    <li><strong>Market price of risk (Sharpe ratio) <code>θ</code></strong> —
+      <code>(μ − r)/σ</code>: extra return over cash per unit of volatility; the size of the drift
+      shift.</li>
+    <li><strong>Risk-neutral pricing formula</strong> —
+      <code>V<sub>t</sub> = E<sub>Q</sub>[e<sup>−r(T−t)</sup>V<sub>T</sub> | ℱ<sub>t</sub>]</code>;
+      equivalently, discounted prices are <code>Q</code>-martingales.</li>
+    <li><strong>Black–Scholes formula</strong> —
+      <code>C = S<sub>0</sub>N(d<sub>1</sub>) − Ke<sup>−rT</sup>N(d<sub>2</sub>)</code>, the risk-neutral
+      expectation evaluated; <code>N(d<sub>2</sub>)</code> is the <code>Q</code>-chance of exercise.</li>
+    <li><strong>Martingale representation theorem</strong> — every <code>Q</code>-martingale on this
+      Brownian motion is an Itô integral, i.e. the profit of some trading strategy: replication exists.</li>
+    <li><strong>FTAP 1 / FTAP 2</strong> — no arbitrage ⟺ a <code>Q</code> exists; completeness ⟺ that
+      <code>Q</code> is unique.</li>
+  </ul>
+
+  <h2>Where you are in the arc</h2>
+  <p>
+    Lesson 014 gave you a solved model of how a stock moves. Today you learned that a price is not a
+    forecast of that motion but the <strong>cost of manufacturing the payoff</strong> — and that this cost
+    can be rewritten as an average, provided you re-weight the futures so that the stock earns only the
+    cash rate. In the two-outcome world that re-weighting is the single number
+    <code>p* = (R − d)/(u − d)</code>; in continuous time it is <strong>Girsanov</strong>, shifting the
+    Brownian motion by <code>θt</code> with <code>θ = (μ − r)/σ</code>. The drift moves; the volatility
+    cannot. And the whole of Black–Scholes falls out as one expectation.
+  </p>
+  <p>
+    Next, Lesson 016 takes the <em>same</em> price and derives it a second, independent way: hedge the
+    <code>dW</code> out of the GBM SDE and you get the <strong>Black–Scholes PDE</strong>, with
+    <strong>Feynman–Kac</strong> as the bridge proving the differential equation and today's expectation
+    are the same object. Lesson 017 makes the hedge real and measures what it costs when you rebalance
+    only once a day. By Lesson 020 you price a European option three independent ways and reconcile them
+    to tolerance — and the <code>Q</code> you built today is the common ancestor of all three. Run the lab
+    first: replicate, price, change measure, and watch the tree become the formula.
+  </p>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="0014-sdes.html">← Lesson 014 (SDEs: GBM &amp; Ornstein–Uhlenbeck)</a></li>
+      <li><a href="../reference/girsanov.html">Reference: Risk-neutral pricing &amp; Girsanov</a></li>
+      <li><a href="../reference/curriculum.html">Next: Unit 016 — The Black–Scholes PDE &amp; Feynman–Kac →</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/predict.js"></script>
+<script src="../assets/teachback.js"></script>
+<script src="../assets/rnpricing-viz.js"></script>
+<script src="../assets/retrieval-pool.js"></script>
+<script src="../assets/retrieval-bank.js"></script>
+<script>
+  RetrievalBank.mount(document.getElementById("warmup"), { upTo: 15, count: 4 });
+
+  RN.mountReplication(document.getElementById("replication"), { p: 0.7 });
+  RN.mountWeights(document.getElementById("weights"), { mu: 0.15 });
+  RN.mountConvergence(document.getElementById("convergence"), { n: 8 });
+
+  Predict.mount(document.getElementById("predict1"), {
+    prompt: "One period: S\u2080 = 100 goes to 110 or 90. A call struck at 100 pays 10 or 0. Rates are zero. The real-world probability of the up move jumps from 50% to 90%. The arbitrage-free price of the call:",
+    options: [
+      { label: "does not move at all \u2014 it stays 5", value: "same" },
+      { label: "rises to about 9, the new average", value: "rise" },
+      { label: "rises, but by less than that jump", value: "some" },
+      { label: "falls, since the upside is priced", value: "fall" }
+    ],
+    correct: "same",
+    reveal: "It does not move. The price is the cost of a portfolio that REPLICATES the option \u2014 here 0.5 shares funded by borrowing 45, costing 5 today \u2014 and that portfolio pays the option's payoff in both states no matter how likely each state is. The probability never appears in the two equations you solve for \u0394 and B. If the price did move to 9, you would sell the option, build the recipe for 5, and keep 4 risk-free. What the sentiment shift does change is the stock price itself (and hence, indirectly, the option) \u2014 but for a GIVEN stock price, the option's price is pinned."
+  });
+
+  Teachback.mount(document.getElementById("teachback1"), {
+    prompt: "In your own words: what is the risk-neutral measure, how does Girsanov construct it, and why does the drift change while the volatility cannot?",
+    points: [
+      "A price is the cost of a replicating portfolio, not a discounted forecast",
+      "Solving the two replication equations gives \u0394 and B; p never appears",
+      "The algebra rewrites that cost as (1/R)[p*C_u + (1\u2212p*)C_d], p* = (R\u2212d)/(u\u2212d)",
+      "Under p*/Q the DISCOUNTED stock is a martingale \u2014 that is what 'risk-neutral' means",
+      "Change of measure = same outcomes, new weights; Z = dQ/dP, E_Q[X] = E_P[ZX], Z > 0",
+      "Girsanov: Z_T = exp(\u2212\u03b8W_T \u2212 \u00bd\u03b8\u00b2T) makes W\u0303 = W + \u03b8t a Q-Brownian motion",
+      "Market price of risk \u03b8 = (\u03bc\u2212r)/\u03c3 turns dS = \u03bcS dt + \u03c3S dW into dS = rS dt + \u03c3S dW\u0303",
+      "Volatility is fixed by quadratic variation, a path-by-path fact equivalent measures share",
+      "Pricing formula V_t = E_Q[e^{\u2212r(T\u2212t)}V_T | F_t]; Black\u2013Scholes is that one expectation"
+    ],
+    model: "A derivative's price is not a forecast of its payoff \u2014 it is the cost of manufacturing that payoff. On a one-period tree you solve two equations (match the payoff in the up state and in the down state) for \u0394 shares and B in cash; the real-world probability p never enters, so the price cannot depend on it. Rearranging that cost algebraically gives Price = (1/R)[p*C_u + (1\u2212p*)C_d] with p* = (R\u2212d)/(u\u2212d): the hedging cost IS an expectation, but under weights manufactured from u, d and the interest rate. Those weights are called risk-neutral because under them the discounted stock is a martingale \u2014 every asset is priced as if it grew at the cash rate r, with the risk premium re-weighted away. Changing measure means keeping the same set of possible outcomes and only changing their weights; the bookkeeping is the Radon\u2013Nikodym derivative Z = dQ/dP, with E_Q[X] = E_P[ZX], and Z must be strictly positive so that P and Q agree on what is impossible (equivalence). Girsanov is that re-weighting for Brownian paths: weight each path by Z_T = exp(\u2212\u03b8W_T \u2212 \u00bd\u03b8\u00b2T) \u2014 where the \u2212\u00bd\u03b8\u00b2T is exactly what makes the weights average to 1 \u2014 and then W\u0303_t = W_t + \u03b8t is a Brownian motion under Q. Completing the square in the Gaussian density shows what happened: the bell curve of W_T moved its centre to \u2212\u03b8T but kept its width. Substituting dW = dW\u0303 \u2212 \u03b8dt into dS = \u03bcS dt + \u03c3S dW gives dS = (\u03bc\u2212\u03c3\u03b8)S dt + \u03c3S dW\u0303, so choosing \u03b8 = (\u03bc\u2212r)/\u03c3 \u2014 the market price of risk, i.e. the Sharpe ratio \u2014 makes the drift r while leaving \u03c3 untouched. The volatility cannot change because it is determined by the quadratic variation [W]_t = t, which holds path by path, and equivalent measures agree on almost-sure path properties; the drift, by contrast, is only visible as an average across paths, which is precisely what re-weighting alters. The payoff is the pricing formula V_t = E_Q[e^{\u2212r(T\u2212t)}V_T | F_t], equivalently 'discounted prices are Q-martingales', and Black\u2013Scholes C = S\u2080N(d\u2081) \u2212 Ke^{\u2212rT}N(d\u2082) is just that expectation evaluated for a call."
+  });
+
+  Quiz.mount(document.getElementById("quiz1"), {
+    question: "On a one-period binomial tree, raising the real-world probability of an up move from 0.5 to 0.9 changes the arbitrage-free option price:",
+    options: [
+      { label: "not at all \u2014 replication ignores it", value: "a" },
+      { label: "upward \u2014 the payoff is likelier now", value: "b" },
+      { label: "upward, only by the discount factor", value: "c" },
+      { label: "downward \u2014 the risk premium shrinks", value: "d" }
+    ],
+    correct: "a",
+    explain: "The price is the cost of the portfolio (\u0394 shares + B cash) that matches the payoff in BOTH states. Solving those two equations never uses p, so the price cannot depend on it."
+  });
+
+  Quiz.mount(document.getElementById("quiz2"), {
+    question: "The weights p* = (R \u2212 d)/(u \u2212 d) are called risk-neutral because under them:",
+    options: [
+      { label: "the discounted stock is a martingale", value: "a" },
+      { label: "the real up and down moves are equal", value: "b" },
+      { label: "investors stop demanding any premium", value: "c" },
+      { label: "the option's payoff becomes riskless", value: "d" }
+    ],
+    correct: "a",
+    explain: "Discounted by R, the stock's p*-average is exactly today's price \u2014 a fair game. Every asset then appears to grow at the risk-free rate, which is why the name says 'neutral'."
+  });
+
+  Quiz.mount(document.getElementById("quiz3"), {
+    question: "Applying Girsanov with market price of risk \u03b8 to dS = \u03bcS dt + \u03c3S dW changes:",
+    options: [
+      { label: "only the drift: \u03bc is replaced by r", value: "a" },
+      { label: "only the volatility: it becomes r", value: "b" },
+      { label: "both the drift and the volatility", value: "c" },
+      { label: "neither \u2014 only the discount factor", value: "d" }
+    ],
+    correct: "a",
+    explain: "dW = dW\u0303 \u2212 \u03b8dt gives dS = (\u03bc\u2212\u03c3\u03b8)S dt + \u03c3S dW\u0303, so \u03b8 = (\u03bc\u2212r)/\u03c3 sets the drift to r. \u03c3 is untouched: quadratic variation is a path-by-path fact that equivalent measures must share."
+  });
+
+  Quiz.mount(document.getElementById("quiz4"), {
+    question: "A stock has \u03bc = 12%, \u03c3 = 25%, and cash pays r = 2%. Its market price of risk \u03b8 is:",
+    options: [
+      { label: "(\u03bc \u2212 r)/\u03c3 = 0.40, the Sharpe ratio", value: "a" },
+      { label: "(\u03bc \u2212 r)\u00b7\u03c3 = 0.03, a scaled premium", value: "b" },
+      { label: "\u03bc/\u03c3 = 0.48, the plain reward ratio", value: "c" },
+      { label: "(r \u2212 \u03bc)/\u03c3 = \u22120.40, the flipped one", value: "d" }
+    ],
+    correct: "a",
+    explain: "\u03b8 = (\u03bc \u2212 r)/\u03c3 = (0.12 \u2212 0.02)/0.25 = 0.40 \u2014 reward per unit of risk, and exactly the size of the Brownian shift that turns the real world into the pricing world."
+  });
+
+  Quiz.mount(document.getElementById("quiz5"), {
+    question: "In C = S\u2080N(d\u2081) \u2212 Ke^{\u2212rT}N(d\u2082), the term N(d\u2082) is:",
+    options: [
+      { label: "the Q-chance the call is exercised", value: "a" },
+      { label: "the real-world exercise probability", value: "b" },
+      { label: "the fraction of the payoff in cash", value: "c" },
+      { label: "the hedge ratio \u0394 of this position", value: "d" }
+    ],
+    correct: "a",
+    explain: "N(d\u2082) = Q(S_T > K), the RISK-NEUTRAL exercise probability. The real-world probability uses \u03bc instead of r and is generally different \u2014 74% vs 56% in the lesson's example."
+  });
+</script>
+</body>
+</html>
