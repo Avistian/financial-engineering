@@ -116,7 +116,10 @@
   and pouring the extra budget into `.plain` / `.numplay` grounding rather than more prose. Lesson 014
   landed ~ the 012/013 size band but denser with worked micro-examples. If the learner still finds a
   lesson long *and* unclear, split it; if unclear but fine on length, add more grounding boxes. Keep
-  asking only if a future lesson feels genuinely too long in one sitting.
+  asking only if a future lesson feels genuinely too long in one sitting. **Update (015):** Lesson 015 ran
+  to ~72 KB — the longest since 011 — because the replication → `p*` → Girsanov chain refuses to skip a
+  link. If the learner reports it clear *but long*, the next lever is splitting Lesson 016, not trimming
+  the `.plain`/`.numplay` boxes.
 
 ## Standing weekly habits (don't let these lapse)
 - 10 mental-math drills + 5 probability brainteasers/week (Green Book / Heard on the Street).
@@ -137,14 +140,27 @@
   the budget on `.plain`/`.numplay` grounding. See the standing decision above. Only re-open if a future
   lesson feels too long *in one sitting*.
 - **The `−½σ²` sign must be automatic before Lesson 016 (Black–Scholes PDE).** 014 shipped and re-used it
-  in the GBM solve; 016's PDE carries it again. Grade the 013/014 teach-backs cold: the `d(log S)`
-  derivation (every `S` cancellation), *why* `∫…dW` is a martingale, and the sign-of-curvature rule
-  (`log S` drags down `−½σ²`; `S²`/`e^W` push up; OU's `e^{θt}X` is linear ⇒ **no** correction). If the
-  learner derives `μ−½σ²` and the OU solve unaided, both go into "Derivations I own."
+  in the GBM solve; 015 re-used it again under `Q` (`S_T = S₀e^{(r−½σ²)T+σW̃_T}`); 016's PDE carries it a
+  third time. Grade the 013/014 teach-backs cold: the `d(log S)` derivation (every `S` cancellation),
+  *why* `∫…dW` is a martingale, and the sign-of-curvature rule (`log S` drags down `−½σ²`; `S²`/`e^W`
+  push up; OU's `e^{θt}X` is linear ⇒ **no** correction). If the learner derives `μ−½σ²` and the OU solve
+  unaided, both go into "Derivations I own."
+- **New for 015 (Girsanov / risk-neutral pricing).** Three things to grade cold, not by MCQ: (1) set up
+  and solve the two replication equations (`Δ = 0.5`, `B = −45`, price `5` — and note `p` never appears);
+  (2) derive `p* = (R−d)/(u−d)` by regrouping the replication cost; (3) derive `θ = (μ−r)/σ` by
+  substituting `dW = dW̃ − θdt` into `dS = μS dt + σS dW`. All three ⇒ "the risk-neutral price" goes into
+  "Derivations I own." Watch two specific confusions: **`N(d₂) = 56%` is a pricing weight, not the 74%
+  real-world chance of exercise** (same error as quoting a risk-neutral default probability as a default
+  rate), and **Girsanov moves the drift but can never move `σ`** (quadratic variation is path-wise, and
+  equivalent measures agree on almost-sure facts — the same reason `μ` needs ~400 years of data to pin
+  down while `σ` does not).
+- **Browser verification is owed for Lesson 015's three widgets** (skipped at the learner's request when
+  015 shipped). `.smoke.js` geometry traps cover layout regressions, but nothing has been eyeballed at
+  375px.
 - **New for 014:** watch that the learner keeps the two OU spreads distinct (mean → `m` vs wobble →
   `σ²/2θ`), reads `θ(m−X)` as a pull *toward* `m`, and remembers the small-sample θ bias (short fits
   overestimate reversion) — that bias is the lab's punchline and a real pairs-trade trap.
-- **Glossary drill owed:** rows for 006–014 are all still blank (47 terms now). Do one cold-definition pass
+- **Glossary drill owed:** rows for 006–015 are all still blank (59 terms now). Do one cold-definition pass
   and fill only what the learner defines unaided.
 - Lesson 010 was **self-reported** as passed (no EXIT TICKET graded here) — offer a fresh checkpoint
   scenario at the next natural break.
