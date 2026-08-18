@@ -12,5 +12,8 @@ labs/data/
 *.parquet
 *.csv.gz
 
+# Scratch screenshots from browser spot-checks
+.screenshots/
+
 # OS / editor
 .DS_Store
