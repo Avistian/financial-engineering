@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Year 6 — what each lesson must teach</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .toc { columns: 2; column-gap: 2rem; font-family: var(--font-sans); font-size: 0.88rem; margin: 1rem 0 2rem; }
+    @media (max-width: 640px) { .toc { columns: 1; } }
+    .unit { margin: 2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .unit h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+    .unit h3 .n { font-family: var(--font-mono); color: var(--accent); margin-right: 0.4rem; }
+    .skill { margin: 0.35rem 0 0.6rem; }
+    .beats { margin: 0.4rem 0 0.8rem; padding-left: 1.2rem; }
+    .beats li { margin: 0.35rem 0; }
+    .chk-unit { background: var(--accent-light); padding: 0.75rem 1rem; border-radius: 4px; }
+    .exit-unit { background: #fef9e7; padding: 0.75rem 1rem; border-radius: 4px; }
+</style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Reference · lesson-by-lesson teaching plan</p>
+  <h1>Year 6 — what each lesson must teach</h1>
+  <p class="subtitle">Units 201–240 · data kit + going live · teaching contract, no labs yet</p>
+  
+  <p>
+    Everyday picture: before you backtest, you need a store of facts that could have been
+    known that morning. Before you trade, you need a loop that turns those facts into
+    orders, a ledger that adds up, and a button that stops you. This year teaches that
+    desk — <strong>data preparation and everything needed to start trading</strong> on
+    both the monthly and daily clocks.
+  </p>
+  <p>
+    <strong>Recommended order (not the unit numbers):</strong> Years 1–3 →
+    <strong>201–210 (data kit)</strong> → Year 4 → Year 5 →
+    <strong>211–240 (prod parity, paper, small live)</strong>.
+    Years 1–5 stay required; this year is extra calendar.
+  </p>
+
+  <nav class="toc">
+    <a href="#u201">201 What a desk data set is</a><br>
+    <a href="#u202">202 Building a price panel: splits, dividends, delist returns</a><br>
+    <a href="#u203">203 Point-in-time membership</a><br>
+    <a href="#u204">204 Point-in-time fundamentals (vintages)</a><br>
+    <a href="#u205">205 Earnings and event calendar as a first-class table</a><br>
+    <a href="#u206">206 Daily bars: open, close, auction, VWAP, volume, spread</a><br>
+    <a href="#u207">207 Liquidity history: ADV, spread, days-to-trade</a><br>
+    <a href="#u208">208 Benchmark reconstitution as data</a><br>
+    <a href="#u209">209 The feature store: as-of keys, no future joins</a><br>
+    <a href="#u210">210 Q1 checkpoint — one store that serves both clocks</a><br>
+    <a href="#u211">211 One code path: backtest calls the same functions as live</a><br>
+    <a href="#u212">212 The score job: scheduled, logged, replayable</a><br>
+    <a href="#u213">213 The optimizer job: constraints as config</a><br>
+    <a href="#u214">214 The order list a broker will accept</a><br>
+    <a href="#u215">215 Fill model vs live fills</a><br>
+    <a href="#u216">216 Position and cash ledger</a><br>
+    <a href="#u217">217 Corporate actions in the live book</a><br>
+    <a href="#u218">218 Calendar, holidays, half-days, auction times</a><br>
+    <a href="#u219">219 Replay, config, and experiment ids</a><br>
+    <a href="#u220">220 Q2 checkpoint — backtest and 'live' agree on one morning</a><br>
+    <a href="#u221">221 Broker mechanics for a long-only cash book</a><br>
+    <a href="#u222">222 Order types you will actually use</a><br>
+    <a href="#u223">223 How the close auction works, operationally</a><br>
+    <a href="#u224">224 The paper-trading loop</a><br>
+    <a href="#u225">225 Reconciliation: your ledger vs the broker</a><br>
+    <a href="#u226">226 Kill switch and risk limits</a><br>
+    <a href="#u227">227 Slippage tracking: predicted vs realized</a><br>
+    <a href="#u228">228 Restricted lists and compliance holds</a><br>
+    <a href="#u229">229 The shape of the trading day</a><br>
+    <a href="#u230">230 Q3 checkpoint — a reconciled week of paper</a><br>
+    <a href="#u231">231 Going live small</a><br>
+    <a href="#u232">232 Monitoring expected vs realized</a><br>
+    <a href="#u233">233 Incident log</a><br>
+    <a href="#u234">234 Two-frequency operations</a><br>
+    <a href="#u235">235 Vendor outage and fallback</a><br>
+    <a href="#u236">236 Tax lots and after-tax as an overlay (awareness)</a><br>
+    <a href="#u237">237 Pre-register the live trial</a><br>
+    <a href="#u238">238 Failure modes of going live</a><br>
+    <a href="#u239">239 The runbook</a><br>
+    <a href="#u240">240 Year-6 exit — a desk you could actually run</a><br>
+  </nav>
+
+  <section class="unit" id="u201">
+    
+    <h3><span class="n">201</span> What a desk data set is</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Name the tables a long-only desk must have, and the as-of key that makes each join legal.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Everyday picture: a vendor is a company that sells facts about stocks. You do not get 'the truth.' You get files with timestamps.</li>
+      <li>The store, in plain words: (1) prices and corporate actions, (2) who was in the universe that morning, (3) company facts as they were known then, (4) earnings/news times, (5) how much each name traded (ADV, spread), (6) the benchmark's membership.</li>
+      <li>An <strong>as-of key</strong> is the pair (name, morning) that every join must respect. No as-of key ⇒ no honest backtest.</li>
+      <li>Snapshot vs event: a snapshot is 'as of this morning, this was the row.' An event is 'at 16:05 this print hit the tape.' Both are required. Mixing them is a leak.</li>
+      <li>This quarter (201–210) is the data kit. <strong>Do it before Year 4 backtests</strong> even though the unit numbers come later. Years 4–5 assume this store exists.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A folder of CSVs with no as-of dates, treated as a database.</div>
+    
+  </section>
+  <section class="unit" id="u202">
+    
+    <h3><span class="n">202</span> Building a price panel: splits, dividends, delist returns</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write the adjuster that turns a vendor close into the holder's wealth, including the last day of a dead name.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>This is unit 123 as a standing piece of infrastructure, not a one-off notebook.</li>
+      <li>Backward split adjustment: multiply past prices so the series does not jump when the split hits.</li>
+      <li>Dividends in the same units as the adjusted price. Delist terminal return stays in the panel.</li>
+      <li>Vendor differences: some files are already split-adjusted and not dividend-adjusted. Teach 'read the flag' as a skill.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Trusting a column named 'adjusted close' without reading whether dividends are in it.</div>
+    
+  </section>
+  <section class="unit" id="u203">
+    
+    <h3><span class="n">203</span> Point-in-time membership</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Answer 'was this name in my universe on this morning?' from add/drop events, not from today's list.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Unit 122 as a table: date × name → in or out. IPOs, index adds, index drops, delists.</li>
+      <li>Survivors-only vs PIT, again, because this is the store every later lesson will query.</li>
+      <li>A reconstitution calendar is part of membership, not a surprise in 208.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Downloading 'current S&amp;P names' and filling ten years backward (122's trap, now as a failing unit test on the store).</div>
+    
+  </section>
+  <section class="unit" id="u204">
+    
+    <h3><span class="n">204</span> Point-in-time fundamentals (vintages)</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Join company facts by what was known that morning, using a vintage / as-of table.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>vintage</strong> is 'this is the earnings number as it stood on date D.' Later restatements create a new vintage, they do not rewrite D.</li>
+      <li>As-of join: for each (name, morning), take the latest vintage with release time ≤ that morning.</li>
+      <li>Restated join (the leak): paste the final 10-K onto the whole year. Plant it. Catch it.</li>
+      <li>Fiscal vs calendar periods. Point-in-time is about the release clock, not the fiscal label.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A fundamentals table keyed only by fiscal year.</div>
+    
+  </section>
+  <section class="unit" id="u205">
+    
+    <h3><span class="n">205</span> Earnings and event calendar as a first-class table</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Store announce time (not just date), surprise, and whether the print was before the open or after the close.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Required columns: name, timestamp (timezone named), period, surprise definition, source.</li>
+      <li>After-close vs before-open. Unit 166's leak is a failing test here.</li>
+      <li>Revisions and upgrades can live in the same event store with a type flag.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A calendar of 'earnings dates' with no timestamps and no timezone.</div>
+    
+  </section>
+  <section class="unit" id="u206">
+    
+    <h3><span class="n">206</span> Daily bars: open, close, auction, VWAP, volume, spread</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Build one row per name per day that a daily book can actually use, and say how each field was made.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Open, close, official auction print, VWAP, dollar volume, a spread estimate.</li>
+      <li>The auction print is not always the last trade. Teach the difference (162).</li>
+      <li>From trades/quotes if you have them; from a vendor daily file if you do not. Either way, write the recipe.</li>
+      <li>Year 5 lives on this table. Year 4 can downsample it, not the other way around.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Using last-trade as 'the close' on a name whose close is an auction.</div>
+    
+  </section>
+  <section class="unit" id="u207">
+    
+    <h3><span class="n">207</span> Liquidity history: ADV, spread, days-to-trade</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Store a trailing ADV and a days-to-trade at your intended participation, as-of each morning.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>ADV window (e.g. 20 days) must be trailing and causal.</li>
+      <li>Days-to-trade at 3% participation for a stated AUM. This number feeds 163 and 182.</li>
+      <li>Spread history: a wide-spread name is expensive even if ADV looks fine.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> An ADV computed on the full sample, so tomorrow's volume helps yesterday's filter.</div>
+    
+  </section>
+  <section class="unit" id="u208">
+    
+    <h3><span class="n">208</span> Benchmark reconstitution as data</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Store who was in the benchmark each morning, with the same as-of rules as the universe.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Unit 129 as a table, not a vibe. Cap-weight, equal-weight, float flags.</li>
+      <li>Adds/drops on reconstitution dates. A backtest that beats a frozen starting list is a different exam.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A single 'benchmark.csv' of today's weights used for the whole history.</div>
+    
+  </section>
+  <section class="unit" id="u209">
+    
+    <h3><span class="n">209</span> The feature store: as-of keys, no future joins</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Put every feature behind (name, as-of morning) and refuse a join that does not carry that key.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A feature store is just a disciplined table: keys, values, a recipe, a vintage.</li>
+      <li>Illegal join patterns: restated fundamentals, same-day close into a close-to-close target, a news timestamp after the decision.</li>
+      <li>Year 4 monthly features and Year 5 daily features are two granularities on one store, not two philosophies.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Each research notebook rebuilding features from raw files with a slightly different as-of rule.</div>
+    
+  </section>
+  <section class="unit" id="u210">
+    <div class="chk-unit">
+    <h3><span class="n">210</span> Q1 checkpoint — one store that serves both clocks</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Query the store for a Year-4 monthly panel and a Year-5 daily panel; both pass the leak tests from 202–209.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Survivorship test (203). Restatement test (204). Timestamp test (205). ADV causality (207). Benchmark membership (208).</li>
+      <li>Until this checkpoint passes, Years 4–5 backtests are not allowed to use ad-hoc CSVs.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A checkpoint that only checks 'the dataframe has 8 columns.'</div>
+    </div>
+  </section>
+  <section class="unit" id="u211">
+    
+    <h3><span class="n">211</span> One code path: backtest calls the same functions as live</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> State the rule 'the backtest is not allowed a private score or optimizer,' and show a violation.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Everyday picture: if live calls <code>score(as_of)</code> and the backtest pastes a CSV of scores, they will drift apart.</li>
+      <li>The backtest loops over mornings and calls the same functions live will call, with that morning's as-of store.</li>
+      <li>A planted violation: a backtest-only 'adjusted' score. Catch it.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A research notebook and a 'prod script' that are cousins, not the same functions.</div>
+    
+  </section>
+  <section class="unit" id="u212">
+    
+    <h3><span class="n">212</span> The score job: scheduled, logged, replayable</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Describe a run that takes an as-of timestamp and writes scores plus a log you can replay.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Inputs: as-of morning, store revision. Outputs: score file, feature snapshot id, git hash, clock.</li>
+      <li>Replay: same inputs ⇒ same scores. If not, you cannot debug Tuesday.</li>
+      <li>This is not Airflow worship. It is 'write down what ran.'</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Scores that exist only in a laptop session named 'final_v3'.</div>
+    
+  </section>
+  <section class="unit" id="u213">
+    
+    <h3><span class="n">213</span> The optimizer job: constraints as config</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Put every constraint in a dated config the PM can read, not in comments in a notebook.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Sentences from 145/182 become fields: name cap, sector cap, ADV participation, turnover penalty, long-only flag.</li>
+      <li>Changing a cap is a new trial (007) if you peek at IR first.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Hard-coded caps that differ between the backtest and the live job.</div>
+    
+  </section>
+  <section class="unit" id="u214">
+    
+    <h3><span class="n">214</span> The order list a broker will accept</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Turn target weights into a list of orders: name, side, quantity, type, limit, auction flag.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A broker does not take a vector of weights. It takes orders.</li>
+      <li>Long-only: side is buy or sell of what you already own (no short-sell). Quantity is shares, not percent, once you pick NAV.</li>
+      <li>Rounding, lot sizes, 'do not trade 12 shares of a $4 name.' Teach the boring arithmetic.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Sending weights to a broker API and hoping it guesses shares.</div>
+    
+  </section>
+  <section class="unit" id="u215">
+    
+    <h3><span class="n">215</span> Fill model vs live fills</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Keep a table of predicted fill (price, time, shortfall) next to realized fill, and read the gap.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>The backtest's fill is a model (close, VWAP, close plus a spread). Live fills are different.</li>
+      <li>A standing table: date, name, predicted, realized, shortfall. This is how 152/188 stay honest after go-live.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Changing the fill model until paper matches last week's luck.</div>
+    
+  </section>
+  <section class="unit" id="u216">
+    
+    <h3><span class="n">216</span> Position and cash ledger</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Keep a book that always adds up: cash + stock market value = NAV, after every fill and dividend.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>ledger</strong> is the notebook of what you hold and how much cash you have. It is not the broker's screen — it is yours, and you will reconcile (225).</li>
+      <li>Every fill, dividend, fee, and future variation-margin (if you overlay) is a row.</li>
+      <li>A broken identity (cash + stock ≠ NAV) is a stop-the-line bug, not a rounding footnote.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> NAV taken from the broker and positions taken from the research file, never forced to meet.</div>
+    
+  </section>
+  <section class="unit" id="u217">
+    
+    <h3><span class="n">217</span> Corporate actions in the live book</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Apply tonight's split or dividend to positions and to open orders, not only to the research panel.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>The adjuster from 202 must run on the ledger. Share counts change. Open limit prices may need to change.</li>
+      <li>A missed overnight split is a wrong order in the morning.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Adjusting research prices and leaving live share counts on the old split.</div>
+    
+  </section>
+  <section class="unit" id="u218">
+    
+    <h3><span class="n">218</span> Calendar, holidays, half-days, auction times</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Know when the market is closed, when it closes early, and when the auction is, in the timezone you trade.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A trading calendar is data. Half-days move the auction. Overseas names have other calendars if the universe ever leaves one country.</li>
+      <li>A 'daily' job that runs on a holiday produces either nothing or a lie.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A cron job on weekdays that does not know about Good Friday.</div>
+    
+  </section>
+  <section class="unit" id="u219">
+    
+    <h3><span class="n">219</span> Replay, config, and experiment ids</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Reproduce Tuesday's book from config + store revision + git hash alone (unit 109, applied).</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>If you cannot replay, you cannot debug, and you cannot claim the backtest was this code.</li>
+      <li>Seeds, config, store revision, code version — four fields, always written.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A live book that cannot be rebuilt from logs.</div>
+    
+  </section>
+  <section class="unit" id="u220">
+    <div class="chk-unit">
+    <h3><span class="n">220</span> Q2 checkpoint — backtest and 'live' agree on one morning</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Pick an as-of date; the backtest path and the live job path produce the same scores, weights, and orders.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Same functions. Same store revision. Byte-for-byte or a stated rounding rule.</li>
+      <li>A planted private backtest path must fail the test.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A checkpoint that compares IR over a year instead of the objects on one morning.</div>
+    </div>
+  </section>
+  <section class="unit" id="u221">
+    
+    <h3><span class="n">221</span> Broker mechanics for a long-only cash book</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Explain account, buying power, cash, and why you do not need a stock borrow — and what still can reject an order.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>broker</strong> is the firm that holds your cash and sends your orders to the exchange.</li>
+      <li>Buying power: how many dollars you may still spend. Long-only cash: you cannot buy more than cash (plus any agreed margin — teach the default as cash-only).</li>
+      <li>No short ⇒ no locate. You can still be rejected: halted name, not enough cash, restricted list (228), odd lots.</li>
+      <li>Paper account vs live account: same objects, fake money. Teach the objects before any API brand.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Assuming 'long-only' means every order is accepted.</div>
+    
+  </section>
+  <section class="unit" id="u222">
+    
+    <h3><span class="n">222</span> Order types you will actually use</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Define market, limit, market-on-close, and limit-on-close, and say which one a monthly vs daily book uses.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li><strong>Market</strong>: take whatever price is there. Fast, sloppy.</li>
+      <li><strong>Limit</strong>: do not pay worse than this price. You may not fill.</li>
+      <li><strong>MOC / LOC</strong>: participate in the close auction, with or without a limit.</li>
+      <li>Year 4 monthly lists often TWAP over days (093) then finish in auctions. Year 5 lives on MOC/LOC. Teach both maps.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A backtest that assumes market orders at the close print.</div>
+    
+  </section>
+  <section class="unit" id="u223">
+    
+    <h3><span class="n">223</span> How the close auction works, operationally</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Walk an order from 'I want this many shares at the close' to a fill, including imbalance and why you might not get the print.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Imbalance: more buy interest than sell interest (or the reverse) going into the auction. The print can move.</li>
+      <li>Cutoff times. A late MOC is a missed trade (193).</li>
+      <li>This is 188 as operations, not as a shortfall formula.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Treating the official close as a guaranteed fill price decided at 15:00.</div>
+    
+  </section>
+  <section class="unit" id="u224">
+    
+    <h3><span class="n">224</span> The paper-trading loop</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write the daily loop in words and objects: as-of store → score → optimize → orders → fills → ledger → NAV.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Paper trading is doing the whole loop with fake money and (ideally) real or delayed market data.</li>
+      <li>Each arrow is a function from 211–216. The loop is the product.</li>
+      <li>A week of paper is 230. This lesson teaches the loop, not the week.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Calling a backtest 'paper trading.' A backtest can peek by construction; paper cannot.</div>
+    
+  </section>
+  <section class="unit" id="u225">
+    
+    <h3><span class="n">225</span> Reconciliation: your ledger vs the broker</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Every day, match positions, cash, and fills; a break is a halt, not a footnote.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Three files: your ledger, the broker's positions, the day's fills. They must tell the same story.</li>
+      <li>Breaks: missed fill, duplicate fill, corporate action only on one side, timezone.</li>
+      <li>The rule: do not send new orders until yesterday reconciles.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Reconciling once a month on a daily book.</div>
+    
+  </section>
+  <section class="unit" id="u226">
+    
+    <h3><span class="n">226</span> Kill switch and risk limits</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write the limits as sentences and the kill as a single action that flattens or freezes.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Limits: max name, max sector, max gross, min cash, max daily loss, max tracking error, max participation.</li>
+      <li>A <strong>kill switch</strong> is the button that stops new risk: freeze orders, or flatten to cash / to the benchmark. Teach both flavors and when each is appropriate for long-only.</li>
+      <li>A limit breach is not 'log and continue.' It is refuse or kill.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Limits that exist in a slide deck and not in the order path.</div>
+    
+  </section>
+  <section class="unit" id="u227">
+    
+    <h3><span class="n">227</span> Slippage tracking: predicted vs realized</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Read the 215 table every week and decide whether the fill model is a lie.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Slippage is implementation shortfall per name per day. Predicted vs realized.</li>
+      <li>A model that is always optimistic will make every paper IR a fiction (152).</li>
+      <li>Feed the gap back into 146/184. That loop is research, not operations theater.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Resetting the fill model every time last week was unlucky.</div>
+    
+  </section>
+  <section class="unit" id="u228">
+    
+    <h3><span class="n">228</span> Restricted lists and compliance holds</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Treat a banned name as a hard zero in the optimizer and as a reject at the broker.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Client bans, insider lists, ESG screens, sanctions. The research universe and the live order path must both see the list.</li>
+      <li>A name added to the list mid-day: you may not buy more; you may have to exit. Teach the two cases.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Filtering restricted names in the score and not in the optimizer (or the reverse).</div>
+    
+  </section>
+  <section class="unit" id="u229">
+    
+    <h3><span class="n">229</span> The shape of the trading day</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write the runbook times: pre-open checks, decision time, auction cutoff, overnight adjust, reconcile.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Year 4: a quiet month, then a rebalance window of a few days.</li>
+      <li>Year 5: a clock. Feature ready by T1, scores by T2, orders by T3, auction cutoff T4, ledger T5.</li>
+      <li>Holidays from 218 sit on this clock.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 'daily job' with no cutoff times.</div>
+    
+  </section>
+  <section class="unit" id="u230">
+    <div class="chk-unit">
+    <h3><span class="n">230</span> Q3 checkpoint — a reconciled week of paper</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Five paper days: loop runs, ledger equals broker, a kill-switch test fires on a planted breach, no silent rejects.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Reconcile each day (225). One planted limit breach must kill or refuse (226).</li>
+      <li>A written shortfall table (227) even if the week is tiny.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Five backtest days labeled 'paper.'</div>
+    </div>
+  </section>
+  <section class="unit" id="u231">
+    
+    <h3><span class="n">231</span> Going live small</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> State the first-week rules: tiny AUM, few names, one sleeve, a written abort.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Small means a size where a mistake is tuition, not a career event. Name a dollar number in the lesson as a worked example, not as advice.</li>
+      <li>One sleeve first (monthly or daily, not both). Restricted list on. Kill switch tested in paper (230) before live.</li>
+      <li>Abort: what happens if reconcile fails on day two.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Going live at research AUM because the paper IR was pretty.</div>
+    
+  </section>
+  <section class="unit" id="u232">
+    
+    <h3><span class="n">232</span> Monitoring expected vs realized</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Each week: IR, turnover, rejects, shortfall, beta — versus what the backtest promised for this kind of week.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A dashboard is a list of comparisons, not a pile of charts. Teach the list.</li>
+      <li>Rejects and unfilled MOCs are first-class. They change the book you actually had.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Watching NAV and ignoring rejects.</div>
+    
+  </section>
+  <section class="unit" id="u233">
+    
+    <h3><span class="n">233</span> Incident log</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write one page per incident: missed auction, stale feature, wrong split, vendor hole — cause, P&amp;L, fix, test.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>If it is not written, it will recur. This is the operational twin of a research autopsy (139).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Fixing the file by hand and not adding a test to 210/220.</div>
+    
+  </section>
+  <section class="unit" id="u234">
+    
+    <h3><span class="n">234</span> Two-frequency operations</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Run a monthly sleeve and a daily sleeve on one NAV without double-counting ADV or cash.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Unit 198 as operations: two clocks, one ledger (216), one restricted list (228), one kill switch (226).</li>
+      <li>ADV is shared. If both sleeves buy AAA on the same day, participation adds. Teach the combined cap.</li>
+      <li>Cash is shared. A monthly rebalance week plus a daily book can overdraw buying power (221).</li>
+      <li>Correlation of active returns is a research number; the operational number is 'did we exceed ADV today?'</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Funding both sleeves at full single-sleeve participation.</div>
+    
+  </section>
+  <section class="unit" id="u235">
+    
+    <h3><span class="n">235</span> Vendor outage and fallback</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write what you do when the store does not land: skip, flatten, or use a stale-but-labeled snapshot — never a silent guess.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A missing as-of table is a halt condition for new risk (226). You may hold what you have.</li>
+      <li>A fallback snapshot must be labeled stale in the log (212 / 219). The backtest is not allowed to invent that morning later.</li>
+      <li>Which fields are required vs optional (prices required; a news feature can be missing).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Filling a hole with yesterday's scores and not writing it down.</div>
+    
+  </section>
+  <section class="unit" id="u236">
+    
+    <h3><span class="n">236</span> Tax lots and after-tax as an overlay (awareness)</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Name what a tax lot is, and why it must not rewrite the pre-tax research book.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>lot</strong> is a bundle of shares you bought on a given day at a given price. Selling can be 'oldest first' or 'highest cost first.'</li>
+      <li>After-tax P&amp;L is a different exam. Teach it as an overlay after the pre-tax capstones (160 / 200) are honest.</li>
+      <li>Do not let tax rules silently change the research target.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Optimizing the research book for a tax story you have not pre-registered.</div>
+    
+  </section>
+  <section class="unit" id="u237">
+    
+    <h3><span class="n">237</span> Pre-register the live trial</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write duration, AUM, abort rules, and what would count as 'paper was a lie' before the first live order.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Twin of 157/196, now with broker and reconcile. Duration (e.g. 20 days), AUM, sleeve, abort (225/226), success definition.</li>
+      <li>If live shortfall is 3× the model, that is a kill of the fill model, not a nudge of the score.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A live trial whose success definition is 'NAV went up.'</div>
+    
+  </section>
+  <section class="unit" id="u238">
+    
+    <h3><span class="n">238</span> Failure modes of going live</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Plant and find: silent stale scores, unreconciled ledger, limits not on the order path, a second sleeve added on day three.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Four operational bugs. The learner finds them in a runbook they did not write.</li>
+      <li>This is 158/197 for the desk, not for the ranker.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 'go-live risks' slide with no planted break.</div>
+    
+  </section>
+  <section class="unit" id="u239">
+    
+    <h3><span class="n">239</span> The runbook</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write the one document a tired person can follow: times, commands, who to call, what 'halt' means.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Contents: clock (229), reconcile (225), kill (226), outage (235), incidents (233), two-sleeve notes (234).</li>
+      <li>If it is not in the runbook, it will be improvised. Improvisation is a failure mode (238).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A runbook that is a copy of the research memo.</div>
+    
+  </section>
+  <section class="unit" id="u240">
+    <div class="exit-unit">
+    <h3><span class="n">240</span> Year-6 exit — a desk you could actually run</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Defend 20 paper (or tiny live) days: store passes 210, backtest=live on a morning (220), week reconciles (230), runbook, proceed/kill.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>This capstone is operations, not a prettier IR. The Year-4 and Year-5 books are inputs.</li>
+      <li>Required: leak tests green, one replayed morning, a reconciled stretch, a kill-switch test, a shortfall table, a written abort/proceed.</li>
+      <li>PM who forbids shorts and asks 'can we turn this on Monday?'</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A capstone that is another backtest with a 'we would paper trade' paragraph.</div>
+    </div>
+  </section>
+  <nav class="nav-links">
+    <ul>
+      <li><a href="year-4-lessons.html">Year 4 teaching plan</a></li>
+      <li><a href="year-5-lessons.html">Year 5 teaching plan</a></li>
+      <li><a href="curriculum.html#y6">Year 6 in the unit table</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>
