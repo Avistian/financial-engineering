@@ -29,10 +29,12 @@ If the broker **forbids shorts**, you cannot build the dollar-neutral book below
 Use a long-only variant (top-N names, or overweight vs a benchmark) and judge success
 as “beat the benchmark after costs,” not “market-neutral alpha.”
 
-That long-only, weeks-to-months job is the whole of **Year 4** (units 121–160): ML
-scores in, constrained optimizer out, **information ratio vs a named benchmark**.
-This template stays the *daily / relative-value* recipe (the Q1 lab). The Year 4
-map is `reference/long-only-mid-horizon.html`. Do not skip there from Year 1.
+That long-only job, on a **weeks-to-months** clock, is **Year 4** (units 121–160).
+The same job on an **hours-to-days** clock — this template's daily recipe, with the
+shorts removed and an ADV cap added — is **Year 5** (units 161–200). Both: ML scores
+in, constrained optimizer out, **information ratio vs a named benchmark**. Maps:
+`reference/long-only-mid-horizon.html` and `reference/long-only-mid-frequency.html`.
+Do not skip there from Year 1.
 
 ---
 
@@ -251,6 +253,7 @@ true Sharpe) is often the binding constraint.
 ## Related
 
 - Worked teaching case: `labs/0010-2-q1-synthesis-walkthrough.ipynb`
-- Year 4 mandate (long-only, mid-horizon, ML + optimizer): `reference/long-only-mid-horizon.html`
+- Year 4 mandate (long-only, weeks–months, ML + optimizer): `reference/long-only-mid-horizon.html`
+- Year 5 mandate (long-only, hours–days, ML + optimizer): `reference/long-only-mid-frequency.html`
 - Plain-language teaching decision: `NOTES.md` (2026-07-27)
 - Q1 checkpoint (spurious signal): `labs/0010-checkpoint-spurious-signal.ipynb`

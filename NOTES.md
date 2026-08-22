@@ -5,7 +5,7 @@
 - **Math:** solid undergrad (calculus, linear algebra, basic probability). **No** measure theory or SDEs yet — Year 1 Q2 is the bridge, don't assume it.
 - **Programming:** strong — Python + C++/Rust, data structures, systems. Labs can move fast on code; the learning is in the *finance/stats*, not the syntax.
 - **Finance:** near zero. Year 1 Q1 builds markets vocabulary from scratch; never assume prior market knowledge.
-- **Time:** ~1.5–2 h/day, sustained, **~4-year horizon** (Years 1–3 original QR track + Year 4 long-only mid-horizon equity).
+- **Time:** ~1.5–2 h/day, sustained, **~5-year horizon** (Years 1–3 original QR track + Year 4 long-only mid-horizon + Year 5 long-only mid-frequency).
 - **Lab stack:** Python-first (numpy/pandas/scikit-learn/statsmodels/PyTorch). C++/Rust only in the Year-3 systems-awareness track.
 
 ## Teaching preferences
@@ -137,22 +137,27 @@
 ## Optional (◆) paper notes — "when it wins / when it breaks"
 - _(one paragraph per ◆ paper as you skim it)_
 
-## Standing decision — Year 4 is a long-only mid-horizon equity year (from 2026-08-22)
+## Standing decision — Years 4–5 are long-only equity years (from 2026-08-22)
 - **Feedback:** the learner asked whether long-only mid-term stock strategies exist, then asked
   to add curriculum tailored to that style, using **ML + optimization**, and to **extend time
-  rather than swap**. They accepted a fourth year.
-- **Mandate this year teaches:** own stocks for weeks to a few months; no borrowed-share shorts;
-  beat a *named benchmark* after costs; ML produces the per-name score; a constrained optimizer
-  produces the holdings. Success metric is **net information ratio vs the benchmark**, not a
-  market-neutral Sharpe.
-- **What did not change:** Years 1–3 (units 001–120) stay in place, in order. Year 4 is units
-  121–160. Do not skip here from Year 1. Y2 Q2 (validation) and Y3 Q1 (Grinold–Kahn / MVO /
-  costs) are the on-ramps.
+  rather than swap**. They accepted a fourth year. They then asked to **extend the same
+  long-only job to mid-frequency** (hours–days) as well.
+- **Year 4 mandate:** own stocks for weeks to a few months; no borrowed-share shorts;
+  beat a *named benchmark* after costs; ML score → constrained optimizer. Exam = **net IR
+  vs the benchmark**. Units 121–160. Sheet: `reference/long-only-mid-horizon.html`.
+- **Year 5 mandate:** the same rules on an hours-to-days clock. Costs and ADV caps are
+  first-order; capacity is smaller; overnight gaps matter. Units 161–200. Sheet:
+  `reference/long-only-mid-frequency.html`.
+- **What did not change:** Years 1–3 (units 001–120) stay in place, in order. Do not skip
+  to Year 4 or 5 from Year 1. Y2 Q2 (validation), Y2 Q3 (impact), Y3 Q1 (Grinold–Kahn),
+  and Y3 Q2 (execution) are the on-ramps. Year 5 also needs Year 4's mandate language
+  and optimizer (especially 121, 141–150, 153).
 - **Name the horizon correctly:** everyday "mid-term" = this course's **low frequency**
-  (weeks+). "Mid-frequency" still means minutes–days (the Q1 lab). The Year 4 sheet
-  (`reference/long-only-mid-horizon.html`) keeps that split visible.
-- Encoded in `CURRICULUM.md` Year 4, `reference/curriculum.html`, `MISSION.md`, and
-  `RESOURCES.md` (QEPM, Bali–Engle–Murray, Gu–Kelly–Xiu, Boyd 2017, JT/FF/AMP).
+  (weeks+) = Year 4. **Mid-frequency** = minutes–days = Year 5 (the Q1 lab's clock,
+  without the shorts).
+- Encoded in `CURRICULUM.md` Years 4–5, both reference sheets, `MISSION.md`, and
+  `RESOURCES.md` (QEPM, Gu–Kelly–Xiu, Jegadeesh 1990, Lehmann 1990, Bernard–Thomas,
+  Amihud, Lou–Polk–Skouras, Boyd 2017, Gârleanu–Pedersen).
 
 ## Open questions / parking lot
 - Secure real LOB data (LOBSTER / Databento / FI-2010) before Year 2 Q3.

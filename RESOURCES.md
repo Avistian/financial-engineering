@@ -135,7 +135,20 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 - ◆ Sharpe (1991), *The Arithmetic of Active Management.* — why beating the cap-weight index, after fees, is a zero-sum exam (unit 129).
 - ◆ Jacobs & Levy, *20 Myths about 130/30* (and related 130/30 notes). — the "a little short sleeve" overlay, not the Year-4 default mandate (units 143, 159).
 - ◆ Burges, *From RankNet to LambdaRank to LambdaMART* (Microsoft Research). — pairwise / listwise ranking losses when the job is "who beats whom," not "predict the exact return" (unit 136).
-- ◆ Korajczyk & Sadka (2004/2008), liquidity / momentum capacity. — what happens to a slow equity signal when AUM grows (unit 156).
+- ◆ Korajczyk & Sadka (2004/2008), liquidity / momentum capacity. — what happens to a slow equity signal when AUM grows (units 156, 189).
+
+### Long-only mid-frequency equity (Year 5)
+- ★ Jegadeesh (1990), *Evidence of Predictable Behavior of Security Returns.* — 1-month (and shorter) cross-sectional reversal: yesterday's losers bounce. Year 5's first baseline; the Q1 lab's `rev5` without the shorts (unit 164).
+- ★ Lehmann (1990), *Fads, Martingales, and Market Efficiency.* — the companion short-horizon reversal paper (unit 164).
+- ★ Bernard & Thomas (1989), *Post-Earnings-Announcement Drift: Delayed Price Response or Risk Premium?*; (1990) *Evidence that Stock Prices Do Not Fully Reflect the Implications of Current Earnings for Future Earnings.* — PEAD: the market is slow to digest earnings. The event baseline a daily long-only book must beat or own honestly (units 166, 177).
+- ★ Amihud (2002), *Illiquidity and Stock Returns.* — a simple liquidity measure (average |return| / dollar volume). Year 5 uses it as a *membership rule*, not as a premium to harvest blindly (units 163, 185).
+- ★ Heston, Korajczyk & Sadka (2010), *Intraday Patterns in the Cross-Section of Stock Returns.* — the trading day is not one return; open, midday, and close have different cross-sections (unit 162).
+- ★ Lou, Polk & Skouras (2019), *A Tug of War: Overnight Versus Intraday Expected Returns.* — who you hold through the close is a different bet from who you hold from open to close (units 162, 167, 191).
+- ◆ Tetlock (2007), *Giving Content to Investor Sentiment: The Role of Media in the Stock Market.* — daily text as a feature, with the usual overfitting trap (unit 168).
+- ◆ Livnat & Mendenhall (2006), *Comparing the Post–Earnings Announcement Drift for Surprises Calculated from Analyst and Time Series Forecasts.* — PEAD implementation details (unit 166).
+- ◆ Blitz, Huij & Martens, residual momentum notes; Da, Qian & Warachka — residual / industry-neutral short-horizon constructions (unit 165).
+- ◆ Bogousslavsky, close-auction / overnight papers. — who gets filled at the close (unit 167).
+- ◆ Kissell — *The Science of Algorithmic Trading and Portfolio Management.* — practitioner execution at this clock (unit 188). Gârleanu–Pedersen 2013 and Boyd 2017 (already ★ above) are the daily multi-period sources (unit 187).
 
 ### Execution & RL
 - ★ Almgren & Chriss (2000), *Optimal Execution of Portfolio Transactions.* — unit 092.
@@ -164,3 +177,4 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 - **RL-for-execution SOTA** moves fast — re-check at the start of Year 3 for post-2023 baselines.
 - **Tabular foundation models** are a live frontier (TabPFN v2, TabDPT, TabICL) — apply the quarterly currency rule before unit 078.
 - **Cross-sectional ML for monthly equity** moves slower than TFMs but is not frozen — before Year 4 Q2, check whether a post-2020 paper (transformers on characteristics, foundation models for the cross-section) has become the baseline you must beat. Gu-Kelly-Xiu 2020 stays ★ until something *replaces* it, not merely cites it.
+- **Daily / intraweek equity ML** is even more leak-prone than the monthly paper. Before Year 5 Q2, confirm you still have a point-in-time earnings calendar and a cost model; do not replace Jegadeesh/Lehmann + Bernard–Thomas as the baselines you must beat.

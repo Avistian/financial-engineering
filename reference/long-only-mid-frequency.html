@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — Long-only mid-frequency equity</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  </style>
+</head>
+<body>
+<article>
+  <h1>Long-only mid-frequency equity</h1>
+  <p class="subtitle">Reference · the Year 5 mandate in plain words · units 161–200</p>
+
+  <p>
+    Everyday picture: each afternoon you look at a list of stocks, give each a score
+    ("how much I like this one versus the others <em>for the next day or few</em>"),
+    an optimizer turns those scores into a shopping cart that is allowed only to
+    <em>own</em> shares and is not allowed to grab more than a small slice of each
+    name's daily volume, you may hold overnight, and you are judged on whether that
+    cart beat a named index <em>after the bill for trading</em>.
+  </p>
+  <p>
+    Same long-only rules as
+    <a href="long-only-mid-horizon.html">Year 4</a>. Different clock: hours to a few
+    days, which Lesson 001 called <strong>mid-frequency</strong>. Years 1–4 stay
+    required. Year 5 is <strong>extra calendar</strong>. Full unit list:
+    <a href="curriculum.html#y5">curriculum Year 5</a>.
+  </p>
+
+  <h2>What changed versus Year 4</h2>
+  <table>
+    <thead><tr><th></th><th>Year 4 (mid-horizon)</th><th>Year 5 (mid-frequency)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Hold</strong></td><td>weeks to a few months</td><td>hours to a few days</td></tr>
+      <tr><td><strong>Rebalance</strong></td><td>about monthly</td><td>daily, sometimes twice a day</td></tr>
+      <tr><td><strong>Independent bets</strong></td><td>few (~120 months in 10 years)</td><td>many (~2,500 days) — more power, more chances to overfit</td></tr>
+      <tr><td><strong>Costs</strong></td><td>matter</td><td><em>the same size as the edge</em> (the Q1 lab already showed this)</td></tr>
+      <tr><td><strong>Capacity</strong></td><td>larger</td><td>smaller — you trade more, so you move prices sooner</td></tr>
+      <tr><td><strong>First baselines</strong></td><td>12-1 momentum, value, quality</td><td>1–5 day reversal, post-earnings drift, overnight vs open-to-close</td></tr>
+      <tr><td><strong>Overnight</strong></td><td>you are long through many nights; one night is small</td><td>one ugly open can be the week's P&amp;L</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Words that are new on this clock</h2>
+  <table>
+    <thead><tr><th>Word</th><th>What it literally means here</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Mid-frequency</strong></td><td>Hold for minutes to a few days. Not "mid-horizon" (weeks+). The Q1 lab lived here, but it was allowed to short.</td></tr>
+      <tr><td><strong>ADV</strong></td><td>Average daily dollar volume — roughly, how many dollars of this stock trade in a typical day. Your participation cap is a fraction of that.</td></tr>
+      <tr><td><strong>Participation</strong></td><td>The slice of today's volume you take. "3% of ADV" means you refuse to buy more than that, even if the score loves the name.</td></tr>
+      <tr><td><strong>Close auction</strong></td><td>The end-of-day matching that sets the official close. A lot of a daily book's trading happens here.</td></tr>
+      <tr><td><strong>Overnight / gap</strong></td><td>The jump from yesterday's close to today's open. You ate that jump if you held the shares.</td></tr>
+      <tr><td><strong>Open-to-close</strong></td><td>The return from the open print to the close print — the continuous session only.</td></tr>
+      <tr><td><strong>PEAD</strong></td><td>Post-earnings announcement drift: after a company reports, the price often keeps moving the same way for days. Slow digestion, not magic.</td></tr>
+      <tr><td><strong>Reversal (short-horizon)</strong></td><td>Names that just fell tend, on average, to bounce a bit over the next few days — the opposite of Year 4's 12-1 momentum. The Q1 lab's <code>rev5</code> is this idea.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The one pipeline Year 5 builds</h2>
+  <pre>liquid universe (point-in-time, ADV filter)
+    → daily features (no same-day close in a close-to-close score)
+    → ML ranker (walk-forward, uniqueness-weighted labels)
+    → score
+    → optimizer (long-only + ADV cap + impact + optional futures hedge)
+    → holdings
+    → hold hours to a few days
+    → net IR vs the named benchmark
+    → capacity vs the Year-4 book + attribution + proceed/kill</pre>
+  <p>
+    Machine learning is still the scoring step. Optimization is still the holdings
+    step. The new load-bearing fact: <strong>if you ignore ADV and impact, the paper
+    IR is a fiction.</strong> Year 4's monthly-tuned optimizer, run every day, goes
+    broke (unit 181 exists to make you feel that).
+  </p>
+
+  <h2>How you keep score</h2>
+  <p>
+    Same IR-vs-Sharpe rule as Year 4. Tiny extra: a daily book can print a lovely
+    <em>gross</em> IR and a negative <em>net</em> IR. The exam is net. A second extra:
+    you may overlay a short index future so the stock cart stays long-only while the
+    economic bet is closer to "who beats whom." Report both Sharpe (unhedged) and IR
+    (versus the benchmark, and versus cash if you hedged).
+  </p>
+
+  <h2>The four quarters</h2>
+  <table>
+    <thead><tr><th>Q</th><th>Units</th><th>One skill</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td>161–170</td><td>State the faster mandate. Filter by liquidity. Beat (or honestly match) reversal and PEAD after costs.</td></tr>
+      <tr><td>Q2</td><td>171–180</td><td>A 1–5 day ML ranker that respects time and overlapping labels. Beat reversal and PEAD, or kill the net.</td></tr>
+      <tr><td>Q3</td><td>181–190</td><td>An optimizer that refuses to take more than a slice of ADV, pays impact, and may hedge beta with futures.</td></tr>
+      <tr><td>Q4</td><td>191–200</td><td>Run it: gaps, stale features, crowding, two-sleeve NAV with Year 4. Capstone to a PM who only allows longs and rebalances often.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Why Years 1–4 still come first</h2>
+  <ul>
+    <li><strong>Q1 lab / 164</strong> — you have already seen 5-day reversal as a <em>long-short</em> toy. Year 5 keeps the idea and drops the shorts.</li>
+    <li><strong>035 / 171</strong> — triple-barrier labeling still applies; the barriers just sit a few days out, not a month.</li>
+    <li><strong>038–039 / 174</strong> — daily 5-day labels overlap. Uniqueness is not optional.</li>
+    <li><strong>062–064 / 184</strong> — impact and ADV are the binding constraint, not a footnote.</li>
+    <li><strong>121 / 141–150</strong> — IR, long-only as a constraint, the QP. Year 5 retunes them for turnover; it does not re-derive them.</li>
+  </ul>
+
+  <div class="trap">
+    <strong>Trap.</strong> Taking Year 4's monthly optimizer and running it every
+    close. Turnover explodes; costs eat the edge. A second trap: scoring with today's
+    close to predict today's close-to-close return (same-day leak). A third: a
+    beautiful IR built on names you could not have bought — they did not trade
+    enough. Units 172, 181, and 163 exist to make those three boringly obvious.
+  </div>
+
+  <div class="callout">
+    <strong>Sources.</strong> Jegadeesh 1990 and Lehmann 1990 for reversal;
+    Bernard–Thomas for PEAD; Amihud for the liquidity filter; Lou–Polk–Skouras and
+    Heston–Korajczyk–Sadka for overnight vs the session; Boyd 2017 and
+    Gârleanu–Pedersen for not fully chasing a one-day score. All of them are in
+    <code>RESOURCES.md</code>.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="curriculum.html#y5">Year 5 in the full curriculum</a></li>
+      <li><a href="long-only-mid-horizon.html">Year 4 mandate (weeks–months)</a></li>
+      <li><a href="study-roadmap.html">Study roadmap</a></li>
+      <li><a href="../TEMPLATE_PORTFOLIO.md">Portfolio template (the daily recipe; Year 5 drops the shorts)</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>
