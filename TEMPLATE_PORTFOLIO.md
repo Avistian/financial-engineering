@@ -34,7 +34,10 @@ The same job on an **hours-to-days** clock — this template's daily recipe, wit
 shorts removed and an ADV cap added — is **Year 5** (units 161–200). Both: ML scores
 in, constrained optimizer out, **information ratio vs a named benchmark**. Maps:
 `reference/long-only-mid-horizon.html` and `reference/long-only-mid-frequency.html`.
-Do not skip there from Year 1.
+What each unit must teach:
+`reference/year-4-lessons.html` and `reference/year-5-lessons.html`.
+The data kit and going-live year is **Year 6** (`reference/year-6-lessons.html`);
+do units 201–210 before Year 4 backtests. Do not skip there from Year 1.
 
 ---
 
@@ -255,5 +258,8 @@ true Sharpe) is often the binding constraint.
 - Worked teaching case: `labs/0010-2-q1-synthesis-walkthrough.ipynb`
 - Year 4 mandate (long-only, weeks–months, ML + optimizer): `reference/long-only-mid-horizon.html`
 - Year 5 mandate (long-only, hours–days, ML + optimizer): `reference/long-only-mid-frequency.html`
+- Year 4 teaching plan (what each lesson must teach): `reference/year-4-lessons.html`
+- Year 5 teaching plan: `reference/year-5-lessons.html`
+- Year 6 teaching plan (data kit + going live): `reference/year-6-lessons.html`
 - Plain-language teaching decision: `NOTES.md` (2026-07-27)
 - Q1 checkpoint (spurious signal): `labs/0010-checkpoint-spurious-signal.ipynb`

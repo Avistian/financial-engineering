@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Year 5 — what each lesson must teach</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .toc { columns: 2; column-gap: 2rem; font-family: var(--font-sans); font-size: 0.88rem; margin: 1rem 0 2rem; }
+    @media (max-width: 640px) { .toc { columns: 1; } }
+    .unit { margin: 2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .unit h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+    .unit h3 .n { font-family: var(--font-mono); color: var(--accent); margin-right: 0.4rem; }
+    .skill { margin: 0.35rem 0 0.6rem; }
+    .beats { margin: 0.4rem 0 0.8rem; padding-left: 1.2rem; }
+    .beats li { margin: 0.35rem 0; }
+    .chk-unit { background: var(--accent-light); padding: 0.75rem 1rem; border-radius: 4px; }
+    .exit-unit { background: #fef9e7; padding: 0.75rem 1rem; border-radius: 4px; }
+</style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Reference · lesson-by-lesson teaching plan</p>
+  <h1>Year 5 — what each lesson must teach</h1>
+  <p class="subtitle">Units 161–200 · long-only · hours to days · teaching contract, no labs yet</p>
+  
+  <p>
+    Everyday picture: each afternoon you re-rank stocks for the next day or few, the optimizer
+    may only own shares and may not take more than a slice of each name's daily volume, and
+    you are judged on beating a named index <em>after the trading bill</em>. This page is
+    <strong>what each lesson must teach</strong>. Labs are not written yet.
+  </p>
+  <p>
+    Same long-only rules as <a href="year-4-lessons.html">Year 4</a>. Different clock
+    (this course's mid-frequency). The
+    <a href="year-6-lessons.html">data kit (201–210)</a> still comes first.
+  </p>
+
+  <nav class="toc">
+    <a href="#u161">161 Mid-frequency vs mid-horizon: the same rules, a faster clock</a><br>
+    <a href="#u162">162 The clock of a trading day</a><br>
+    <a href="#u163">163 Liquidity as a membership rule</a><br>
+    <a href="#u164">164 Short-horizon baseline I — 1–5 day reversal</a><br>
+    <a href="#u165">165 Residual and industry-neutral reversal</a><br>
+    <a href="#u166">166 Event baseline — post-earnings announcement drift</a><br>
+    <a href="#u167">167 Overnight and the close auction as a holding decision</a><br>
+    <a href="#u168">168 News and text as a daily ranker, not a vibe</a><br>
+    <a href="#u169">169 Combining short-horizon baselines under more trials</a><br>
+    <a href="#u170">170 Q1 checkpoint — reversal + PEAD, costs first</a><br>
+    <a href="#u171">171 The 1–5 day prediction target</a><br>
+    <a href="#u172">172 Point-in-time daily features</a><br>
+    <a href="#u173">173 IC decay over hours and days</a><br>
+    <a href="#u174">174 Overlapping daily labels and uniqueness</a><br>
+    <a href="#u175">175 Trees on the daily cross-section</a><br>
+    <a href="#u176">176 Short return-paths as features, without becoming DeepLOB</a><br>
+    <a href="#u177">177 Event-aware ML</a><br>
+    <a href="#u178">178 Two clocks, one research book</a><br>
+    <a href="#u179">179 When daily ML is just reversal in costume</a><br>
+    <a href="#u180">180 Q2 checkpoint — daily ranker, defend or kill</a><br>
+    <a href="#u181">181 Why the Year-4 optimizer, run daily, goes broke</a><br>
+    <a href="#u182">182 Participation caps: do not take more than a slice of ADV</a><br>
+    <a href="#u183">183 Intraday vs close-only rebalance</a><br>
+    <a href="#u184">184 Temporary impact on a daily trade list</a><br>
+    <a href="#u185">185 Liquidity-aware risk: exiting is the hard day</a><br>
+    <a href="#u186">186 Daily futures overlay on a high-turnover stock book</a><br>
+    <a href="#u187">187 Multi-period daily: a 1–5 day half-life</a><br>
+    <a href="#u188">188 Auction-aware execution</a><br>
+    <a href="#u189">189 Capacity is smaller than Year 4</a><br>
+    <a href="#u190">190 Q3 checkpoint — ADV-capped daily book</a><br>
+    <a href="#u191">191 Overnight gap risk</a><br>
+    <a href="#u192">192 Corporate actions on a daily book</a><br>
+    <a href="#u193">193 Live vs paper at this clock: stale scores and late features</a><br>
+    <a href="#u194">194 Attribution for a daily long-only</a><br>
+    <a href="#u195">195 Crowding: when everyone fades yesterday</a><br>
+    <a href="#u196">196 Pre-register the daily capstone</a><br>
+    <a href="#u197">197 Failure modes of the daily mandate</a><br>
+    <a href="#u198">198 Two-sleeve NAV: monthly plus daily</a><br>
+    <a href="#u199">199 Overlays: 130/30 and synthetic market-neutral</a><br>
+    <a href="#u200">200 Year-5 exit — daily long-only capstone</a><br>
+  </nav>
+
+  <section class="unit" id="u161">
+    
+    <h3><span class="n">161</span> Mid-frequency vs mid-horizon: the same rules, a faster clock</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Keep the long-only exam (IR vs a named benchmark) and put costs in the first sentence, not the last.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Hold is now hours to a few days. Lesson 001 called this <strong>mid-frequency</strong>. Year 4 was weeks-to-months.</li>
+      <li>Same long-only rule: no borrowed-share shorts. Same exam: net IR vs a named benchmark.</li>
+      <li>The Q1 lab already lived on this clock, but it was allowed to short. This year drops the shorts and adds a volume cap.</li>
+      <li>Same scores, daily vs monthly rebalance, after costs: the monthly book often wins on net IR. That comparison is the opening fact.</li>
+      <li>More independent bets (~2,500 days in 10 years vs ~120 months) means more power and more chances to overfit.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Taking Year 4's monthly optimizer and running it every close. Unit 181 exists to make that pain concrete; preview it here.</div>
+    
+  </section>
+  <section class="unit" id="u162">
+    
+    <h3><span class="n">162</span> The clock of a trading day</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Split a day's return into overnight, open-to-close, and the close auction, and say which one your rule is betting on.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Open: the first prints. Continuous session: the day. <strong>Close auction</strong>: the end-of-day match that sets the official close. Overnight / <strong>gap</strong>: close to next open.</li>
+      <li>Heston–Korajczyk–Sadka: the cross-section is not the same at 10:00 and at 15:50.</li>
+      <li>Lou–Polk–Skouras: who you hold through the close is a different bet from who you hold from open to close.</li>
+      <li>A close-to-close target mixes overnight and the session. Teach when that mix is intended.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Scoring at today's close to 'predict' today's close-to-close return. That is the same-day leak (172).</div>
+    
+  </section>
+  <section class="unit" id="u163">
+    
+    <h3><span class="n">163</span> Liquidity as a membership rule</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Refuse names you cannot trade, before you compute a score.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li><strong>ADV</strong> (average daily dollar volume): roughly how many dollars of this stock trade in a typical day.</li>
+      <li><strong>Participation</strong>: the slice of today's volume you take. '3% of ADV' is a hard refusal, not a hope.</li>
+      <li><strong>Days-to-trade</strong>: how many days to enter or exit at that participation. If it is 8 days, a 1-day hold is a fantasy.</li>
+      <li>Amihud as a simple illiquidity number (|return| / dollar volume). Use it as a filter, not as a premium to harvest blindly.</li>
+      <li>Same signal, liquid-only vs all names: the fake IR from illiquids is the lesson.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A beautiful IR built on names that did not trade enough for your AUM.</div>
+    
+  </section>
+  <section class="unit" id="u164">
+    
+    <h3><span class="n">164</span> Short-horizon baseline I — 1–5 day reversal</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Build long-only 1–5 day reversal and net it of costs; contrast it with Year 4's 12-1.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Everyday idea: names that just fell often bounce a bit over the next few days. That is the opposite of 12-1 momentum.</li>
+      <li>Jegadeesh 1990 and Lehmann 1990 are the papers. The Q1 lab's <code>rev5</code> is this idea with shorts.</li>
+      <li>Long-only top-decile vs long-short. Costs eat a daily reversal fast. Net IR is the only number that counts.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Calling reversal 'momentum' or running it monthly. Wrong name, wrong clock.</div>
+    
+  </section>
+  <section class="unit" id="u165">
+    
+    <h3><span class="n">165</span> Residual and industry-neutral reversal</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Strip industry and the market from the lookback so the bounce is not 'all banks fell yesterday.'</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Raw reversal buys everything that fell, including a whole industry that had a bad day.</li>
+      <li>Residual reversal: bounce relative to industry (and beta). The leftover is closer to 'this name, not this sector.'</li>
+      <li>Residual momentum (medium horizon) is a different cousin; name it so the labels stay clean.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 'residual' that still contains yesterday's market because the residualization used the full sample, including today.</div>
+    
+  </section>
+  <section class="unit" id="u166">
+    
+    <h3><span class="n">166</span> Event baseline — post-earnings announcement drift</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Own names after an earnings surprise using the timestamp of the print, not the calendar date.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li><strong>PEAD</strong>: after a company reports, the price often keeps moving the same way for days. Slow digestion.</li>
+      <li>Bernard–Thomas. Surprise vs a simple forecast (last year, or analysts). Teach one honest surprise definition.</li>
+      <li>Announce time: after the close vs before the open. Treating an after-close print as known at that day's close is a leak.</li>
+      <li>Revisions and upgrades are cousins; PEAD is the required baseline.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> An earnings calendar with a date and no time. Half the prints are after 16:00.</div>
+    
+  </section>
+  <section class="unit" id="u167">
+    
+    <h3><span class="n">167</span> Overnight and the close auction as a holding decision</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Compare hold-through-close vs flatten-at-close on the same scores.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>If you hold through the close, you eat the overnight gap (191). If you flatten, you pay two tickets (exit today, enter tomorrow) and miss the overnight return.</li>
+      <li>A lot of a daily book's volume happens at the auction (188). Who you are at 15:50 is a design choice.</li>
+      <li>Net IR of the two holding rules on the same ranker.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Assuming 'daily' means you are flat overnight. Many daily books are not.</div>
+    
+  </section>
+  <section class="unit" id="u168">
+    
+    <h3><span class="n">168</span> News and text as a daily ranker, not a vibe</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Turn a filing or headline into a next-day residual feature with an as-of timestamp.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm 075–076: Loughran–McDonald counts; embeddings later. The job is a rank, not a sentiment essay.</li>
+      <li>Tetlock as the cautionary daily-media paper: easy to overfit.</li>
+      <li>Timestamp again: a 16:01 headline is not a 15:59 feature.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A news score that uses the next morning's write-up of today's move.</div>
+    
+  </section>
+  <section class="unit" id="u169">
+    
+    <h3><span class="n">169</span> Combining short-horizon baselines under more trials</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Screen ~15 daily signals with a multiple-testing correction that matches how you will commit capital.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>More days ⇒ more trials ⇒ more false winners (007, 128). Daily does not relax the bar; it invites more searching.</li>
+      <li>Bonferroni / BH on the same list. Keep only what survives the bar you would use to fund the book.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> 'We have 2,500 days so t = 2 is fine.' Breadth is not a license to skip the family of tests.</div>
+    
+  </section>
+  <section class="unit" id="u170">
+    <div class="chk-unit">
+    <h3><span class="n">170</span> Q1 checkpoint — reversal + PEAD, costs first</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> A liquid PIT universe, two baselines net of costs, IR vs a named benchmark, a trial-count sentence.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Liquid mask from 163. Reversal and PEAD, long-only, net IR.</li>
+      <li>Same-day leak hunt on the earnings timestamps.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A checkpoint that reports gross IR.</div>
+    </div>
+  </section>
+  <section class="unit" id="u171">
+    
+    <h3><span class="n">171</span> The 1–5 day prediction target</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Choose next-day residual, open-to-close, or a short triple-barrier, and say which clock it matches.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Three targets, same features. IC and long-only IR for each.</li>
+      <li>A 5-day triple-barrier (035) is legal if the hold is 5 days. Overlap then becomes 174.</li>
+      <li>Open-to-close drops the overnight. That is a different mandate (162).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A close-to-close target built from a score that already contains today's close.</div>
+    
+  </section>
+  <section class="unit" id="u172">
+    
+    <h3><span class="n">172</span> Point-in-time daily features</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Build yesterday's residuals, volume shocks, range, overnight gap — and plant a same-day-close leak.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Allowed: information available at the decision time (e.g. yesterday's close, this morning's open if you trade at 10:00).</li>
+      <li>Forbidden: today's close in a score that claims to predict today's close-to-close.</li>
+      <li>Volume shocks and range are magnitude features; they can leak if they include the same interval you forecast.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> The leak is one column. The lesson plants it and requires the learner to find it.</div>
+    
+  </section>
+  <section class="unit" id="u173">
+    
+    <h3><span class="n">173</span> IC decay over hours and days</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Plot IC at close+1h, +1d, +5d and pick a hold that matches the death of the score.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Same IC idea as 133, faster grid.</li>
+      <li>A score dead by tomorrow morning does not belong in a 5-day hold.</li>
+      <li>This number becomes the half-life in 187.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 5-day hold on a one-hour signal 'to reduce turnover' without checking that the IC is already gone.</div>
+    
+  </section>
+  <section class="unit" id="u174">
+    
+    <h3><span class="n">174</span> Overlapping daily labels and uniqueness</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Weight 5-day labels by how unique they are, because Tuesday's 5-day path shares days with Monday's.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm 038–039. A 5-day residual starting every day is not 2,500 independent bets.</li>
+      <li>Average uniqueness. Sequential bootstrap as the sampling story.</li>
+      <li>Unweighted vs uniqueness-weighted IC. The gap is the lesson.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Quoting a t-stat on overlapping 5-day returns as if n = number of rows.</div>
+    
+  </section>
+  <section class="unit" id="u175">
+    
+    <h3><span class="n">175</span> Trees on the daily cross-section</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Walk-forward a daily GBDT (regress and rank) against linear and 5-day reversal.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Same tools as 135, daily rows, uniqueness weights from 174.</li>
+      <li>Purged walk-forward. No i.i.d. K-fold.</li>
+      <li>Must beat or honestly lose to reversal. A tree that is reversal in costume fails 179.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A giant in-sample daily fit with 200 features and a pretty IC.</div>
+    
+  </section>
+  <section class="unit" id="u176">
+    
+    <h3><span class="n">176</span> Short return-paths as features, without becoming DeepLOB</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Compare 20-day path features to simple aggregates under an honest split, and keep tabular unless the path wins.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm 071–072 only as far as 'a sequence can be a feature.' This is not a LOB net (073).</li>
+      <li>Aggregates (mean, vol, last residual) vs the raw 20-day vector.</li>
+      <li>If the path does not win honestly, keep the aggregates. That decision is in-syllabus.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Importing a transformer because Year 2 Q4 exists. Deep sequence models earn their keep on microstructure and text, not by default on 20 daily returns.</div>
+    
+  </section>
+  <section class="unit" id="u177">
+    
+    <h3><span class="n">177</span> Event-aware ML</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Flag earnings and news days so the model does not treat them as ordinary Tuesdays.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A PEAD day is a different data-generating process. A flag (or a separate model) is the honest design.</li>
+      <li>Compare with/without flags. Leftover PEAD after the flag is the test of whether the tree already stole 166.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Dropping earnings days from training and then trading them live.</div>
+    
+  </section>
+  <section class="unit" id="u178">
+    
+    <h3><span class="n">178</span> Two clocks, one research book</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Combine a daily ML sleeve with Year 4's monthly scores and measure incremental IR.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Grinold blend again. Correlation of the two sleeves' active returns.</li>
+      <li>One long-only NAV, two rebalance clocks (234 / 198 will operationalize this).</li>
+      <li>Incremental IR of adding the daily sleeve to a monthly book that already exists.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Adding the daily sleeve and quoting the combined Sharpe, which is still mostly beta.</div>
+    
+  </section>
+  <section class="unit" id="u179">
+    
+    <h3><span class="n">179</span> When daily ML is just reversal in costume</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Residualize the ML score on 5-day reversal and see whether any leftover IR remains.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Orthogonalize the score to the baseline. If leftover IR dies, the tree is a fancy reversal.</li>
+      <li>Write the autopsy even if the leftover lives — say how much of the IR was the baseline.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A model card that never mentions 164.</div>
+    
+  </section>
+  <section class="unit" id="u180">
+    <div class="chk-unit">
+    <h3><span class="n">180</span> Q2 checkpoint — daily ranker, defend or kill</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Walk-forward IC/IR vs reversal and PEAD, leak hunt included.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Same structure as 140, daily clock, uniqueness weights, costs on the IR.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A checkpoint that reports gross IC.</div>
+    </div>
+  </section>
+  <section class="unit" id="u181">
+    
+    <h3><span class="n">181</span> Why the Year-4 optimizer, run daily, goes broke</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Run the monthly-tuned QP every close and watch costs eat the book.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Take the 150 optimizer, change the calendar to daily, do not retune the turnover penalty.</li>
+      <li>Turnover explodes. Net IR dies. That plot is the lesson.</li>
+      <li>The fix is not 'trade less for vibes.' The fix is 182–187: ADV caps, impact, multi-period at a 1–5 day half-life.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Silently raising the turnover penalty until the plot looks like Year 4 and calling it the same model.</div>
+    
+  </section>
+  <section class="unit" id="u182">
+    
+    <h3><span class="n">182</span> Participation caps: do not take more than a slice of ADV</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write a hard ADV constraint and list the names the optimizer wanted but could not buy.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Participation as a number (e.g. 3% of ADV) and as an inequality in the QP.</li>
+      <li>Names you loved and could not own. That list is the capacity story at the name level.</li>
+      <li>A soft penalty vs a hard cap. Teach both; the PM usually wants a hard cap.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 'liquidity score' in the ranker instead of a cap in the optimizer. The ranker will still ask for 20% of a name's volume.</div>
+    
+  </section>
+  <section class="unit" id="u183">
+    
+    <h3><span class="n">183</span> Intraday vs close-only rebalance</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Compare one close optimization vs an open-and-close pair on net IR.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Close-only: one book a day, auction-heavy (188).</li>
+      <li>Open + close: two decisions. More chances to be right, more tickets, more ways to leak the open print.</li>
+      <li>Net IR, not 'more trades look sophisticated.'</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Using the 10:00 print in a score that was supposed to be decided at 9:31.</div>
+    
+  </section>
+  <section class="unit" id="u184">
+    
+    <h3><span class="n">184</span> Temporary impact on a daily trade list</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Apply the square-root law to today's list and subtract it from paper IR as AUM grows.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm 064 / Almgren 2005. Temporary impact grows with (your dollars / ADV)^0.5, roughly.</li>
+      <li>Paper vs impact-adjusted IR. The curve vs AUM is 189's cousin.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A linear cost (spread only) at a size where impact dominates.</div>
+    
+  </section>
+  <section class="unit" id="u185">
+    
+    <h3><span class="n">185</span> Liquidity-aware risk: exiting is the hard day</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Stress a 5-day liquidation of the long-only book and watch 'diversifiers' become the same trade.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Names that look diversifying in a covariance can be the same exit when everyone sells.</li>
+      <li>Kyle / Amihud again: the cost of getting out is part of risk, not a surprise.</li>
+      <li>A 5-day unwind schedule at the participation cap. Days-to-exit per name.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A risk model that assumes you can trade any name tomorrow at yesterday's spread.</div>
+    
+  </section>
+  <section class="unit" id="u186">
+    
+    <h3><span class="n">186</span> Daily futures overlay on a high-turnover stock book</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Hedge beta every day with an index future while the cash names stay long-only; include roll cost.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Same idea as 153, daily. The hedge must move when the stock cart's beta moves.</li>
+      <li>Unhedged Sharpe vs hedged Sharpe vs IR. Roll cost as a line item.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A hedge sized on yesterday's beta and left for a week on a book that turns over 30% a day.</div>
+    
+  </section>
+  <section class="unit" id="u187">
+    
+    <h3><span class="n">187</span> Multi-period daily: a 1–5 day half-life</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Smooth toward the target instead of chasing every close; count the skipped turnover.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Gârleanu–Pedersen / Boyd again, with the half-life from 173.</li>
+      <li>Myopic daily vs smoothed. Turnover cut vs IR kept.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Copying Year 4's monthly half-life into the daily program.</div>
+    
+  </section>
+  <section class="unit" id="u188">
+    
+    <h3><span class="n">188</span> Auction-aware execution</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Decide how much of the list goes to the close auction vs a TWAP, and measure shortfall.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>MOC / LOC: market-on-close and limit-on-close. These are the order types a daily book actually uses (222).</li>
+      <li>Perold shortfall on the daily list. Auction vs TWAP.</li>
+      <li>Kissell as optional practitioner reading, not a second theory.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Assuming you get the close print as a fill. You get a fill in the auction, which can differ (162's auction jump).</div>
+    
+  </section>
+  <section class="unit" id="u189">
+    
+    <h3><span class="n">189</span> Capacity is smaller than Year 4</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Draw net IR vs AUM for the daily book next to the monthly book, same capital.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Daily turnover × impact ⇒ the AUM where IR hits the hurdle is smaller.</li>
+      <li>Same names, two clocks, two curves. The comparison is the lesson.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Funding the daily book at Year 4's AUM because 'it is the same stocks.'</div>
+    
+  </section>
+  <section class="unit" id="u190">
+    <div class="chk-unit">
+    <h3><span class="n">190</span> Q3 checkpoint — ADV-capped daily book</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Daily scores + ADV caps + impact + optional futures hedge; defend net IR and the death-AUM.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Written constraints. Participation list of refused names. Net IR. AUM where it dies vs Year 4.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A checkpoint that uses Year 4's turnover penalty 'because it was already coded.'</div>
+    </div>
+  </section>
+  <section class="unit" id="u191">
+    
+    <h3><span class="n">191</span> Overnight gap risk</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Split P&amp;L into overnight vs session and autopsy a gap day.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>You are long into the open if you held the close (167). One ugly gap can be the week's P&amp;L.</li>
+      <li>Overnight vs intraday contribution over a quarter. A single gap-day write-up.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Averaging overnight returns and calling the risk 'small' because the mean is small. The tail is the risk.</div>
+    
+  </section>
+  <section class="unit" id="u192">
+    
+    <h3><span class="n">192</span> Corporate actions on a daily book</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Show that missing a split mid-week lies about P&amp;L when you rebalance every day.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>More events per hold than Year 4. The same adjuster (123 / 202) now runs every night.</li>
+      <li>Miss a split on purpose; the P&amp;L lie is larger when you trade daily.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Reusing a monthly-adjusted panel for a daily book and ignoring intra-month actions.</div>
+    
+  </section>
+  <section class="unit" id="u193">
+    
+    <h3><span class="n">193</span> Live vs paper at this clock: stale scores and late features</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Delay features by one bar and measure IR death.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A daily score that arrives at 16:20 is not a 15:50 score. A vendor blip is a missed day.</li>
+      <li>Delay by one bar. The IR drop is the live-vs-paper lesson (101, again).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A research score that uses a file that lands after the auction you claimed to trade.</div>
+    
+  </section>
+  <section class="unit" id="u194">
+    
+    <h3><span class="n">194</span> Attribution for a daily long-only</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Split a quarter of active return into selection, timing, cost, and beta.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Brinson still applies. Add a cost bucket (the bill is first-order) and a timing bucket (when you traded).</li>
+      <li>Beta: the unhedged daily book still rides the tide.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Attribution that ignores costs on a 40% monthly-turnover-equivalent book.</div>
+    
+  </section>
+  <section class="unit" id="u195">
+    
+    <h3><span class="n">195</span> Crowding: when everyone fades yesterday</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Show the post-2009 reversal fade and write the memo.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Short-horizon reversal got crowded. A rule that was easy in 1992 is a different rule now.</li>
+      <li>McLean–Pontiff / Lou–Polk as the reading. The memo is the skill.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 1990–2024 backtest whose IR is earned entirely before 2004.</div>
+    
+  </section>
+  <section class="unit" id="u196">
+    
+    <h3><span class="n">196</span> Pre-register the daily capstone</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write kill criteria (universe, hold, ADV cap, hurdle) before the run.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Same discipline as 157, faster clock. Participation cap is a required line.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A pre-registration that omits the ADV cap.</div>
+    
+  </section>
+  <section class="unit" id="u197">
+    
+    <h3><span class="n">197</span> Failure modes of the daily mandate</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Plant and find: same-day leak, ADV-blind optimizer, closet indexer, cost-free Sharpe.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Four bugs, one notebook the learner did not write. Twin of 158.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A lecture without planted bugs.</div>
+    
+  </section>
+  <section class="unit" id="u198">
+    
+    <h3><span class="n">198</span> Two-sleeve NAV: monthly plus daily</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Put Year 4 and Year 5 on one long-only NAV; report joint IR, correlation of actives, and capacity.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>How much capital each sleeve gets. Correlation of active returns (not of scores).</li>
+      <li>Joint capacity is not the sum of the two capacities if they trade the same names on the same day.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Funding both sleeves at full single-sleeve capacity.</div>
+    
+  </section>
+  <section class="unit" id="u199">
+    
+    <h3><span class="n">199</span> Overlays: 130/30 and synthetic market-neutral</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Same names, three mandates: long-only, 130/30, futures-hedged; say what IR and Sharpe each claim.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Cash stays long-only under the futures overlay (153/186). 130/30 is a different permission.</li>
+      <li>Three columns of numbers. One paragraph on which mandate the PM actually gave you.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Reporting the hedged Sharpe as the long-only result.</div>
+    
+  </section>
+  <section class="unit" id="u200">
+    <div class="exit-unit">
+    <h3><span class="n">200</span> Year-5 exit — daily long-only capstone</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Defend a liquid, walk-forward, ADV-and-cost-aware long-only book on net IR, with capacity vs Year 4.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>PIT liquid universe → 1–5 day ranker → ADV-capped optimizer → net IR → capacity vs Year 4 → attribution → proceed/kill.</li>
+      <li>PM who forbids shorts and rebalances often.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A monthly notebook with the calendar changed to daily.</div>
+    </div>
+  </section>
+  <nav class="nav-links">
+    <ul>
+      <li><a href="year-4-lessons.html">Year 4 teaching plan (weeks–months)</a></li>
+      <li><a href="year-6-lessons.html">Year 6 teaching plan (data + go-live)</a></li>
+      <li><a href="curriculum.html#y5">Year 5 in the unit table</a></li>
+      <li><a href="long-only-mid-frequency.html">Year 5 mandate sheet</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

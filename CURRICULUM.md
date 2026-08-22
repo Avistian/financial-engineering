@@ -3,19 +3,27 @@
 Agent-facing plan for lesson sequencing. The student-facing version is
 [reference/curriculum.html](./reference/curriculum.html).
 
-**Pace:** ~1.5–2 hours/day **baseline** · ~600–700 hours/year · **~3,350 hours over 5 years.**
-Years 1–3 are the original systematic-alpha QR track (unchanged). **Years 4–5 are extra
+**Pace:** ~1.5–2 hours/day **baseline** · ~600–700 hours/year · **~4,000 hours over 6 years.**
+Years 1–3 are the original systematic-alpha QR track (unchanged). **Years 4–6 are extra
 calendar, not a swap:** two long-only equity books using ML scores and constrained
 optimization — Year 4 at a **weeks-to-months** clock, Year 5 at a **hours-to-days**
-(mid-frequency) clock. QT (pricing, microstructure) and QD (systems, latency) stay in
-Years 1–3 at the depth a top QR needs to collaborate and interview.
+(mid-frequency) clock — plus Year 6, the **data kit and going-live desk** for both clocks.
+QT and QD stay in Years 1–3 at awareness depth.
 
-### Why 200 units take 5 years (read this if the math looks off)
+**Lesson-by-lesson teaching plans** (what each unit must teach, in order; labs not written yet):
+[Year 4](./reference/year-4-lessons.html) ·
+[Year 5](./reference/year-5-lessons.html) ·
+[Year 6](./reference/year-6-lessons.html).
 
-A common, correct objection: *200 lessons ÷ 365 days ≈ 7 months — so at one lesson/day this is
-a one-year plan, not five.* That objection is right about **reading** and wrong about
+**Recommended order (not the unit numbers):** Years 1–3 → **201–210 (data kit)** →
+Year 4 → Year 5 → **211–240 (prod parity, paper, small live)**.
+
+### Why 240 units take 6 years (read this if the math looks off)
+
+A common, correct objection: *240 lessons ÷ 365 days ≈ 8 months — so at one lesson/day this is
+a one-year plan, not six.* That objection is right about **reading** and wrong about
 **mastery**. Stop treating a numbered row as "one day." Years 1–3 are still the original
-~2,000-hour QR track; Years 4–5 add two ~650-hour specializations and do not shorten them.
+~2,000-hour QR track; Years 4–6 add three ~650-hour specializations and do not shorten them.
 
 **A unit ≠ a day.** Each numbered row below is a **unit** = one concept *plus its lab/reproduction
 work plus its quiz/checkpoint*. Units are not uniform:
@@ -26,28 +34,30 @@ work plus its quiz/checkpoint*. Units are not uniform:
 | Derivation / math unit (prove it, then code it) | 2–5 sessions | Y1 Q2, interview prep |
 | Lab / reproduction unit (build, tune, debug, re-run) | 4–12 sessions | dominant Y2–Y5 |
 | Checkpoint / exit exam | 3–6 sessions | end of each quarter/year |
-| Capstone (project + write-up + defense) | 20–40+ sessions | Y3 Q4, Y4 Q4, Y5 Q4 |
+| Capstone (project + write-up + defense) | 20–40+ sessions | Y3 Q4, Y4 Q4, Y5 Q4, Y6 Q4 |
 
-**Where the ~3,350 hours actually go** (lessons are a small slice of the clock):
+**Where the ~4,000 hours actually go** (lessons are a small slice of the clock):
 
 | Activity | ≈ hours | Share |
 |----------|---------|-------|
-| Lesson content itself (200 × ~0.75h) | ~150 | ~4% |
-| Deep primary-source reading (books + ~65 core papers) | ~500 | ~15% |
-| **Hands-on labs & reproduction** (pricing, ML pipelines, LOB, backtests, long-only books) | ~1,400 | ~42% |
-| Checkpoints + year exit exams | ~260 | ~8% |
-| Spaced retrieval / review | ~230 | ~7% |
-| **Interview drilling** (mental math, brainteasers, LeetCode) — runs *throughout*, concentrated in Y3 Q4 | ~200 | ~6% |
-| **Year-3 capstone** (general systematic-alpha defense) | ~200 | ~6% |
+| Lesson content itself (240 × ~0.75h) | ~180 | ~5% |
+| Deep primary-source reading (books + ~65 core papers) | ~520 | ~13% |
+| **Hands-on labs & reproduction** (pricing, ML pipelines, LOB, backtests, long-only books, desk loop) | ~1,650 | ~41% |
+| Checkpoints + year exit exams | ~300 | ~8% |
+| Spaced retrieval / review | ~260 | ~7% |
+| **Interview drilling** (mental math, brainteasers, LeetCode) — runs *throughout*, concentrated in Y3 Q4 | ~200 | ~5% |
+| **Year-3 capstone** (general systematic-alpha defense) | ~200 | ~5% |
 | **Year-4 capstone** (long-only mid-horizon ML + optimizer, defended) | ~150 | ~4% |
 | **Year-5 capstone** (long-only mid-frequency ML + optimizer, defended) | ~150 | ~4% |
+| **Year-6 capstone** (data store + paper/live desk, defended) | ~150 | ~4% |
 
 **Density curve (front-loaded learning, back-loaded building, then a mandate year):**
 - **Year 1** — concept- and derivation-dense. Units arrive ~2–3/week. This is the only phase where "lessons/week" is the right mental model. You are buying vocabulary, the stochastic-calculus toolkit, and *evaluation discipline*.
 - **Year 2** — reproduction-heavy. ~1 unit/week; each is days of feature engineering, model fitting, and — above all — validation. This is the heart of the QR craft.
 - **Year 3** — build- and interview-dominated. Portfolio construction, execution, systems awareness, then the interview gauntlet and a capstone whose calendar is set by experiments and writing, not reading.
 - **Year 4** — mandate-specific, also reproduction-heavy. Same validation bar as Year 2, now aimed at a **long-only, weeks-to-months equity book** whose scores come from ML and whose holdings come from a constrained optimizer.
-- **Year 5** — the same long-only + ML + optimizer job on a **hours-to-days** clock (this course's mid-frequency). Costs and execution are first-order; capacity is smaller; you have more independent bets. Do **not** skip here from Year 1: the data hygiene, CPCV/PBO, Grinold–Kahn math, and Year 4's mandate language live upstream.
+- **Year 5** — the same long-only + ML + optimizer job on a **hours-to-days** clock (this course's mid-frequency). Costs and execution are first-order; capacity is smaller; you have more independent bets.
+- **Year 6** — the store and the desk: point-in-time data, backtest=live code path, paper loop, reconcile, kill switch, small live. Do **not** skip here from Year 1. **Do** run 201–210 before Year 4 backtests.
 
 **Unit numbering:** Year N → units `(N-1)*40 + 001` … `(N-1)*40 + 040`.
 **Rule:** finish each quarter's checkpoint before advancing. A unit is "done" when its lab runs
@@ -283,6 +293,9 @@ Trading* · Cartea-Jaimungal-Penalva full text · *Designing Data-Intensive Appl
 
 ## Year 4 — Long-only mid-horizon equity: ML scores, constrained books (Units 121–160)
 
+**What each lesson must teach:** [reference/year-4-lessons.html](./reference/year-4-lessons.html)
+(one skill, ordered beats, the trap). Labs are specified later; they are not written yet.
+
 **This year is extra time, not a replacement.** Years 1–3 stay required. Year 4 takes that
 toolkit and aims it at one mandate:
 
@@ -377,6 +390,9 @@ after-tax long-only (only after the pre-tax capstone is honest).
 
 ## Year 5 — Long-only mid-frequency equity: daily scores, cost-first books (Units 161–200)
 
+**What each lesson must teach:** [reference/year-5-lessons.html](./reference/year-5-lessons.html).
+Labs are not written yet.
+
 **This year is extra time, not a replacement.** Years 1–4 stay required. Year 5 takes the
 Year 4 mandate (long-only, beat a named benchmark, ML score → constrained optimizer) and
 moves the clock from **weeks** to **hours and days** — what Lesson 001 called
@@ -468,6 +484,85 @@ died in costs, and why this book's capacity is smaller than Year 4's.
 **◆ Optional (Year 5):** Kissell *The Science of Algorithmic Trading* · full Tetlock /
 news-alpha literature after the PEAD baseline is honest · overnight-only or
 open-to-close-only specialist sleeves (only after the close-to-close capstone is honest).
+
+---
+
+## Year 6 — Data kit and going live (Units 201–240)
+
+**What each lesson must teach:** [reference/year-6-lessons.html](./reference/year-6-lessons.html).
+Labs are not written yet. This year is extra time. It is the data-preparation and
+"start trading" year for **both** clocks.
+
+**Recommended calendar:** do **Q1 (201–210) immediately after Year 3**, before Year 4
+backtests. Do **Q2–Q4 (211–240)** after Years 4–5 have a book worth paper-trading.
+
+> Build a store of facts that could have been known that morning. Then a loop that
+> turns those facts into orders, a ledger that adds up, and a button that stops you.
+
+### Q1 · The data kit (do before Year 4 backtests) (Units 201–210)
+| # | Unit topic | Primary source | Later lab (not written) |
+|---|-----------|----------------|-------------------|
+| 201 | What a desk data set is: tables + as-of keys | vendor docs; unit 101 | Name the six tables; refuse a join without an as-of key |
+| 202 | Price panel: splits, dividends, delist returns | Bali-Engle-Murray; CRSP notes | Adjuster; price-only lie vs total return |
+| 203 | Point-in-time membership: IPO, add/drop, delist | unit 122 | Survivors-only vs PIT; fake premium |
+| 204 | Point-in-time fundamentals (vintages / as-of join) | Bali-Engle-Murray | Restated leak vs vintage join |
+| 205 | Earnings/event calendar: timestamp, timezone, surprise | Bernard-Thomas | After-close vs before-open leak test |
+| 206 | Daily bars: open, close, auction, VWAP, volume, spread | Heston-Korajczyk-Sadka | Auction ≠ last trade |
+| 207 | Liquidity history: trailing ADV, spread, days-to-trade | Amihud 2002 | Causal ADV; days-to-trade at stated AUM |
+| 208 | Benchmark reconstitution as data | unit 129 | Frozen starting list vs true membership |
+| 209 | Feature store: (name, as-of morning), no future joins | AFML point-in-time | Illegal-join unit tests |
+| 210 | **Q1 checkpoint** — one store that serves monthly and daily | 202–209 | Both panels pass the leak tests |
+
+### Q2 · Research/prod parity (Units 211–220)
+| # | Unit topic | Primary source | Later lab (not written) |
+|---|-----------|----------------|-------------------|
+| 211 | One code path: backtest calls the same functions as live | unit 109 | Plant a private backtest score; catch it |
+| 212 | Score job: scheduled, logged, replayable | — | Same inputs ⇒ same scores |
+| 213 | Optimizer job: constraints as dated config | units 145, 182 | Config mismatch backtest vs live |
+| 214 | Order list a broker accepts: name, side, qty, type | Hull; broker docs | Weights → share orders, long-only |
+| 215 | Fill model vs live fills as a standing table | Perold 1988 | Predicted vs realized shortfall |
+| 216 | Position and cash ledger: cash + stock = NAV | — | Broken identity is a halt |
+| 217 | Corporate actions on the live book (not only the panel) | unit 202 | Missed overnight split |
+| 218 | Calendar: holidays, half-days, auction times | exchange calendars | Job on a closed day |
+| 219 | Replay from config + store revision + git hash | unit 109 | Rebuild Tuesday's book |
+| 220 | **Q2 checkpoint** — backtest and live agree on one morning | 211–219 | Same scores, weights, orders |
+
+### Q3 · Broker, paper, risk (Units 221–230)
+| # | Unit topic | Primary source | Later lab (not written) |
+|---|-----------|----------------|-------------------|
+| 221 | Broker mechanics: account, cash, buying power, rejects | broker docs | Cash-only long-only; why orders still reject |
+| 222 | Order types: MKT, LMT, MOC, LOC | unit 093; exchange docs | Which type each clock uses |
+| 223 | Close auction operationally: imbalance, cutoffs | unit 188 | Late MOC is a missed trade |
+| 224 | Paper-trading loop: store → score → orders → fills → ledger | synthesis | The loop in objects, not a backtest relabel |
+| 225 | Reconciliation: ledger vs broker vs fills | — | Daily match; break ⇒ no new orders |
+| 226 | Kill switch and risk limits on the order path | unit 089 | Planted breach must refuse or flatten |
+| 227 | Slippage tracking: predicted vs realized | units 215, 152 | Weekly read of the gap |
+| 228 | Restricted lists and compliance holds | unit 159 | Hard zero in optimizer *and* broker |
+| 229 | Shape of the trading day: cutoffs for each clock | — | Written clock: T1…T5 |
+| 230 | **Q3 checkpoint** — a reconciled week of paper | 224–227 | Five days, one kill test, not five backtest days |
+
+### Q4 · Small live and the ops capstone (Units 231–240)
+| # | Unit topic | Primary source | Later lab (not written) |
+|---|-----------|----------------|-------------------|
+| 231 | Going live small: tiny AUM, one sleeve, written abort | — | First-week rules |
+| 232 | Monitoring: expected vs realized IR, turnover, rejects | — | Dashboard as a list of comparisons |
+| 233 | Incident log: missed auction, stale feature, wrong split | — | Cause, P&amp;L, fix, test |
+| 234 | Two-frequency ops on one NAV | unit 198 | Shared ADV and cash |
+| 235 | Vendor outage and fallback | — | Skip / flatten / labeled stale — never a silent guess |
+| 236 | Tax lots / after-tax as an overlay (awareness) | — | Do not rewrite the pre-tax book |
+| 237 | Pre-register the live trial | units 157, 196 | Duration, AUM, abort, 'paper was a lie' |
+| 238 | Failure modes of going live | synthesis | Four planted operational bugs |
+| 239 | The runbook | — | Times, halt, who to call |
+| 240 | **Q4 / Year-6 exit — Capstone** | 201–239; Y4; Y5 | 20 paper (or tiny live) days: store + replay + reconcile + kill test + proceed/kill |
+
+**Year 6 exit criterion:** you can answer a PM who asks "can we turn this on Monday?"
+with a store that passes the leak tests, a morning where backtest=live, a reconciled
+paper stretch, a tested kill switch, and a runbook — for a long-only book on either
+clock.
+
+**◆ Optional (Year 6):** a specific broker's API (IBKR paper, etc.) only after the
+objects in 221–226 are solid without brand names · after-tax lots only after 240 is
+honest pre-tax.
 
 ---
 
