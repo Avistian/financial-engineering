@@ -29,15 +29,15 @@ If the broker **forbids shorts**, you cannot build the dollar-neutral book below
 Use a long-only variant (top-N names, or overweight vs a benchmark) and judge success
 as “beat the benchmark after costs,” not “market-neutral alpha.”
 
-That long-only job, on a **weeks-to-months** clock, is **Year 4** (units 121–160).
-The same job on an **hours-to-days** clock — this template's daily recipe, with the
-shorts removed and an ADV cap added — is **Year 5** (units 161–200). Both: ML scores
-in, constrained optimizer out, **information ratio vs a named benchmark**. Maps:
+That long-only job, on a **weeks-to-months** clock, is the monthly book
+(units 131–170). The same job on an **hours-to-days** clock — this template's
+daily recipe, with the shorts removed and an ADV cap added — is units 171–210.
+Both: ML scores in, constrained optimizer out, **information ratio vs a named
+benchmark**. The store you must build first is Year 4 Q1 (121–130). Maps:
 `reference/long-only-mid-horizon.html` and `reference/long-only-mid-frequency.html`.
-What each unit must teach:
-`reference/year-4-lessons.html` and `reference/year-5-lessons.html`.
-The data kit and going-live year is **Year 6** (`reference/year-6-lessons.html`);
-do units 201–210 before Year 4 backtests. Do not skip there from Year 1.
+What each unit must teach: `reference/year-4-lessons.html`,
+`reference/year-5-lessons.html`, `reference/year-6-lessons.html`.
+Do not skip there from Year 1.
 
 ---
 

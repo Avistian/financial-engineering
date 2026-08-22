@@ -43,13 +43,13 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 - ◆ **O'Hara — *Market Microstructure Theory***. Classic theory: adverse selection, spread decomposition.
 
 ### Portfolio construction & risk
-- ★ **Grinold & Kahn — *Active Portfolio Management*** (2nd ed.). The Fundamental Law, IC/breadth, factor risk, alpha combination. Year 3 Q1 and the on-ramp to Year 4 (units 121, 133, 142–146, 155).
-- ★ **Qian, Hua & Sorensen — *Quantitative Equity Portfolio Management*** (Chapman & Hall). The practitioner book for **long-only, benchmark-relative** equity: active return, tracking error, information ratio, IC decay, and turning a score into a constrained book. Primary Year-4 companion (units 121, 129, 133, 141).
-- ★ **Boyd & Vandenberghe — *Convex Optimization*** (CUP; free online). What a quadratic / second-order-cone program *is*, why convexity lets a solver certify a solution, and how to write constraints so they stay convex. Use selected chapters for Year 4 Q3 (units 145, 148).
-- ★ **Boyd, Busseti, Diamond, Kahn, Koh, Nystrup & Speth — *Multi-Period Trading via Convex Optimization*** (Foundations & Trends in Optimization, 2017; free preprint). The clean modern statement of “maximize expected return − risk − costs” over several rebalances, including when *not* to trade. Primary source for units 146–147.
-- ★ **Bali, Engle & Murray — *Empirical Asset Pricing: The Cross Section of Stock Returns*** (Wiley). The handbook for building a point-in-time stock universe, total returns, and characteristic-sorted portfolios without the usual CRSP traps. Year 4 Q1 (units 122–124, 132).
-- ◆ **Cochrane — *Asset Pricing*** (Princeton, revised). Discount-factor view of the cross-section; Ch.12 is the Fama–MacBeth companion (unit 124).
-- ◆ **Fabozzi, Kolm, Pachamanova & Focardi — *Robust Portfolio Optimization and Management***. When Markowitz inputs are noisy (they always are). Unit 149.
+- ★ **Grinold & Kahn — *Active Portfolio Management*** (2nd ed.). The Fundamental Law, IC/breadth, factor risk, alpha combination. Year 3 Q1 and the on-ramp to Year 4 (units 131, 143, 152–156, 165).
+- ★ **Qian, Hua & Sorensen — *Quantitative Equity Portfolio Management*** (Chapman & Hall). The practitioner book for **long-only, benchmark-relative** equity: active return, tracking error, information ratio, IC decay, and turning a score into a constrained book. Primary Year-4 companion (units 131, 139, 143, 151).
+- ★ **Boyd & Vandenberghe — *Convex Optimization*** (CUP; free online). What a quadratic / second-order-cone program *is*, why convexity lets a solver certify a solution, and how to write constraints so they stay convex. Use selected chapters for Year 4 Q4 (units 155, 158).
+- ★ **Boyd, Busseti, Diamond, Kahn, Koh, Nystrup & Speth — *Multi-Period Trading via Convex Optimization*** (Foundations & Trends in Optimization, 2017; free preprint). The clean modern statement of “maximize expected return − risk − costs” over several rebalances, including when *not* to trade. Primary source for units 156–157.
+- ★ **Bali, Engle & Murray — *Empirical Asset Pricing: The Cross Section of Stock Returns*** (Wiley). The handbook for building a point-in-time stock universe, total returns, and characteristic-sorted portfolios without the usual CRSP traps. Year 4 Q1–Q2 (units 122–124, 132–134, 142).
+- ◆ **Cochrane — *Asset Pricing*** (Princeton, revised). Discount-factor view of the cross-section; Ch.12 is the Fama–MacBeth companion (unit 134).
+- ◆ **Fabozzi, Kolm, Pachamanova & Focardi — *Robust Portfolio Optimization and Management***. When Markowitz inputs are noisy (they always are). Unit 159.
 - ◆ **Bouchaud & Potters — *Theory of Financial Risk and Derivative Pricing***. RMT for covariance cleaning.
 - ★ **McNeil, Frey & Embrechts — *Quantitative Risk Management*** (Princeton). Copulas (Ch.5–7), VaR/ES, risk aggregation. Core for units 085–086 and 089.
 - ◆ **Nelsen — *An Introduction to Copulas*** (Springer). Gentler mathematical companion to MFE when Sklar/margins need a slower pass.
@@ -118,37 +118,37 @@ Tiers match [CURRICULUM.md](./CURRICULUM.md): **★ Core** (required, reproduce 
 - ◆ Li (2000), *On Default Correlation: A Copula Function Approach.* — the Gaussian-copula CDO formula; taught as a **failure-mode case study**, not a method to copy (unit 086).
 
 ### Empirical asset pricing / long-only mid-horizon equity (Year 4)
-- ★ Fama & MacBeth (1973), *Risk, Return, and Equilibrium: Empirical Tests.* — the cross-section regression that is still the first linear baseline (units 124, 134).
-- ★ Jegadeesh & Titman (1993), *Returns to Buying Winners and Selling Losers.* — 3–12 month cross-sectional momentum; the 12-1 construction (skip the most recent month) is the Year-4 baseline (unit 125).
-- ★ Fama & French (1992), *The Cross-Section of Expected Stock Returns*; (1993) *Common Risk Factors…*; (2015) *A Five-Factor Asset Pricing Model.* — value, size, profitability, investment as the characteristics a long-only book must beat or own honestly (units 126–127).
-- ★ Asness, Moskowitz & Pedersen (2013), *Value and Momentum Everywhere.* — the two classic premia in one paper, including why they hedge each other (units 125–126).
-- ★ Novy-Marx (2013), *The Other Side of Value: The Gross Profitability Premium.* — quality / profitability as a characteristic, not a vibe (unit 127).
-- ★ Ang, Hodrick, Xing & Zhang (2006), *The Cross-Section of Volatility and Expected Returns.* — low-volatility in the cross-section; the trap is that it is often a hidden beta bet (unit 127).
-- ★ McLean & Pontiff (2016), *Does Academic Research Destroy Stock Return Predictability?* — publication decay: a characteristic's edge shrinks after the paper comes out (units 128, 139, 156).
-- ★ Hou, Xue & Zhang (2020), *Replicating Anomalies.* — most of the "factor zoo" does not replicate under a common protocol (unit 128).
-- ★ Green, Hand & Zhang (2017), *The Characteristics that Provide Independent Information for the Cross-Section of Stock Returns.* — which of ~90 characteristics are not just the same few bets renamed (unit 132).
-- ★ Gu, Kelly & Xiu (2020), *Empirical Asset Pricing via Machine Learning.* — the baseline paper for *monthly* cross-sectional ML (trees, nets) versus a linear model. Year 4 Q2's "must beat or match honestly" result (units 131–135, 139–140).
-- ★ Gârleanu & Pedersen (2013), *Dynamic Trading with Predictable Returns and Transaction Costs.* — the continuous-time reason a decaying signal plus costs says "don't fully chase today's alpha" (unit 147).
-- ★ Perold (1988), *The Implementation Shortfall: Paper versus Reality.* — the gap between the paper book and the fills you actually get (unit 152).
-- ★ Brinson, Hood & Beebower (1986), *Determinants of Portfolio Performance*; Brinson & Fachler (1985), *Measuring Non-U.S. Equity Portfolio Performance.* — allocation vs selection vs interaction (unit 155).
-- ◆ Moskowitz, Ooi & Pedersen (2012), *Time Series Momentum.* — trend on an asset versus cash, not winner-vs-loser (unit 125).
-- ◆ Sharpe (1991), *The Arithmetic of Active Management.* — why beating the cap-weight index, after fees, is a zero-sum exam (unit 129).
-- ◆ Jacobs & Levy, *20 Myths about 130/30* (and related 130/30 notes). — the "a little short sleeve" overlay, not the Year-4 default mandate (units 143, 159).
-- ◆ Burges, *From RankNet to LambdaRank to LambdaMART* (Microsoft Research). — pairwise / listwise ranking losses when the job is "who beats whom," not "predict the exact return" (unit 136).
-- ◆ Korajczyk & Sadka (2004/2008), liquidity / momentum capacity. — what happens to a slow equity signal when AUM grows (units 156, 189).
+- ★ Fama & MacBeth (1973), *Risk, Return, and Equilibrium: Empirical Tests.* — the cross-section regression that is still the first linear baseline (units 134, 144).
+- ★ Jegadeesh & Titman (1993), *Returns to Buying Winners and Selling Losers.* — 3–12 month cross-sectional momentum; the 12-1 construction (skip the most recent month) is the Year-4 baseline (unit 135).
+- ★ Fama & French (1992), *The Cross-Section of Expected Stock Returns*; (1993) *Common Risk Factors…*; (2015) *A Five-Factor Asset Pricing Model.* — value, size, profitability, investment as the characteristics a long-only book must beat or own honestly (units 136–137).
+- ★ Asness, Moskowitz & Pedersen (2013), *Value and Momentum Everywhere.* — the two classic premia in one paper, including why they hedge each other (units 135–136).
+- ★ Novy-Marx (2013), *The Other Side of Value: The Gross Profitability Premium.* — quality / profitability as a characteristic, not a vibe (unit 137).
+- ★ Ang, Hodrick, Xing & Zhang (2006), *The Cross-Section of Volatility and Expected Returns.* — low-volatility in the cross-section; the trap is that it is often a hidden beta bet (unit 137).
+- ★ McLean & Pontiff (2016), *Does Academic Research Destroy Stock Return Predictability?* — publication decay: a characteristic's edge shrinks after the paper comes out (units 138, 149, 166).
+- ★ Hou, Xue & Zhang (2020), *Replicating Anomalies.* — most of the "factor zoo" does not replicate under a common protocol (unit 138).
+- ★ Green, Hand & Zhang (2017), *The Characteristics that Provide Independent Information for the Cross-Section of Stock Returns.* — which of ~90 characteristics are not just the same few bets renamed (unit 142).
+- ★ Gu, Kelly & Xiu (2020), *Empirical Asset Pricing via Machine Learning.* — the baseline paper for *monthly* cross-sectional ML (trees, nets) versus a linear model. Year 4 Q2's "must beat or match honestly" result (units 141–145, 149–150).
+- ★ Gârleanu & Pedersen (2013), *Dynamic Trading with Predictable Returns and Transaction Costs.* — the continuous-time reason a decaying signal plus costs says "don't fully chase today's alpha" (unit 157).
+- ★ Perold (1988), *The Implementation Shortfall: Paper versus Reality.* — the gap between the paper book and the fills you actually get (unit 162).
+- ★ Brinson, Hood & Beebower (1986), *Determinants of Portfolio Performance*; Brinson & Fachler (1985), *Measuring Non-U.S. Equity Portfolio Performance.* — allocation vs selection vs interaction (unit 165).
+- ◆ Moskowitz, Ooi & Pedersen (2012), *Time Series Momentum.* — trend on an asset versus cash, not winner-vs-loser (unit 135).
+- ◆ Sharpe (1991), *The Arithmetic of Active Management.* — why beating the cap-weight index, after fees, is a zero-sum exam (unit 139).
+- ◆ Jacobs & Levy, *20 Myths about 140/30* (and related 140/30 notes). — the "a little short sleeve" overlay, not the Year-4 default mandate (units 153, 169).
+- ◆ Burges, *From RankNet to LambdaRank to LambdaMART* (Microsoft Research). — pairwise / listwise ranking losses when the job is "who beats whom," not "predict the exact return" (unit 146).
+- ◆ Korajczyk & Sadka (2004/2008), liquidity / momentum capacity. — what happens to a slow equity signal when AUM grows (units 166, 199).
 
 ### Long-only mid-frequency equity (Year 5)
-- ★ Jegadeesh (1990), *Evidence of Predictable Behavior of Security Returns.* — 1-month (and shorter) cross-sectional reversal: yesterday's losers bounce. Year 5's first baseline; the Q1 lab's `rev5` without the shorts (unit 164).
-- ★ Lehmann (1990), *Fads, Martingales, and Market Efficiency.* — the companion short-horizon reversal paper (unit 164).
-- ★ Bernard & Thomas (1989), *Post-Earnings-Announcement Drift: Delayed Price Response or Risk Premium?*; (1990) *Evidence that Stock Prices Do Not Fully Reflect the Implications of Current Earnings for Future Earnings.* — PEAD: the market is slow to digest earnings. The event baseline a daily long-only book must beat or own honestly (units 166, 177).
-- ★ Amihud (2002), *Illiquidity and Stock Returns.* — a simple liquidity measure (average |return| / dollar volume). Year 5 uses it as a *membership rule*, not as a premium to harvest blindly (units 163, 185).
-- ★ Heston, Korajczyk & Sadka (2010), *Intraday Patterns in the Cross-Section of Stock Returns.* — the trading day is not one return; open, midday, and close have different cross-sections (unit 162).
-- ★ Lou, Polk & Skouras (2019), *A Tug of War: Overnight Versus Intraday Expected Returns.* — who you hold through the close is a different bet from who you hold from open to close (units 162, 167, 191).
-- ◆ Tetlock (2007), *Giving Content to Investor Sentiment: The Role of Media in the Stock Market.* — daily text as a feature, with the usual overfitting trap (unit 168).
-- ◆ Livnat & Mendenhall (2006), *Comparing the Post–Earnings Announcement Drift for Surprises Calculated from Analyst and Time Series Forecasts.* — PEAD implementation details (unit 166).
-- ◆ Blitz, Huij & Martens, residual momentum notes; Da, Qian & Warachka — residual / industry-neutral short-horizon constructions (unit 165).
-- ◆ Bogousslavsky, close-auction / overnight papers. — who gets filled at the close (unit 167).
-- ◆ Kissell — *The Science of Algorithmic Trading and Portfolio Management.* — practitioner execution at this clock (unit 188). Gârleanu–Pedersen 2013 and Boyd 2017 (already ★ above) are the daily multi-period sources (unit 187).
+- ★ Jegadeesh (1990), *Evidence of Predictable Behavior of Security Returns.* — 1-month (and shorter) cross-sectional reversal: yesterday's losers bounce. Year 5's first baseline; the Q1 lab's `rev5` without the shorts (unit 174).
+- ★ Lehmann (1990), *Fads, Martingales, and Market Efficiency.* — the companion short-horizon reversal paper (unit 174).
+- ★ Bernard & Thomas (1989), *Post-Earnings-Announcement Drift: Delayed Price Response or Risk Premium?*; (1990) *Evidence that Stock Prices Do Not Fully Reflect the Implications of Current Earnings for Future Earnings.* — PEAD: the market is slow to digest earnings. The event baseline a daily long-only book must beat or own honestly (units 176, 187).
+- ★ Amihud (2002), *Illiquidity and Stock Returns.* — a simple liquidity measure (average |return| / dollar volume). Year 5 uses it as a *membership rule*, not as a premium to harvest blindly (units 173, 195).
+- ★ Heston, Korajczyk & Sadka (2010), *Intraday Patterns in the Cross-Section of Stock Returns.* — the trading day is not one return; open, midday, and close have different cross-sections (unit 172).
+- ★ Lou, Polk & Skouras (2019), *A Tug of War: Overnight Versus Intraday Expected Returns.* — who you hold through the close is a different bet from who you hold from open to close (units 172, 177, 201).
+- ◆ Tetlock (2007), *Giving Content to Investor Sentiment: The Role of Media in the Stock Market.* — daily text as a feature, with the usual overfitting trap (unit 178).
+- ◆ Livnat & Mendenhall (2006), *Comparing the Post–Earnings Announcement Drift for Surprises Calculated from Analyst and Time Series Forecasts.* — PEAD implementation details (unit 176).
+- ◆ Blitz, Huij & Martens, residual momentum notes; Da, Qian & Warachka — residual / industry-neutral short-horizon constructions (unit 175).
+- ◆ Bogousslavsky, close-auction / overnight papers. — who gets filled at the close (unit 177).
+- ◆ Kissell — *The Science of Algorithmic Trading and Portfolio Management.* — practitioner execution at this clock (unit 198). Gârleanu–Pedersen 2013 and Boyd 2017 (already ★ above) are the daily multi-period sources (unit 197).
 
 ### Execution & RL
 - ★ Almgren & Chriss (2000), *Optimal Execution of Portfolio Transactions.* — unit 092.
