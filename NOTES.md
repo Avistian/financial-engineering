@@ -120,6 +120,11 @@
   to ~72 KB — the longest since 011 — because the replication → `p*` → Girsanov chain refuses to skip a
   link. If the learner reports it clear *but long*, the next lever is splitting Lesson 016, not trimming
   the `.plain`/`.numplay` boxes.
+  **Update (016):** The first 016 draft was too short. The learner pointed at Lessons
+  013–015 as the detail template, so 016 was rewritten to that slow-lane standard
+  (hour map, every hedge cancellation written out, four-step Feynman–Kac proof, heat
+  flip with numbers, put as worked example 2) and now sits above 015's size. Re-open
+  a split only if 016 feels too long *in one sitting*.
 
 ## Standing weekly habits (don't let these lapse)
 - 10 mental-math drills + 5 probability brainteasers/week (Green Book / Heard on the Street).
@@ -139,12 +144,14 @@
   length (012/013 hard to understand). Treating length as "as long as the scaffolding needs" and spending
   the budget on `.plain`/`.numplay` grounding. See the standing decision above. Only re-open if a future
   lesson feels too long *in one sitting*.
-- **The `−½σ²` sign must be automatic before Lesson 016 (Black–Scholes PDE).** 014 shipped and re-used it
-  in the GBM solve; 015 re-used it again under `Q` (`S_T = S₀e^{(r−½σ²)T+σW̃_T}`); 016's PDE carries it a
-  third time. Grade the 013/014 teach-backs cold: the `d(log S)` derivation (every `S` cancellation),
-  *why* `∫…dW` is a martingale, and the sign-of-curvature rule (`log S` drags down `−½σ²`; `S²`/`e^W`
-  push up; OU's `e^{θt}X` is linear ⇒ **no** correction). If the learner derives `μ−½σ²` and the OU solve
-  unaided, both go into "Derivations I own."
+- **Learner marked Lesson 015 done (2026-08-22)** and asked for Lesson 016. No cold teach-back was
+  graded in this session — still owed: the three 015 derivations (replication, `p*`, `θ = (μ−r)/σ`)
+  and the `P`/`Q` probe ("is 56% a forecast?"). Glossary rows for 006–016 remain blank.
+- **The `−½σ²` sign is now in its third costume (Lesson 016).** Same rule, opposite curvature: `log S`
+  drags down `−½σ²`; a call's `½σ²S²V_ss` is a *lift* because `V_ss > 0`. The four-term budget at
+  `(0,100)` is `−6.414 + 3.184 + 3.752 − 0.523 = 0`. Grade cold: derive the PDE from the hedge
+  (`Δ = V_s`, then `dΠ = rΠ dt`), say why `μ` cancels, and state Feynman–Kac in one sentence. If those
+  land, "the Black–Scholes PDE" and "Feynman–Kac" go into "Derivations I own."
 - **New for 015 (Girsanov / risk-neutral pricing).** Three things to grade cold, not by MCQ: (1) set up
   and solve the two replication equations (`Δ = 0.5`, `B = −45`, price `5` — and note `p` never appears);
   (2) derive `p* = (R−d)/(u−d)` by regrouping the replication cost; (3) derive `θ = (μ−r)/σ` by
@@ -155,12 +162,19 @@
   equivalent measures agree on almost-sure facts — the same reason `μ` needs ~400 years of data to pin
   down while `σ` does not).
 - **Browser verification is owed for Lesson 015's three widgets** (skipped at the learner's request when
-  015 shipped). `.smoke.js` geometry traps cover layout regressions, but nothing has been eyeballed at
-  375px.
+  015 shipped) **and for Lesson 016's three widgets** if this session cannot eyeball them. `.smoke.js`
+  geometry traps cover layout regressions, but nothing has been eyeballed at 375px.
 - **New for 014:** watch that the learner keeps the two OU spreads distinct (mean → `m` vs wobble →
   `σ²/2θ`), reads `θ(m−X)` as a pull *toward* `m`, and remembers the small-sample θ bias (short fits
   overestimate reversion) — that bias is the lab's punchline and a real pairs-trade trap.
-- **Glossary drill owed:** rows for 006–015 are all still blank (59 terms now). Do one cold-definition pass
+- **Glossary drill owed:** rows for 006–016 are all still blank (67 terms now). Do one cold-definition pass
   and fill only what the learner defines unaided.
 - Lesson 010 was **self-reported** as passed (no EXIT TICKET graded here) — offer a fresh checkpoint
   scenario at the next natural break.
+- **New for 016 (Black–Scholes PDE / Feynman–Kac).** Grade cold, not by MCQ: (1) write Itô on
+  `V(t,S)` under `Q` and form `Π = V − V_s S` until `dW` dies; (2) impose `dΠ = rΠ dt` and rearrange
+  to `V_t + rS V_s + ½σ²S² V_ss − rV = 0`; (3) state Feynman–Kac in one sentence (PDE + terminal
+  condition **is** the discounted `Q`-average). Watch three confusions: **`μ` in the PDE** (residual
+  `+6.368` at the running point), **dropping the curvature term** (ordinary calculus, residual
+  `−3.752`), and **writing the payoff as a starting condition**. The four-term budget
+  `−6.414 + 3.184 + 3.752 − 0.523 = 0` should become as automatic as `−½σ²`.

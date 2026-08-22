@@ -61,6 +61,7 @@ const files = [
   "assets/ito-viz.js",
   "assets/sde-viz.js",
   "assets/rnpricing-viz.js",
+  "assets/bspde-viz.js",
 ];
 files.forEach(f => { eval(fs.readFileSync(f, "utf8")); });
 
@@ -508,6 +509,96 @@ trap("RN convergence numbers: CRR tree -> Black-Scholes 10.4506 as n grows", () 
   });
   function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
   inputs(el, []).forEach(i => { i.value = "1"; i.dispatch("input"); i.value = "120"; i.dispatch("input"); });
+});
+
+trap("BS hedge geometry stays inside the canvas (every delta)", () => {
+  for (let d = 0; d <= 120; d += 10) {
+    const canvases = withRecordedCanvas(() => {
+      window.BS.mountHedge(makeEl("div"), { delta: d / 100 });
+    });
+    assertInBounds(canvases[0], "BShedge[delta=" + (d / 100) + "]");
+  }
+});
+
+trap("BS backward geometry stays inside the canvas (every tau)", () => {
+  for (let t = 0; t <= 100; t += 10) {
+    const canvases = withRecordedCanvas(() => {
+      window.BS.mountBackward(makeEl("div"), { tau: t / 100 });
+    });
+    assertInBounds(canvases[0], "BSback[tau=" + (t / 100) + "]");
+  }
+});
+
+trap("BS Feynman-Kac geometry stays inside the canvas (every n)", () => {
+  for (let n = 10; n <= 800; n += 70) {
+    const canvases = withRecordedCanvas(() => {
+      window.BS.mountFK(makeEl("div"), { n: n });
+    });
+    assertInBounds(canvases[0], "BSfk[n=" + n + "]");
+  }
+});
+
+trap("BS hedge numbers: residual std is smallest near N(d1) = 0.6368", () => {
+  const el = makeEl("div");
+  const w = window.BS.mountHedge(el, { delta: 0.64 });
+  const near = (a, b, tol) => Math.abs(a - b) < (tol || 1e-3);
+  if (!near(w.trueDelta, 0.6368, 5e-4)) throw new Error("trueDelta should be N(0.35) ≈ 0.6368, got " + w.trueDelta);
+  if (!near(w.call, 10.4506, 1e-3)) throw new Error("ATM 1y call should be ~10.4506, got " + w.call);
+  const atTrue = w.residualStd(w.trueDelta);
+  const atLow = w.residualStd(0.30);
+  const atHigh = w.residualStd(1.00);
+  if (!(atTrue < atLow)) throw new Error("residualStd at true delta must beat 0.30: " + atTrue + " vs " + atLow);
+  if (!(atTrue < atHigh)) throw new Error("residualStd at true delta must beat 1.00: " + atTrue + " vs " + atHigh);
+  // a coarse scan: the minimum on a 0.05 grid sits at 0.65 (nearest to 0.6368)
+  let bestD = -1, bestSd = 1e9;
+  for (let d = 0; d <= 1.2001; d += 0.05) {
+    const sd = w.residualStd(d);
+    if (sd < bestSd) { bestSd = sd; bestD = d; }
+  }
+  if (Math.abs(bestD - 0.65) > 1e-9) throw new Error("min residualStd on 0.05-grid should be at 0.65, got " + bestD);
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "120"; i.dispatch("input"); });
+});
+
+trap("BS backward numbers: hockey-stick at tau=0, 10.4506 at tau=1, time value >= 0", () => {
+  const el = makeEl("div");
+  const w = window.BS.mountBackward(el, { tau: 1 });
+  const near = (a, b, tol) => Math.abs(a - b) < (tol || 1e-9);
+  if (!near(w.value(0, 100), 0)) throw new Error("payoff ATM is 0, got " + w.value(0, 100));
+  if (!near(w.value(0, 120), 20)) throw new Error("payoff at 120 is 20, got " + w.value(0, 120));
+  if (!near(w.value(1, 100), 10.4506, 1e-3)) throw new Error("one-year ATM call should be ~10.4506, got " + w.value(1, 100));
+  if (!near(w.d1, 0.35, 1e-12)) throw new Error("d1 should be 0.35, got " + w.d1);
+  if (!near(w.d2, 0.15, 1e-12)) throw new Error("d2 should be 0.15, got " + w.d2);
+  // European call with r >= 0 sits above its payoff
+  for (const s of [60, 80, 100, 120, 150]) {
+    for (const tau of [0, 0.25, 0.5, 1]) {
+      if (w.value(tau, s) + 1e-9 < w.payoff(s)) {
+        throw new Error("C(tau,s) must be >= payoff at s=" + s + " tau=" + tau);
+      }
+    }
+  }
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "0"; i.dispatch("input"); i.value = "100"; i.dispatch("input"); });
+});
+
+trap("BS Feynman-Kac numbers: MC dots approach the PDE solution 10.4506", () => {
+  const el = makeEl("div");
+  const w = window.BS.mountFK(el, { n: 80 });
+  const near = (a, b, tol) => Math.abs(a - b) < (tol || 1e-9);
+  if (!near(w.bs, 10.4506, 1e-3)) throw new Error("bs should be ~10.4506, got " + w.bs);
+  if (!near(w.bsAt(100), w.bs, 1e-12)) throw new Error("bsAt(100) must equal bs");
+  if (!near(w.bsAt(120), window.BS._bsCall(120, 100, 0.05, 0.20, 1), 1e-12)) {
+    throw new Error("bsAt(120) must match the closed form");
+  }
+  if (!(Math.abs(w.mcAt(100, 800) - w.bs) < 0.02)) {
+    throw new Error("800-node quadrature at S=100 should be within 0.02 of BS, got " + w.mcAt(100, 800));
+  }
+  // finer strata, smaller gap (deterministic inverse-CDF quadrature)
+  if (!(Math.abs(w.mcAt(100, 800) - w.bs) < Math.abs(w.mcAt(100, 20) - w.bs))) {
+    throw new Error("gap to BS should shrink from n=20 to n=800");
+  }
+  function inputs(node, acc) { (node.children || []).forEach(c => { if (c.tagName === "input") acc.push(c); inputs(c, acc); }); return acc; }
+  inputs(el, []).forEach(i => { i.value = "10"; i.dispatch("input"); i.value = "800"; i.dispatch("input"); });
 });
 
 console.log(ok ? "\nALL WIDGETS OK" : "\nSMOKE FAILED");

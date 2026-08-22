@@ -79,3 +79,13 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Black–Scholes formula (N(d₁), N(d₂)) | — | — | 015 |
 | Martingale representation theorem | — | — | 015 |
 | FTAP 1 / FTAP 2 (existence / uniqueness of Q) | — | — | 015 |
+| Price surface V(t, s) | — | — | 016 |
+| Delta / gamma / theta (PDE slopes) | — | — | 016 |
+| Delta-hedged book Π = V − V_s S | — | — | 016 |
+| Black–Scholes PDE | — | — | 016 |
+| Terminal condition | — | — | 016 |
+| Feynman–Kac theorem | — | — | 016 |
+| PDE residual (unit test) | — | — | 016 |
+| Heat equation (as transformed BS) | — | — | 016 |
+| European put | — | — | 016 |
+| Put-call parity | — | — | 016 |
