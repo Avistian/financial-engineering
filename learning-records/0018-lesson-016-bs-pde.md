@@ -39,8 +39,12 @@ no-arbitrage force the leftover to earn `r`, so the chain is:
 
 Pacing devices per the 2026-08-13 standing decision: **`.plain` notes and `.numplay`
 boxes** on every load-bearing equation; every derivation in the slow lane with each
-step's licence stated. 015 was marked done without a length complaint, so 016 shipped
-as one unit rather than a split.
+step's licence stated. The first 016 draft was too short; the learner pointed at
+Lessons 013–015 as the detail template. The rewrite adds an hour map, the hedge
+algebra with every cancellation written out (014-style), a four-step Feynman–Kac
+proof (ride the surface → PDE kills the sure pile → martingale), the heat-equation
+clock-flip with the four-term budget, and a put as worked example 2 (same PDE,
+parity as the sanity check).
 
 ## Failure-mode-first
 Six traps: `μ` in the PDE; dropping `½σ²S²V_ss` (ordinary calculus, residual

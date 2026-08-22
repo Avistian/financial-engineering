@@ -87,3 +87,5 @@ when you've forgotten it. This is a mastery ledger, not a lecture — newest at 
 | Feynman–Kac theorem | — | — | 016 |
 | PDE residual (unit test) | — | — | 016 |
 | Heat equation (as transformed BS) | — | — | 016 |
+| European put | — | — | 016 |
+| Put-call parity | — | — | 016 |

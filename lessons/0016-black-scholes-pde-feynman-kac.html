@@ -32,7 +32,7 @@
 <article>
   <p class="mission-tag">Mission · Quant Researcher · Year 1 · Q2</p>
   <h1>The Black–Scholes PDE &amp; Feynman–Kac</h1>
-  <p class="subtitle">Lesson 016 · Why a differential equation and an average are the same price · ~65 min</p>
+  <p class="subtitle">Lesson 016 · Why a differential equation and an average are the same price · ~90 min</p>
 
   <h2>Warm up</h2>
   <div id="warmup"></div>
@@ -44,78 +44,214 @@
     <span style="background:var(--bg-soft);border-left:3px solid var(--accent);padding:0 .3em">In&nbsp;plain&nbsp;words</span>
     note that restates it as one sentence, and a
     <span style="background:#fbf7ec;padding:0 .2em;border-radius:3px">with-real-numbers</span> box that
-    plugs in actual numbers. Everything is built from things you already own: Itô's lemma
-    (<a href="0013-ito-lemma.html">013</a>), the solved stock SDE
-    (<a href="0014-sdes.html">014</a>), and the risk-neutral price
-    (<a href="0015-risk-neutral-pricing-girsanov.html">015</a>). The only genuinely new object is a
-    <em>partial differential equation</em> — a local balance rule — that turns out to be yesterday's
-    average in a different costume.
+    plugs in actual numbers. Nothing here needs a markets job or a finance degree. If a word has a
+    special money-sense (<em>book</em>, <em>hedge</em>, <em>short</em>, <em>option</em>), it is
+    defined in the same breath it appears. We re-state the pieces of Lessons
+    <a href="0013-ito-lemma.html">013</a>–<a href="0015-risk-neutral-pricing-girsanov.html">015</a>
+    before we use them, so a rusty memory is not a blocker.
   </div>
 
   <p>
-    Yesterday you learned that a derivative's price is not a forecast. It is the
-    <strong>cost of a hedging recipe</strong>, and that cost can be rewritten as one average under a
-    special set of weights <code>Q</code>:
+    Here is the honest map for the hour — the same shape as Lessons
+    <a href="0013-ito-lemma.html">013</a>–<a href="0015-risk-neutral-pricing-girsanov.html">015</a>,
+    just a new object. First we re-state, from scratch, the ticket we are still pricing and
+    the <code>10.45</code> Lesson 015 already found. Then we ask for a
+    <em>second</em> description of that same number: a local balance rule, a
+    <strong>partial differential equation</strong>. To get there we (1) picture the price as
+    a hill over time and share-price, (2) re-warm Itô so we know how the hill moves,
+    (3) cancel the random shove by selling the matching number of shares, and
+    (4) demand that the leftover sure trickle earn only the bank rate. Out falls the
+    <strong>Black–Scholes PDE</strong>. We then prove — slowly, every cancellation written
+    out — that this local rule plus the ticket's final payout <em>is</em> yesterday's
+    average. That dictionary is <strong>Feynman–Kac</strong>. We finish by seeing why the
+    closed form you already own must solve the PDE, why a heat-equation change of variables
+    is the reason <code>N(d<sub>1</sub>)</code> appears, and what the PDE cannot do.
+  </p>
+
+  <h2>The ticket we are still pricing</h2>
+  <p>
+    Keep the same concrete object as Lesson 015, restated from scratch because the words are easy
+    to lose. A company share trades at <code>S = 100</code> dollars today. You are looking at a
+    <strong>ticket</strong> that says: on a fixed future date one year from now, you may
+    <em>buy</em> one share for a fixed price of <code>100</code> — and you may tear the ticket up
+    if you do not want to. If the share is then at 130, you use the ticket, pay 100, and pocket
+    30. If the share is at 80, you walk away and the ticket is worth nothing. So on the final
+    date the ticket pays
+  </p>
+  <div class="formula">(S<sub>T</sub> − 100)<sup>+</sup> &nbsp;=&nbsp; whichever is larger: S<sub>T</sub> − 100, or 0</div>
+  <div class="plain">
+    <span class="tag">In plain words</span>
+    Final payout = leftover of (share price minus 100), but never a negative number. You cannot
+    be forced to buy a cheap share at an expensive fixed price.
+  </div>
+  <p>
+    People who trade these tickets call this a <strong>European call option</strong>. Each word
+    is ordinary English used in a special way, so here they are, one at a time:
+  </p>
+  <ul>
+    <li><strong>Option</strong> — everyday: a choice. Here: a contract that gives you a choice
+      (use the ticket, or tear it up). It is <em>not</em> "a stock" and not "a preference."</li>
+    <li><strong>Call</strong> — everyday: a phone call. Here: a ticket that lets you
+      <em>buy</em>. The opposite ticket, a <em>put</em>, lets you sell. We will stay with the
+      call.</li>
+    <li><strong>European</strong> — everyday: from Europe. Here: you may use the ticket
+      <em>only on the final date</em>, not earlier. (An "American" ticket can be used any day
+      up to the final date. We are not pricing those today.)</li>
+    <li><strong>Strike <code>K</code></strong> — the fixed buy-price written on the ticket.
+      Ours is <code>K = 100</code>, the same as today's share price. Traders say
+      <strong>at the money</strong> for that coincidence; it just means "the ticket starts
+      neither already winning nor already losing."</li>
+  </ul>
+  <p>
+    Two background numbers sit next to the share. Cash in the bank grows at a sure rate
+    <code>r = 5%</code> per year (continuously compounded — a dollar today becomes
+    <code>e<sup>0.05</sup> ≈ 1.051</code> in a year). The share wobbles with
+    <strong>volatility</strong> <code>σ = 20%</code> per year: the size of the random shove,
+    from Lesson <a href="0014-sdes.html">014</a>. The share's <em>real-world</em> expected
+    growth, <code>μ = 15%</code>, we will meet and then watch disappear.
+  </p>
+  <p>
+    Lesson 015 already priced this ticket at <strong><code>10.4506</code></strong> dollars.
+    That number is our north star. Everything today must land on it.
+  </p>
+
+  <h2>Yesterday's answer, said slowly</h2>
+  <p>
+    Lesson 015's punchline: the <code>10.45</code> is <em>not</em> "what you expect the ticket
+    to pay, shrunk back to today." That guess uses your personal forecast of the share, and
+    different people have different forecasts, yet the ticket has one price. The price is the
+    <strong>cost of a recipe</strong> that manufactures the ticket's payout out of shares and
+    cash. That recipe is called a <strong>hedge</strong> — everyday: a garden hedge, a
+    barrier. Here: an offsetting position that <em>cancels</em> the ticket's risk, the way a
+    hedge blocks the wind. Once the risk is gone, no-arbitrage (no free money) pins the cost.
+  </p>
+  <p>
+    The surprise of 015 is that this cost can be rewritten as an average after all — provided
+    you use a special set of weights, not your forecast. Those weights are the
+    <strong>risk-neutral</strong> ones, written <code>Q</code>. Under them the share is
+    pretended to grow only at the cash rate <code>r</code>, and the ticket's price is
   </p>
   <div class="formula">V<sub>t</sub> = E<sub>Q</sub>[ e<sup>−r(T−t)</sup> V<sub>T</sub> | ℱ<sub>t</sub> ]</div>
   <div class="plain">
     <span class="tag">In plain words</span>
-    Today's price equals "average the ticket's final payout, shrink that average back to today at the
-    cash rate <code>r</code>, using the risk-neutral weights from Lesson 015." The real-world drift
+    Today's price <code>V<sub>t</sub></code> = average, under the special weights
+    <code>Q</code>, of (the ticket's final payout, shrunk back to today at the bank rate
+    <code>r</code>), given what we know at time <code>t</code>. The shrink-factor
+    <code>e<sup>−r(T−t)</sup></code> is "a dollar on date <code>T</code> is worth less
+    today, because cash in the bank would have grown." The real-world growth
     <code>μ</code> is not in the formula.
   </div>
+  <div class="numplay">
+    <strong>With real numbers.</strong> For our ticket, <code>t = 0</code>,
+    <code>T = 1</code>, <code>r = 0.05</code>, so the shrink-factor is
+    <code>e<sup>−0.05</sup> ≈ 0.951</code>. One possible ending: the share finishes at 130,
+    the ticket pays 30, and that 30 is worth <code>0.951 × 30 ≈ 28.5</code> today. Another
+    ending: the share finishes at 80, the ticket pays 0, worth 0 today. Average those
+    (and every other ending) with the <code>Q</code>-weights — <em>not</em> with "I think
+    the share will rise" weights — and you get <code>10.45</code>.
+  </div>
   <p>
-    That is one description of the price: a <em>global</em> one. It looks at every possible future,
-    averages, and discounts. Today we derive the <em>same number</em> a second, independent way: as
-    the solution of a <strong>partial differential equation</strong> (PDE). Plain picture: a PDE is a
-    local rule that says "at this stock price and this moment, these slopes of the price surface must
-    add to zero." No futures are averaged. You only look at a tiny neighbourhood of
-    <em>here and now</em>.
+    That is one description of the price: a <em>global</em> one. It looks at every possible
+    future, averages, and shrinks. Today we derive the <em>same</em> <code>10.45</code> a
+    second, independent way.
+  </p>
+
+  <h2>Why a second picture: weather map vs weather equation</h2>
+  <p>
+    Picture two ways to know tomorrow's temperature in a room. Way A: you have a giant list
+    of possible weather histories, you average them, and you read off a number. Way B: you
+    have a local rule that says "at this spot in the room, right now, the way temperature
+    slants in space and the way it changes in time must balance, because heat cannot appear
+    from nowhere." Both ways, done honestly, give the same temperature. They are not two
+    guesses. They are one fact, written twice.
   </p>
   <p>
-    Why bother with a second route to a number you already have? Three reasons, and they are the
-    hour's map. First, the PDE is the hedge <em>in motion</em>: you will watch the random shove
-    <code>dW</code> cancel when you hold the right number of shares, and then watch no-arbitrage
-    force the leftover to earn only the cash rate <code>r</code>. That is Lesson 015's "a price is a
-    hedging cost," now written as a differential equation. Second,
-    <strong>Feynman–Kac</strong> — named for Richard Feynman and Mark Kac — is the dictionary that
-    says the PDE and yesterday's expectation are not two approximations of each other; they are
-    <em>the same object</em>. Third, when there is no closed-form formula (most contracts), desks
-    solve the PDE on a grid. The Black–Scholes formula you already evaluated at
-    <code>10.45</code> is just the one case where the grid has an exact answer.
+    The list-of-histories is Lesson 015's average. The local balance rule is today's
+    object: a <strong>partial differential equation</strong>, or <strong>PDE</strong>.
+    "Differential equation" means a rule about how something <em>changes</em>. "Partial"
+    means the something depends on more than one input — here, on time <em>and</em> on the
+    share price — so the rule talks about several different slants at once. Contrast that
+    with an ordinary (one-input) equation you already know: cash in the bank,
+    <code>dx = r x\,dt</code>, depends only on time.
   </p>
   <p>
-    The contract is the same European call as yesterday: a ticket that lets you buy one share at
-    strike <code>K</code> on date <code>T</code>, worth <code>(S<sub>T</sub> − K)<sup>+</sup></code>
-    at the end. The market numbers stay the same too, so every check can be compared to a number
-    you already trust: <code>S<sub>0</sub> = K = 100</code>, <code>r = 5%</code>,
-    <code>σ = 20%</code>, <code>T = 1</code>, price <code>10.4506</code>.
+    Why bother, if we already have the average? Three reasons, and they are the hour's map.
   </p>
+  <ul>
+    <li><strong>You will <em>see</em> the hedge work.</strong> The average hides the
+      recipe. The PDE is the recipe written as "cancel the random shove, then the leftover
+      must earn the bank rate." That is Lesson 015's "a price is a hedging cost," now in
+      motion.</li>
+    <li><strong>The two pictures are the same object.</strong> A theorem named
+      <strong>Feynman–Kac</strong> (Richard Feynman and Mark Kac) is the dictionary:
+      this local rule plus the ticket's final payout <em>is</em> yesterday's average.
+      Not approximately. Exactly.</li>
+    <li><strong>Most tickets have no formula.</strong> Barriers, averages-of-the-path,
+      anything messy. Then you either simulate the average or solve the local rule on a
+      grid. The Black–Scholes formula that gave us <code>10.45</code> is the rare case
+      where the grid has an exact answer.</li>
+  </ul>
 
   <h2>Predict before you read on</h2>
   <p>
-    Before the algebra, commit to a picture. You own one call. You short some number
-    <code>Δ</code> of shares against it, and you park the leftover cash in the bank. The
-    Black–Scholes recipe will ask for about <code>0.64</code> shares. Suppose instead you short
-    only <code>0.30</code>.
+    Before the algebra, commit to a picture. You own the ticket. Against it you
+    <strong>sell some shares you do not own</strong> — you borrow them, sell them, and promise
+    to give them back later. That is all <strong>shorting</strong> means here: sell now, buy
+    back later. (Everyday "short" = not enough. Finance "short" = you have sold something
+    borrowed.) The number of borrowed shares is written <code>Δ</code> (just a count; it can
+    be a fraction). The recipe we will derive asks for about <code>0.64</code> shares. Suppose
+    instead you borrow and sell only <code>0.30</code>.
   </p>
   <div id="predict1"></div>
 
-  <h2>Re-warm: Itô on a function of time and the stock</h2>
+  <h2>The price as a hill</h2>
   <p>
-    Lesson <a href="0013-ito-lemma.html">013</a> gave you a rule for how a smooth function of a
-    random quantity changes. We need that rule with one extra input: the function is allowed to
-    depend on <em>calendar time</em> as well as on the stock. Think of the option's value as a
-    surface <code>V(t, s)</code> sitting over the <code>(time, stock price)</code> plane — a hill
-    whose height at each point is "what the ticket is worth if the clock says <code>t</code> and
-    the share is at <code>s</code>." As the clock ticks and the share wobbles, you slide around on
-    that hill. Itô tells you the slide.
+    The ticket's value depends on two things you can see right now: <em>what time it is</em>,
+    and <em>where the share is</em>. Write that as a function of two inputs:
+    <code>V(t, s)</code> — "if the clock says <code>t</code> and the share is at
+    <code>s</code> dollars, the ticket is worth this many dollars." Picture a hill sitting
+    over the <code>(time, share price)</code> plane. Height = ticket value. As the clock
+    ticks and the share wobbles, you slide around on that hill. Today's job is to find the
+    shape of the hill.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers — three points on the hill.</strong> Same ticket, three
+    different "now"s, all computed from the formula you already own:
+    <table>
+      <thead><tr><th>Clock</th><th>Share price</th><th>Ticket value V</th></tr></thead>
+      <tbody>
+        <tr><td>one year left</td><td class="num">80</td><td class="num">1.09</td></tr>
+        <tr><td>one year left</td><td class="num">100</td><td class="num">10.45</td></tr>
+        <tr><td>one year left</td><td class="num">120</td><td class="num">24.51</td></tr>
+        <tr><td>the final date</td><td class="num">80</td><td class="num">0</td></tr>
+        <tr><td>the final date</td><td class="num">100</td><td class="num">0</td></tr>
+        <tr><td>the final date</td><td class="num">120</td><td class="num">20</td></tr>
+      </tbody>
+    </table>
+    On the final date the hill <em>is</em> the kinked payout (0, 0, 20). A year earlier it
+    is a smooth bump sitting above that kink. The extra height is "time value": the chance
+    the kink still goes your way. We are looking for a rule that forces the hill to have
+    exactly this shape, and no other.
+  </div>
+
+  <h2>Re-warm: how a hill changes (ordinary calculus, then Itô)</h2>
+  <p>
+    If the share moved smoothly — no random kick — you would already know how the height
+    changes. Freeze the share and advance the clock a tiny bit <code>dt</code>: the height
+    changes by <code>V<sub>t</sub> · dt</code>, where <code>V<sub>t</sub></code> is the
+    <strong>time slope</strong> ("how fast the hill drops if only the clock moves"). Freeze
+    the clock and nudge the share by <code>ds</code>: the height changes by
+    <code>V<sub>s</sub> · ds</code>, where <code>V<sub>s</sub></code> is the
+    <strong>space slope</strong> ("how fast the hill rises if only the share moves"). Add
+    them: <code>dV = V<sub>t</sub> dt + V<sub>s</sub> ds</code>. That is ordinary calculus
+    for a function of two inputs, and it is <em>wrong</em> for our share, because the share
+    is jiggled by Brownian motion.
   </p>
   <p>
-    Recall the pieces, slowly. If a quantity <code>X</code> moves by
-    <code>dX = a\,dt + b\,dW</code> — a steady shove of size <code>a</code> per unit time, plus a
-    random shove of size <code>b</code> — and <code>f(t, x)</code> is a smooth function of time and
-    of <code>X</code>, then
+    Lesson <a href="0013-ito-lemma.html">013</a> told you what to add. When a quantity
+    <code>X</code> moves by <code>dX = a\,dt + b\,dW</code> — a steady shove of size
+    <code>a</code> per unit time, plus a random shove of size <code>b</code> — a smooth
+    function <code>f(t, x)</code> of time and of <code>X</code> changes by
   </p>
   <div class="formula">
     df = (f<sub>t</sub> + a f<sub>x</sub> + ½ b² f<sub>xx</sub>) dt + b f<sub>x</sub> dW
@@ -128,25 +264,35 @@
     013: ordinary calculus would have dropped it.
   </div>
   <p>
-    Three new marks on that formula, because we will live in them for the rest of the hour:
+    Three marks on that formula. Everyday names first; the trader nicknames come after, and
+    you do not need them to follow the argument.
   </p>
   <ul>
-    <li><code>f<sub>t</sub></code> is the <strong>time slope</strong> — how the surface height
-      changes if you freeze the stock and only advance the clock. For an option this is usually
-      negative: a call with less time left is worth less, all else equal. Traders call
-      <code>V<sub>t</sub></code> the option's <strong>theta</strong>.</li>
-    <li><code>f<sub>x</sub></code> is the <strong>space slope</strong> — how the height changes if
-      you freeze the clock and nudge the stock. For the call this is the hedge ratio from Lesson
-      015, now written <code>V<sub>s</sub></code>. Traders call it <strong>delta</strong>.</li>
-    <li><code>f<sub>xx</sub></code> is the <strong>curvature</strong> — how the slope itself
-      changes as the stock moves. For the call it is positive (the hockey-stick bends up). Traders
-      call <code>V<sub>ss</sub></code> <strong>gamma</strong>.</li>
+    <li><code>f<sub>t</sub></code> is the <strong>time slope</strong> — how the hill's height
+      changes if you freeze the share and only advance the clock. For our ticket this is
+      usually negative: less time left means less chance the kink goes your way, so the
+      ticket is worth less. Traders nickname <code>V<sub>t</sub></code>
+      <strong>theta</strong>. We will just say time slope.</li>
+    <li><code>f<sub>x</sub></code> (for us, <code>V<sub>s</sub></code>) is the
+      <strong>space slope</strong> — how the height changes if you freeze the clock and nudge
+      the share by one dollar. If the share goes up one dollar and the ticket goes up 64
+      cents, the space slope is 0.64. That 0.64 is also "how many shares move like one
+      ticket," which is why it will be the number we borrow and sell. Traders nickname it
+      <strong>delta</strong>.</li>
+    <li><code>f<sub>xx</sub></code> (for us, <code>V<sub>ss</sub></code>) is the
+      <strong>curvature</strong> — how the space slope itself changes when the share moves.
+      For the call it is positive: the kinked payout bends up, like a smile. A tiny extra
+      bit of share-move is worth more when you are already a little in the winning region.
+      Traders nickname it <strong>gamma</strong>.</li>
   </ul>
   <p>
-    Now put the stock underneath. Lesson 015 already moved us to the pricing world
-    <code>Q</code>, where the share earns the cash rate:
-    <code>dS = r S\,dt + σ S\,dW̃</code>. So the steady shove is <code>a = rS</code> and the
-    random-shove size is <code>b = σS</code>. Plug those into Itô with
+    Now put the share underneath the hill. Lesson 015 already moved us to the pricing world
+    <code>Q</code> — same possible endings, different weights — where the share is treated as
+    if it grew only at the bank rate:
+    <code>dS = r S\,dt + σ S\,dW̃</code>. Read that as: over a tiny step, the share gets a
+    sure shove of size <code>r S</code> (5% of 100 is 5 dollars per year) and a random shove
+    of size <code>σ S</code> (20% of 100 is 20 dollars per square-root-year). So the two
+    Itô ingredients are <code>a = rS</code> and <code>b = σS</code>. Plug those in with
     <code>f = V(t, S)</code>:
   </p>
   <div class="formula">
@@ -186,12 +332,25 @@
     That copy-count is what lets us cancel the noise.
   </p>
 
-  <h2>Kill the noise: the delta-hedged book</h2>
+  <h2>Kill the noise: hold the ticket, sell the matching shares</h2>
   <p>
-    Here is the same idea as Lesson 015's replicating portfolio, now in continuous time. Hold
-    <strong>one option</strong> and <strong>short <code>Δ</code> shares</strong>. The combination
-    is a tiny book — "book" here means the bundle of positions you hold right now, not a
-    notebook — whose value is
+    Here is Lesson 015's recipe, now in continuous time, said without assuming you remember
+    the two-state algebra. You hold one ticket. The ticket's random shove is
+    <code>σ S V<sub>s</sub> dW̃</code> — "space slope times the share's own random shove."
+    The share's random shove is <code>σ S dW̃</code>. So if you hold
+    <code>V<sub>s</sub></code> shares, those two random pieces are the same size. If you
+    <em>sell</em> that many shares (the short), the two random pieces point opposite ways
+    and cancel.
+  </p>
+  <p>
+    Everyday picture: you own a boat that rocks with the waves. You also rent a second boat
+    of a well-chosen size and point it the other way. The waves lift one and drop the other;
+    the pair sits still. The well-chosen size is the space slope.
+  </p>
+  <p>
+    The pair — one ticket plus the sold shares — is a tiny
+    <strong>book</strong>. Everyday: a notebook. Here: the bundle of positions you hold
+    right now. Its value is
   </p>
   <div class="formula">Π = V − Δ · S</div>
   <div class="plain">
@@ -202,30 +361,52 @@
     <code>10.45 − 64 = −53.55</code> (you have borrowed, in effect).
   </div>
   <p>
-    Over a tiny step the book changes by <code>dΠ = dV − Δ\,dS</code>. (We treat
-    <code>Δ</code> as frozen for the step and then rebalance — the continuous-time version of
-    "the recipe is self-financing." Lesson 017 will measure what happens when you rebalance only
-    once a day.) Substitute <code>dV</code> and <code>dS</code>:
+    Over a tiny step the bundle changes by <code>dΠ = dV − Δ\,dS</code>: the ticket moves, and
+    you subtract the move of the shares you sold. We treat <code>Δ</code> as frozen for the
+    step and then adjust it (rebalance). That "adjust as you go, without injecting extra
+    cash" is what textbooks call <strong>self-financing</strong> — you are not topping up
+    the recipe from your pocket at each step; sales of one piece pay for the other. Lesson
+    017 will measure what happens when you rebalance only once a day instead of every
+    instant. Now substitute, the same slow-lane style as Lesson
+    <a href="0014-sdes.html">014</a>'s OU cancel: write every term, then watch two pairs
+    vanish.
   </p>
   <div class="step">
-    <strong>Step 1 — write both moves.</strong>
-    <code>dV = (V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub>) dt + σ S V<sub>s</sub> dW̃</code>
-    and <code>dS = r S\,dt + σ S\,dW̃</code>.
+    <strong>Step 1 — write both moves, in full.</strong>
+    From Itô:
+    <code>dV = (V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub>) dt + σ S V<sub>s</sub> dW̃</code>.
+    From the stock:
+    <code>dS = r S\,dt + σ S\,dW̃</code>.
   </div>
   <div class="step">
-    <strong>Step 2 — subtract Δ copies of the stock.</strong>
-    <code>dΠ = dV − Δ\,dS</code> has a <code>dt</code> pile and a <code>dW̃</code> pile. The
-    random pile is <code>σ S V<sub>s</sub> − Δ · σ S</code>.
+    <strong>Step 2 — write Δ copies of the stock, in full.</strong>
+    <code>Δ\,dS = Δ·r S\,dt + Δ·σ S\,dW̃</code>.
+    Two piles: a sure piece of size <code>Δ·r S</code> per year, and a random piece of
+    size <code>Δ·σ S</code>.
   </div>
   <div class="step">
-    <strong>Step 3 — choose Δ to kill the random pile.</strong>
-    Set <code>Δ = V<sub>s</sub></code>, the space slope. Then
-    <code>σ S V<sub>s</sub> − V<sub>s</sub> · σ S = 0</code>. The <code>dW̃</code> is gone.
+    <strong>Step 3 — subtract, still with Δ unnamed.</strong>
+    <code>dΠ = dV − Δ\,dS</code> is, collecting like with like,
+    <code>[V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − Δ·r S] dt
+    + [σ S V<sub>s</sub> − Δ·σ S] dW̃</code>.
+    Legal because subtraction just lines the two <code>dt</code> piles up and the two
+    <code>dW̃</code> piles up. No assumption used.
   </div>
   <div class="step">
-    <strong>Step 4 — read what is left.</strong>
-    The <code>r S V<sub>s</sub></code> inside <code>dV</code> is cancelled by the
-    <code>Δ · r S</code> coming from the short stock, too. What remains is only
+    <strong>Step 4 — choose Δ to kill the random pile.</strong>
+    The coefficient of <code>dW̃</code> is <code>σ S (V<sub>s</sub> − Δ)</code>. Set
+    <code>Δ = V<sub>s</sub></code>, the space slope. Then
+    <code>V<sub>s</sub> − Δ = 0</code>, so the whole <code>dW̃</code> pile is
+    <code>0</code>. The random kick is gone.
+  </div>
+  <div class="step">
+    <strong>Step 5 — watch the matching sure terms cancel too.</strong>
+    With that same <code>Δ = V<sub>s</sub></code>, the <code>dt</code> pile is
+    <code>V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − V<sub>s</sub>·r S</code>.
+    The middle two pieces are <code>+ r S V<sub>s</sub></code> and
+    <code>− r S V<sub>s</sub></code> — they cancel exactly, the same way
+    <code>+θ e<sup>θt</sup>X</code> cancelled <code>−θ e<sup>θt</sup>X</code> in Lesson
+    014. What remains is only
   </div>
   <div class="formula">dΠ = (V<sub>t</sub> + ½ σ² S² V<sub>ss</sub>) dt</div>
   <div class="plain">
@@ -264,28 +445,55 @@
     the stock's. What remains is a riskless trickle.
   </p>
 
-  <h2>No free lunch: the leftover must earn r</h2>
+  <h2>No free lunch: a sure leftover must earn the bank rate</h2>
   <p>
-    A riskless book cannot earn more than cash, and it cannot earn less. If it earned more, you
-    would borrow cash and hold the book — free money. If it earned less, you would short the book
-    and hold cash — again free money. Lesson 015 called this <strong>no arbitrage</strong>: a
-    trade costing nothing today that can never lose and might win is not allowed, so any price
-    that permits one is not a price.
+    After the random kick is cancelled, the bundle's next move is a sure trickle. A sure
+    trickle is the same kind of thing as cash in the bank. Cash in the bank grows at
+    <code>r</code>. So the trickle must grow at <code>r</code> too.
   </p>
   <p>
-    Cash grows at <code>r</code>, so a riskless book of value <code>Π</code> must satisfy
-    <code>dΠ = r Π\,dt</code>. That is the whole of "no free lunch" in one line. Substitute what
-    we have:
+    Why "must"? Because otherwise there is free money — what Lesson 015 called
+    <strong>arbitrage</strong>: a trade that costs nothing today, can never lose, and might
+    win. If the riskless bundle earned <em>more</em> than the bank, you would borrow from
+    the bank (pay <code>r</code>) and hold the bundle (earn more than <code>r</code>); the
+    difference is profit with no chance of loss. If the bundle earned <em>less</em> than
+    the bank, you would do the opposite: sell the bundle, put the proceeds in the bank.
+    In a working market those two free lunches cannot sit there, so the only leftover
+    growth that is allowed is exactly <code>r</code>.
+  </p>
+  <div class="numplay">
+    <strong>With real numbers.</strong> Our bundle is worth
+    <code>Π = 10.45 − 0.6368 × 100 = −53.23</code>. The minus sign means you have, in
+    effect, borrowed: you sold 63.68 dollars of share and only spent 10.45 on the ticket,
+    so 53.23 dollars of cash landed in your pocket and must be accounted for. A borrowed
+    53.23, if it were a bank loan, would cost you <code>0.05 × 53.23 ≈ 2.66</code> dollars
+    per year. That 2.66 will reappear in a moment as the leftover drift
+    <code>V<sub>t</sub> + ½ σ² S² V<sub>ss</sub> = −6.414 + 3.752 = −2.662</code>. The two
+    numbers matching is the PDE, seen from the cash side.
+  </div>
+  <p>
+    In symbols: a riskless bundle of value <code>Π</code> must satisfy
+    <code>dΠ = r Π\,dt</code>. That is the whole of "no free lunch" in one line. Substitute
+    what we have:
   </p>
   <div class="step">
-    <strong>Step 5 — write both sides.</strong>
+    <strong>Step 6 — write both sides.</strong>
     Left side, from the hedge: <code>dΠ = (V<sub>t</sub> + ½ σ² S² V<sub>ss</sub>) dt</code>.
     Right side, from no-arbitrage: <code>r Π\,dt = r(V − V<sub>s</sub> S)\,dt</code>.
+    Why the right side looks like that: <code>Π = V − V<sub>s</sub> S</code> is the
+    book's value, and a riskless book of that value, parked at the bank, would earn
+    <code>r</code> times itself per year.
   </div>
   <div class="step">
-    <strong>Step 6 — cancel dt and rearrange.</strong>
-    <code>V<sub>t</sub> + ½ σ² S² V<sub>ss</sub> = r V − r S V<sub>s</sub></code>.
-    Move every term to the left:
+    <strong>Step 7 — cancel dt (legal: it is a common factor, not zero) and expand.</strong>
+    <code>V<sub>t</sub> + ½ σ² S² V<sub>ss</sub> = r(V − V<sub>s</sub> S)
+    = r V − r S V<sub>s</sub></code>.
+    The last equality is just the distributive law.
+  </div>
+  <div class="step">
+    <strong>Step 8 — move every term to the left.</strong>
+    Add <code>r S V<sub>s</sub></code> and subtract <code>r V</code> on both sides
+    (same operation on both sides, so the equality stays true):
   </div>
   <div class="formula">
     V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − r V = 0
@@ -318,21 +526,47 @@
 
   <p>
     Two remarks before we move. First, the <code>−½σ²</code> you have been carrying since Lesson
-    013 is in here, just wearing a different coat. It lived in <code>d(log S)</code> because
-    <code>log</code> curves down. Here the option curves <em>up</em>
-    (<code>V<sub>ss</sub> &gt; 0</code>), so the correction
-    <code>½ σ² S² V<sub>ss</sub></code> is positive — it is the extra drift you earn from
-    being long a convex ticket. Same rule, opposite curvature, opposite sign.
+    013 is in here, just wearing a different coat. Itô always adds
+    "half the curvature times the shove-size squared." For <code>log S</code> the curve
+    bends <em>down</em> (logs flatten as the share grows), so the leftover is a drag:
+    <code>−½σ²</code>. For the ticket the curve bends <em>up</em> (the kinked payout is
+    U-shaped on the winning side), so the leftover
+    <code>½ σ² S² V<sub>ss</sub></code> is a <em>lift</em>. Same rule. Opposite bend.
+    Opposite sign. That is the sign-of-curvature habit this quarter has been building.
   </p>
   <p>
-    Second, there is an equivalent derivation that never mentions a book. Lesson 015 said
-    discounted prices are <code>Q</code>-martingales: the process
-    <code>e<sup>−rt</sup> V(t, S<sub>t</sub>)</code> has no <code>dt</code> term. Apply Itô to
-    that product (it is linear in <code>V</code>, so there is no extra correction on the
-    discount factor itself — Lesson 013's "linear ⇒ no correction") and set the
-    <code>dt</code> coefficient to zero. You get the identical PDE. Hedge-and-no-arbitrage, or
-    "discounted price is a martingale": two sentences for one equation.
+    Second, there is an equivalent derivation that never mentions a bundle. Lesson 015 said
+    a fairly priced ticket, after you shrink it back to today, is a
+    <strong>martingale</strong> under <code>Q</code> — a fair game, no built-in drift. In
+    symbols the shrunk ticket <code>e<sup>−rt</sup> V(t, S<sub>t</sub>)</code> has no
+    <code>dt</code> term. We can check that slowly.
   </p>
+  <div class="step">
+    <strong>Martingale route, step A.</strong> Let
+    <code>Ṽ = e<sup>−rt</sup> V</code>. This is "the ticket's value, quoted in today's
+    dollars." The shrink-factor <code>e<sup>−rt</sup></code> is a smooth function of time
+    only. Its own move is <code>d(e<sup>−rt</sup>) = −r e<sup>−rt</sup> dt</code> — ordinary
+    calculus, no random kick.
+  </div>
+  <div class="step">
+    <strong>Martingale route, step B.</strong> The product rule, plus Itô: because
+    <code>e<sup>−rt</sup></code> has no <code>dW</code>, there is no extra curvature
+    leftover on the product (Lesson 013: a straight line in <code>V</code> has zero
+    curvature). You get
+    <code>dṼ = −r e<sup>−rt</sup> V dt + e<sup>−rt</sup> dV</code>.
+  </div>
+  <div class="step">
+    <strong>Martingale route, step C.</strong> Substitute the <code>dV</code> we already
+    have. The <code>dt</code> pile of <code>dṼ</code> is
+    <code>e<sup>−rt</sup>(V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − r V)</code>.
+    A fair game has no <code>dt</code> pile, so the thing in parentheses is zero. That
+    is the same PDE.
+  </div>
+  <div class="plain">
+    <span class="tag">In plain words</span>
+    "Hedge, then demand the leftover earn the bank rate" and "the shrunk ticket is a fair
+    game" are two sentences for one equation. Use whichever picture sticks.
+  </div>
   <p class="takeaway">
     Takeaway: a cancelled random piece plus no free lunch is a differential equation. That
     equation is the Black–Scholes PDE.
@@ -346,13 +580,30 @@
     start the derivation in the <em>real</em> world instead of under <code>Q</code>.
   </p>
   <p>
-    Under <code>P</code> the stock is <code>dS = μ S\,dt + σ S\,dW</code>. Itô on the option
-    then carries <code>μ S V<sub>s</sub></code> in its <code>dt</code> pile, and the short
-    stock contributes <code>− Δ · μ S</code>. Choose <code>Δ = V<sub>s</sub></code> and those
-    two <code>μ</code> terms cancel, exactly. What is left is
-    <code>dΠ = (V<sub>t</sub> + ½ σ² S² V<sub>ss</sub>) dt</code> — no <code>μ</code> — and
-    no-arbitrage still says this equals <code>r Π\,dt</code>. Same PDE.
+    Under <code>P</code> the stock is <code>dS = μ S\,dt + σ S\,dW</code>. Same slow lane
+    as Steps 1–5, only the letter on the sure shove changes.
   </p>
+  <div class="step">
+    <strong>P-world, write both moves.</strong>
+    Itô on the option now carries the real-world drift:
+    <code>dV = (V<sub>t</sub> + μ S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub>) dt + σ S V<sub>s</sub> dW</code>.
+    The stock is <code>dS = μ S\,dt + σ S\,dW</code>.
+  </div>
+  <div class="step">
+    <strong>P-world, subtract Δ copies.</strong>
+    <code>dΠ = [V<sub>t</sub> + μ S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − Δ·μ S] dt
+    + [σ S V<sub>s</sub> − Δ·σ S] dW</code>.
+  </div>
+  <div class="step">
+    <strong>P-world, the same Δ kills both extras.</strong>
+    Set <code>Δ = V<sub>s</sub></code>. The random pile dies as before. The sure pile
+    loses <code>+ μ S V<sub>s</sub></code> against <code>− V<sub>s</sub>·μ S</code> —
+    they cancel exactly. What is left is
+    <code>dΠ = (V<sub>t</sub> + ½ σ² S² V<sub>ss</sub>) dt</code> — <em>no
+    <code>μ</code></em>. No-arbitrage still says this equals <code>r Π\,dt</code>,
+    because a riskless leftover can earn only the bank rate, not the stock's hoped-for
+    extra. Same PDE.
+  </div>
   <div class="plain">
     <span class="tag">In plain words</span>
     Whatever extra return the stock is expected to earn, the option is expected to earn the
@@ -396,11 +647,16 @@
     <li><strong>If the share is worthless,</strong> <code>s = 0</code>, it stays worthless
       (GBM at zero stays at zero). A call on a worthless share is worthless:
       <code>V(t, 0) = 0</code>.</li>
-    <li><strong>If the share is extremely expensive,</strong> the call is almost a forward —
-      you will certainly exercise — so
-      <code>V(t, s) ≈ s − K e<sup>−r(T−t)</sup></code>, the share minus the discounted strike.
-      (You do not pay <code>K</code> until date <code>T</code>, so you only subtract the
-      present value of <code>K</code>.)</li>
+    <li><strong>If the share is extremely expensive,</strong> you will certainly use the
+      ticket (traders say <em>exercise</em> — everyday: go to the gym; here: take the
+      choice the ticket offers). Then the ticket is almost a promise to buy the share
+      later at <code>K</code>. A promise to pay <code>K</code> on date <code>T</code> is
+      worth only <code>K e<sup>−r(T−t)</sup></code> today, because that is what you would
+      need in the bank now to have <code>K</code> later. So
+      <code>V(t, s) ≈ s − K e<sup>−r(T−t)</sup></code>, the share minus the
+      already-shrunk strike. A contract that just swaps a share for cash later is called
+      a <strong>forward</strong>; the expensive-share edge says "the ticket has become a
+      forward."</li>
   </ul>
   <p>
     Together, the PDE plus the finish line plus the two edges pick out exactly one surface
@@ -435,13 +691,30 @@
     Together they pick out one price at every <code>(t, s)</code>.
   </p>
 
-  <h2>Feynman–Kac: a differential equation is an average</h2>
+  <h2>Feynman–Kac: two recipes, one cake</h2>
   <p>
-    You now have two descriptions of the same surface. Description A, from Lesson 015: at
-    each <code>(t, s)</code>, <code>V</code> is a discounted risk-neutral average of the
-    finish-line payoff. Description B, from this lesson: <code>V</code> solves a PDE with
-    that payoff as its terminal condition. <strong>Feynman–Kac</strong> is the theorem that
-    these are not two close answers. They are one answer, written twice.
+    Everyday picture first, then the name. You have two recipes that claim to bake the same
+    cake. Recipe A: list every possible future of the share, write down the ticket's payout
+    on that future, shrink it back to today, and average with the special
+    <code>Q</code>-weights. Recipe B: start from the kinked payout on the final date and
+    walk backward, at every step enforcing "these slopes must add to zero."
+    <strong>Feynman–Kac</strong> — named for the physicist Richard Feynman and the
+    mathematician Mark Kac — is the theorem that the two recipes produce the same cake.
+    Not two close cakes. One cake, two recipes.
+  </p>
+  <p>
+    You already watched this happen, without the name, in Lesson 015. The
+    two-state tree said "today's price is the shrunk <code>p*</code>-average of the two
+    children." That is Recipe A on a two-branch world. Rolling the tree back from the
+    final date is Recipe B on the same world. They agreed because they had to. A 2,000-step
+    tree and the formula agreed to a hundredth of a cent for the same reason.
+  </p>
+  <p>
+    You now have two descriptions of the same hill. Description A, from Lesson 015: at
+    each <code>(t, s)</code>, <code>V</code> is a shrunk <code>Q</code>-average of the
+    finish-line payout. Description B, from this lesson: <code>V</code> solves a local
+    balance rule with that payout as its finish line. Feynman–Kac says these are one
+    answer, written twice.
   </p>
   <p>
     The general statement — still in our notation, no extra machinery — is this. Suppose a
@@ -460,17 +733,88 @@
     <code>g(X<sub>T</sub>)</code> starting from <code>X<sub>t</sub> = x</code>.
   </div>
   <p>
-    The conclusion is
+    That "then" is a theorem, not a definition. Here is why it is true, every cancellation
+    written out — the same slow-lane habit as Lesson
+    <a href="0014-sdes.html">014</a>'s integrating factor and Lesson
+    <a href="0015-risk-neutral-pricing-girsanov.html">015</a>'s completing-the-square.
+    The idea: start at time <code>t</code> with <code>X<sub>t</sub> = x</code>, ride
+    along the surface <code>u</code> as <code>X</code> wobbles, shrink the height back
+    to time-<code>t</code> dollars as you go, and watch the predictable leftover vanish
+    because the PDE said it had to.
   </p>
+  <div class="step">
+    <strong>FK, step A — name the riding process.</strong>
+    Fix a starting time <code>t</code> and a starting spot <code>x</code>. For later
+    times <code>s</code> between <code>t</code> and <code>T</code>, write
+    <code>Y<sub>s</sub> = e<sup>−r(s−t)</sup> u(s, X<sub>s</sub>)</code>.
+    Read that as: "the surface's height at the random place <code>X</code> has reached
+    by time <code>s</code>, already shrunk back to time-<code>t</code> money." At the
+    start, <code>s = t</code>, the shrink-factor is <code>e<sup>0</sup> = 1</code> and
+    <code>X<sub>t</sub> = x</code>, so <code>Y<sub>t</sub> = u(t, x)</code> — the number
+    we want. At the finish, <code>s = T</code>, the surface equals the payoff, so
+    <code>Y<sub>T</sub> = e<sup>−r(T−t)</sup> g(X<sub>T</sub>)</code> — the number we
+    average.
+  </div>
+  <div class="step">
+    <strong>FK, step B — Itô on the product.</strong>
+    <code>Y</code> is a product of a sure shrink-factor
+    <code>e<sup>−r(s−t)</sup></code> (a function of time only) and the surface
+    <code>u(s, X<sub>s</sub>)</code>. The shrink-factor moves by ordinary calculus:
+    <code>d(e<sup>−r(s−t)</sup>) = −r e<sup>−r(s−t)</sup> ds</code>, no random kick.
+    Itô on <code>u</code> is the formula we have been using all hour:
+    <code>du = (u<sub>t</sub> + a u<sub>x</sub> + ½ b² u<sub>xx</sub>) ds + b u<sub>x</sub> dW</code>.
+    The product rule, plus Itô: because the shrink-factor has no
+    <code>dW</code>, there is no extra curvature leftover on the product (Lesson
+    <a href="0013-ito-lemma.html">013</a>: a straight line in <code>u</code> has zero
+    second derivative). So
+    <code>dY = −r e<sup>−r(s−t)</sup> u\,ds + e<sup>−r(s−t)</sup> du</code>.
+  </div>
+  <div class="step">
+    <strong>FK, step C — substitute du and collect the sure pile.</strong>
+    The <code>ds</code> coefficient of <code>dY</code> is
+    <code>e<sup>−r(s−t)</sup>(u<sub>t</sub> + a u<sub>x</sub> + ½ b² u<sub>xx</sub> − r u)</code>.
+    Look at the parenthesis: that is exactly the left-hand side of the PDE we assumed
+    <code>u</code> solves. The PDE says it is <code>0</code>. So the sure pile of
+    <code>dY</code> is <code>0</code>. What remains is only a random kick:
+    <code>dY = e<sup>−r(s−t)</sup> b u<sub>x</sub> dW</code>.
+  </div>
+  <div class="step">
+    <strong>FK, step D — a process with no sure pile is a fair game.</strong>
+    Re-warm Lesson <a href="0013-ito-lemma.html">013</a>: any
+    <code>∫ … dW</code> is a <strong>martingale</strong> — a fair game whose best
+    forecast of the next value is the value you have now. So
+    <code>Y<sub>t</sub> = E[Y<sub>T</sub> | X<sub>t</sub> = x]</code>. Substitute
+    the two ends from step A:
+  </div>
   <div class="formula">
     u(t, x) = E[ e<sup>−r(T−t)</sup> g(X<sub>T</sub>) | X<sub>t</sub> = x ]
+  </div>
+  <div class="plain">
+    <span class="tag">In plain words</span>
+    Ride the surface, shrink as you go, and the PDE cancels every predictable leftover.
+    A leftover-free ride is a fair game, so today's height equals the average of the
+    shrunk finish-line payout. That is the whole theorem: the local balance
+    <em>forces</em> the global average.
   </div>
   <p>
     Specialise to Black–Scholes: <code>a = r s</code>, <code>b = σ s</code>,
     <code>g(s) = (s − K)<sup>+</sup></code>, and the expectation is taken under
-    <code>Q</code>. You recover yesterday's pricing formula on the left and today's PDE on
-    the right. Either side can be taken as the definition of the price; the other is then a
-    theorem.
+    <code>Q</code> (because that is the world in which the share's drift is
+    <code>r</code>). You recover yesterday's pricing formula on the left and today's
+    PDE on the right. Either side can be taken as the definition of the price; the
+    other is then a theorem.
+  </p>
+  <p>
+    One compact nickname, now that you have earned it. The combination
+    <code>a ∂<sub>x</sub> + ½ b² ∂<sub>xx</sub></code> — "drift times space slope,
+    plus half diffusion-squared times curvature" — is called the
+    <strong>infinitesimal generator</strong> of the process <code>X</code>, written
+    <code>𝒜</code>. Everyday picture: it is the local recipe that turns a function
+    of the current state into the <em>sure</em> part of how that function is about
+    to move. The PDE is then one short sentence:
+    <code>u<sub>t</sub> + 𝒜u − r u = 0</code>. You do not need the name to use the
+    PDE. You need it because every later process (jumps in 018, random volatility)
+    is described by writing down its generator and dropping it into this same slot.
   </p>
 
   <div class="numplay">
@@ -518,16 +862,57 @@
 
   <h2>The formula you already own solves this PDE</h2>
   <p>
-    We have claimed, twice, that
-    <code>C = S N(d<sub>1</sub>) − K e<sup>−rτ</sup> N(d<sub>2</sub>)</code>
-    satisfies the PDE. The lab will grind the derivatives and check the residual is machine
-    zero on a grid. Here is the honest shorter reason it <em>must</em> work, without grinding.
+    Re-state the formula from Lesson
+    <a href="0015-risk-neutral-pricing-girsanov.html">015</a>, every symbol defined, because
+    we are about to lean on it. A European call — our ticket — is worth
+  </p>
+  <div class="formula">
+    C = S N(d<sub>1</sub>) − K e<sup>−rτ</sup> N(d<sub>2</sub>)
+  </div>
+  <div class="formula">
+    d<sub>1</sub> = [ ln(S/K) + (r + ½σ²)τ ] / (σ√τ),
+    &nbsp;&nbsp; d<sub>2</sub> = d<sub>1</sub> − σ√τ
+  </div>
+  <div class="plain">
+    <span class="tag">In plain words</span>
+    The ticket is worth "the share you might receive, minus the cash you might have to
+    pay" — each counted only in the worlds where you actually use the ticket.
+    <code>τ = T − t</code> is time left. <code>N(·)</code> is the standard-normal
+    cumulative from Lesson <a href="0005-probability-refresher.html">005</a>:
+    <code>N(x)</code> is the chance a bell-curve draw lands below <code>x</code>.
+    <code>N(d<sub>2</sub>)</code> is the risk-neutral chance you use the ticket, so
+    <code>K e<sup>−rτ</sup> N(d<sub>2</sub>)</code> is the already-shrunk strike you
+    expect to pay. <code>S N(d<sub>1</sub>)</code> is the value of the share you
+    expect to receive, weighted a little more heavily than a plain probability
+    because the worlds where you use the ticket are also the worlds where the share
+    is worth more.
+  </div>
+  <div class="numplay">
+    <strong>With real numbers — the same 10.45, written out again.</strong>
+    <code>S = 100</code>, <code>K = 100</code>, <code>r = 0.05</code>,
+    <code>σ = 0.20</code>, <code>τ = 1</code>. Then
+    <code>ln(100/100) = 0</code>, so
+    <code>d<sub>1</sub> = (0 + (0.05 + 0.02)·1) / 0.20 = 0.07 / 0.20 = 0.35</code>
+    and <code>d<sub>2</sub> = 0.35 − 0.20 = 0.15</code>. From the normal table,
+    <code>N(0.35) = 0.6368</code> and <code>N(0.15) = 0.5596</code>, and
+    <code>e<sup>−0.05</sup> = 0.9512</code>. So
+    <code>C = 100 × 0.6368 − 100 × 0.9512 × 0.5596 = 63.68 − 53.23 =
+    <strong>10.45</strong></code>. That <code>0.6368</code> is also today's space
+    slope <code>V<sub>s</sub></code> — the hedge ratio we have been using all hour.
+    Not a coincidence: for a call, <code>V<sub>s</sub> = N(d<sub>1</sub>)</code>.
+  </div>
+  <p>
+    We have claimed, twice, that this formula satisfies the PDE. The lab will grind
+    the derivatives and check the residual is machine-zero on a grid. Here is the
+    honest shorter reason it <em>must</em> work, without grinding.
   </p>
   <p>
-    Lesson 015 derived that formula as one risk-neutral expectation. Feynman–Kac says every
-    such expectation solves the corresponding PDE. Therefore the formula solves the PDE. The
-    chain has no gap: the only thing to check is that we specialise Feynman–Kac to the right
-    <code>a</code>, <code>b</code>, <code>r</code>, and <code>g</code> — and we just did.
+    Lesson 015 derived that formula as one risk-neutral expectation. Feynman–Kac,
+    the four-step argument we just wrote, says every such expectation solves the
+    corresponding PDE. Therefore the formula solves the PDE. The chain has no gap:
+    the only thing to check is that we specialise Feynman–Kac to the right
+    <code>a</code>, <code>b</code>, <code>r</code>, and <code>g</code> — and we
+    just did.
   </p>
   <p>
     What you <em>should</em> be able to do cold is the four-term budget at one point, because
@@ -553,6 +938,59 @@
     <em>which</em> piece is missing.
   </div>
 
+  <h2>Worked example 2: a put, same PDE</h2>
+  <p>
+    Lesson <a href="0013-ito-lemma.html">013</a> drove Itô home on two functions;
+    Lesson <a href="0014-sdes.html">014</a> solved two SDEs. Here is today's second
+    object, so the PDE does not stay glued to one ticket. A
+    <strong>European put</strong> is the opposite ticket: it lets you
+    <em>sell</em> one share at the fixed price <code>K</code> on the final date,
+    and lets you tear it up if you do not want to. If the share finishes at 80
+    and the ticket lets you sell at 100, you use it and pocket 20. If the share
+    finishes at 130, you walk away. Final payout:
+    <code>(K − S<sub>T</sub>)<sup>+</sup></code>.
+  </p>
+  <p>
+    The hedge argument never used the shape of the payout — only that the value
+    is some smooth surface <code>V(t, s)</code> and that the share is
+    <code>dS = r S dt + σ S dW̃</code>. So a put obeys the
+    <em>same</em> PDE. What changes is the finish line:
+    <code>P(T, s) = (K − s)<sup>+</sup></code>. The cheap-share edge is now
+    <code>P(t, 0) ≈ K e<sup>−r(T−t)</sup></code> (a worthless share makes the
+    put a sure cash <code>K</code> later), and the expensive-share edge is
+    <code>P(t, s) → 0</code> (you will not sell an expensive share at
+    <code>K</code>).
+  </p>
+  <div class="numplay">
+    <strong>With real numbers — put-call parity is the sanity check.</strong>
+    Same market: <code>S = K = 100</code>, <code>r = 5%</code>,
+    <code>σ = 20%</code>, one year. The call was <code>10.45</code>. The put,
+    from the same formula with the signs flipped
+    (<code>P = K e<sup>−rτ</sup> N(−d<sub>2</sub>) − S N(−d<sub>1</sub>)</code>),
+    is <code>5.57</code>. Check:
+    <code>call − put = 10.45 − 5.57 = 4.88</code>, and
+    <code>S − K e<sup>−rτ</sup> = 100 − 95.12 = 4.88</code>. That identity —
+    <strong>put-call parity</strong> — says "a call minus a put is a forward":
+    buying the call and selling the put manufactures a promise to buy the share
+    later at <code>K</code>, which is worth the share minus the already-shrunk
+    strike. If a colleague's put pricer returns <code>7</code> against our
+    <code>10.45</code> call, you do not need the PDE: parity is already broken.
+  </div>
+  <p>
+    And because the PDE is linear (every term has exactly one factor of
+    <code>V</code> or a slope of <code>V</code>), the difference
+    <code>C − P</code> itself solves the PDE, with finish line
+    <code>(s − K)<sup>+</sup> − (K − s)<sup>+</sup> = s − K</code>. The
+    unique solution of that problem is
+    <code>s − K e<sup>−r(T−t)</sup></code> — the forward. Parity is not an
+    extra fact. It is the PDE, run on a simpler ticket.
+  </p>
+  <p class="takeaway">
+    Takeaway: the PDE comes from the share and the hedge, not from the
+    payout. A put is the same motion rule with a different finish line.
+    Put-call parity is that rule applied to <code>C − P</code>.
+  </p>
+
   <h2>Why a closed form exists (the heat equation)</h2>
   <p>
     Most PDEs do not have a formula. This one does, and the reason is a change of variables
@@ -562,13 +1000,65 @@
     and flattens bumps.
   </p>
   <p>
-    Three substitutions, each with a job. Let <code>τ = T − t</code> be time <em>left</em>
-    (so the finish line is <code>τ = 0</code> and we walk forward in <code>τ</code> as we
-    walk backward in calendar time). Let <code>x = log(s/K)</code> so the stock's
-    multiplicative wobble becomes an additive one. Let
-    <code>V = K e<sup>−α τ</sup> u(τ, x)</code> with a constant <code>α</code> chosen to
-    swallow the <code>− r V</code> funding term and the first-derivative leftover. After the
-    dust settles,
+    You do not need to reproduce the substitutions in an interview. You do need the picture.
+    Heat in a metal bar: a hot corner cools because heat flows from hot to cold, and the
+    flow is faster where the temperature is more curved. The equation is "how temperature
+    changes in time = a constant times how curved it is in space." Our hill, after three
+    changes of label, is that equation.
+  </p>
+  <p>
+    The three label-changes, each with a job. We will do the first one in the slow
+    lane so you see what "a change of variables" actually does to a PDE, then name
+    the other two and read off the result.
+  </p>
+  <div class="step">
+    <strong>Label-change 1 — flip the clock.</strong>
+    Let <code>τ = T − t</code> be time <em>left</em>. The finish line is then
+    <code>τ = 0</code>, and walking <em>forward</em> in <code>τ</code> is walking
+    <em>backward</em> on the calendar — the direction a PDE solver actually steps.
+    The chain rule: <code>V<sub>t</sub> = V<sub>τ</sub> · ∂τ/∂t = V<sub>τ</sub> · (−1)
+    = − V<sub>τ</sub></code>. Legal because <code>τ</code> depends only on
+    <code>t</code>, so the space slopes <code>V<sub>s</sub></code> and
+    <code>V<sub>ss</sub></code> are untouched. Substitute into the PDE:
+    <code>− V<sub>τ</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − r V = 0</code>,
+    or <code>V<sub>τ</sub> = r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − r V</code>.
+    In words: as expiry approaches, the hill changes by the cash-rate carry, plus
+    the curvature leftover, minus the funding cost.
+  </div>
+  <div class="numplay">
+    <strong>With real numbers — the flipped clock at our point.</strong>
+    Today, <code>τ = 1</code> and we already have
+    <code>V<sub>t</sub> = −6.414</code>. After the flip,
+    <code>V<sub>τ</sub> = − V<sub>t</sub> = +6.414</code>: as you give the ticket
+    <em>more</em> time (increase <code>τ</code>), the hill rises by 6.414 dollars
+    per year. That matches the everyday fact that a longer ticket is worth more.
+    Check the other side of the flipped PDE:
+    <code>r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − r V
+    = 3.184 + 3.752 − 0.523 = 6.413</code>, which is
+    <code>− V<sub>t</sub></code> again. Same four-term budget, just read
+    "how the hill grows as you add time" instead of "how it drops as the clock
+    advances."
+  </div>
+  <div class="step">
+    <strong>Label-change 2 — take logs.</strong>
+    Let <code>x = log(s/K)</code>. The share's "multiply by a random factor"
+    wobble becomes an "add a random amount" wobble — logs turn products into
+    sums, which is why Lesson <a href="0014-sdes.html">014</a> solved GBM by
+    applying Itô to <code>log S</code>. After this change, the ugly
+    <code>S</code> and <code>S²</code> coefficients in front of the slopes
+    become constants. You do not need the algebra; you need the reason: GBM
+    is a multiplier, and a log turns a multiplier into a shifter.
+  </div>
+  <div class="step">
+    <strong>Label-change 3 — peel off the funding.</strong>
+    Write <code>V = K e<sup>−α τ</sup> u(τ, x)</code> and choose the constant
+    <code>α</code> so the <code>− r V</code> funding term and a leftover
+    first-slope term are absorbed into the exponential prefactor. What remains
+    of <code>u</code> has no zeroth-order piece and no first-slope piece —
+    only time-change and curvature.
+  </div>
+  <p>
+    After those three relabellings,
   </p>
   <div class="formula">u<sub>τ</sub> = ½ σ² u<sub>xx</sub></div>
   <div class="plain">
@@ -725,6 +1215,52 @@
       hundredth of a cent in the Lesson 015 lab: the tree was solving today's equation
       without announcing it.
     </dd>
+    <dt>“What does ‘short’ actually mean? Do I need a broker who lends shares?”</dt>
+    <dd>
+      For the argument, "short <code>Δ</code> shares" just means "your bundle's value
+      moves opposite to those shares." In a real account, yes, you borrow the shares
+      (or the futures market builds the same exposure without a stock-loan). The
+      derivation does not depend on the plumbing. What it depends on is: you can hold
+      a fractional, negative amount of the share and mark it to the current price.
+    </dd>
+    <dt>“Why is the time slope negative? Doesn't a longer ticket have more ways to win?”</dt>
+    <dd>
+      A longer ticket <em>is</em> worth more — that is why, at a fixed date, a one-year
+      ticket beats a one-month ticket. The time slope <code>V<sub>t</sub></code> asks a
+      different question: freeze the share and <em>advance the clock toward the finish</em>.
+      You have <em>less</em> time left, so the ticket is worth <em>less</em>. Negative time
+      slope is "the ticket ages," not "longer tickets are cheaper."
+    </dd>
+    <dt>“Is 10.45 the money I should expect to make if I buy the ticket?”</dt>
+    <dd>
+      No. <code>10.45</code> is what it costs to <em>manufacture</em> the payout, and
+      therefore the fair sale price. What you <em>expect to make</em> as a buyer depends
+      on the real-world growth <code>μ</code> and on how you hedge. If you buy at 10.45
+      and the share drifts up faster than the bank rate, you expect to profit; if it
+      does not, you expect to lose. The price does not promise you a profit. It promises
+      that nobody can lock in a risk-free profit against you.
+    </dd>
+    <dt>“Feynman–Kac looked like a proof. Did we actually prove uniqueness too?”</dt>
+    <dd>
+      Almost. The four-step argument showed: <em>if</em> a surface solves the PDE
+      with the given finish line, <em>then</em> it equals the discounted expectation.
+      The expectation is one number, so there cannot be two different solutions —
+      uniqueness is free. Existence is the other direction: the discounted
+      expectation, under mild conditions on <code>g</code> and on the coefficients,
+      is smooth enough to be fed back into Itô and shown to solve the PDE. For our
+      call the closed form is that existence proof, in a box. For a messy payoff
+      you trust a theorem (Shreve II §6.4) rather than writing the formula.
+    </dd>
+    <dt>“Why is put-call parity true even if I do not believe Black–Scholes?”</dt>
+    <dd>
+      Because it does not use the PDE's coefficients — only no-arbitrage and the
+      two finish lines. Buying a call and selling a put of the same strike and
+      expiry manufactures a forward: you will buy the share at <code>K</code> on
+      date <code>T</code> no matter where it finishes. A forward's price is
+      <code>S − K e<sup>−r(T−t)</sup></code> as long as you can hold the share
+      and borrow cash, which is a much thinner model than GBM. That is why a
+      broken parity is a bug, not a "different volatility."
+    </dd>
   </dl>
 
   <h2>Sources &amp; further reading</h2>
@@ -761,10 +1297,12 @@
     <code>dW̃</code> cancels. (3) Impose <code>dΠ = r Π dt</code> and rearrange to the
     PDE. (4) Explain, in one sentence, why <code>μ</code> cannot appear. (5) Write the
     terminal condition and say why it is a finish line, not a start. (6) State
-    Feynman–Kac in one sentence: the PDE and the discounted expectation are the same
-    object. (7) At <code>(0, 100)</code>, quote the four-term budget
+    Feynman–Kac in one sentence, then the four-step reason: ride the surface,
+    the PDE kills the sure pile, a leftover-free ride is a fair game. (7) At
+    <code>(0, 100)</code>, quote the four-term budget
     (<code>−6.414 + 3.184 + 3.752 − 0.523 = 0</code>) and say which term is the Itô
-    correction. Re-read anything shaky before the lab.
+    correction. (8) Write put-call parity and say why the put uses the same PDE.
+    Re-read anything shaky before the lab.
   </div>
 
   <div class="ask-teacher">
@@ -791,6 +1329,14 @@
     <li><strong>Black–Scholes PDE</strong> —
       <code>V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − r V = 0</code>;
       the local no-arbitrage balance after the noise is cancelled.</li>
+    <li><strong>European put</strong> — the opposite ticket: the right to
+      <em>sell</em> one share at <code>K</code> on date <code>T</code>; pays
+      <code>(K − S<sub>T</sub>)<sup>+</sup></code>. Same PDE, different finish
+      line.</li>
+    <li><strong>Put-call parity</strong> —
+      <code>C − P = S − K e<sup>−r(T−t)</sup></code>; a call minus a put is a
+      forward. True by no-arbitrage, and also the PDE run on
+      <code>C − P</code>.</li>
     <li><strong>Terminal condition</strong> — the finish-line requirement
       <code>V(T, s) = g(s)</code>; for a call, <code>(s − K)<sup>+</sup></code>.</li>
     <li><strong>Feynman–Kac theorem</strong> — a PDE of this form plus a terminal

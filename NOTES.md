@@ -120,10 +120,11 @@
   to ~72 KB — the longest since 011 — because the replication → `p*` → Girsanov chain refuses to skip a
   link. If the learner reports it clear *but long*, the next lever is splitting Lesson 016, not trimming
   the `.plain`/`.numplay` boxes.
-  **Update (016):** Lesson 015 was marked done without a length complaint, so 016 shipped as one
-  unit (PDE + Feynman–Kac) at a similar size band, with the extra budget in `.plain`/`.numplay`
-  boxes and the four-term budget rather than a split. Re-open the split only if 016 feels too
-  long *in one sitting*.
+  **Update (016):** The first 016 draft was too short. The learner pointed at Lessons
+  013–015 as the detail template, so 016 was rewritten to that slow-lane standard
+  (hour map, every hedge cancellation written out, four-step Feynman–Kac proof, heat
+  flip with numbers, put as worked example 2) and now sits above 015's size. Re-open
+  a split only if 016 feels too long *in one sitting*.
 
 ## Standing weekly habits (don't let these lapse)
 - 10 mental-math drills + 5 probability brainteasers/week (Green Book / Heard on the Street).
