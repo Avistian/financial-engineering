@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Expert Curriculum — Quant Research (3-year)</title>
+  <title>Expert Curriculum — Quant Research (5-year)</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <style>
     .hero { border: 1px solid var(--accent); background: var(--accent-light); padding: 1rem 1.25rem; border-radius: 4px; margin: 1rem 0 1.75rem; font-size: 0.92rem; }
@@ -29,19 +29,23 @@
 <article>
   <p class="mission-tag">Reference · full plan</p>
   <h1>Expert Curriculum — Quantitative Research</h1>
-  <p class="subtitle">3 years · 120 units · systematic-alpha track</p>
+  <p class="subtitle">5 years · 200 units · systematic-alpha track + two long-only equity years</p>
 
   <div class="hero">
     A <strong>unit ≠ a day.</strong> Each row is a concept <em>plus</em> its lab/reproduction
-    <em>plus</em> its quiz. Reading is ~5% of the ~2,000 hours; hands-on labs, validation, and the
-    Year-3 capstone are where expertise forms. Finish each quarter's checkpoint before advancing.
+    <em>plus</em> its quiz. Reading is a small slice of the ~3,350 hours; hands-on labs, validation,
+    and the three capstones are where expertise forms. Years 1–3 are the original QR track
+    (unchanged). <strong>Years 4–5 are extra time, not a swap:</strong> long-only stocks using
+    ML scores and a constrained optimizer — Year 4 on a weeks-to-months clock, Year 5 on
+    an hours-to-days (mid-frequency) clock. Finish each quarter's checkpoint before
+    advancing. Do not skip to Year 4 or 5 from Year 1.
   </div>
 
   <div class="stats">
-    <div class="stat"><span class="stat-num">3</span><span class="stat-label">Years</span></div>
-    <div class="stat"><span class="stat-num">12</span><span class="stat-label">Quarters</span></div>
-    <div class="stat"><span class="stat-num">120</span><span class="stat-label">Units</span></div>
-    <div class="stat"><span class="stat-num">~2000</span><span class="stat-label">Hours</span></div>
+    <div class="stat"><span class="stat-num">5</span><span class="stat-label">Years</span></div>
+    <div class="stat"><span class="stat-num">20</span><span class="stat-label">Quarters</span></div>
+    <div class="stat"><span class="stat-num">200</span><span class="stat-label">Units</span></div>
+    <div class="stat"><span class="stat-num">~3350</span><span class="stat-label">Hours</span></div>
   </div>
 
   <p><strong>Legend:</strong> shaded <span class="chk">blue</span> = quarter checkpoint ·
@@ -51,7 +55,9 @@
   <nav class="toc">
     <a href="#y1">Year 1 — Foundations</a><br>
     <a href="#y2">Year 2 — Researcher's Craft</a><br>
-    <a href="#y3">Year 3 — Alpha, Execution &amp; Interview</a>
+    <a href="#y3">Year 3 — Alpha, Execution &amp; Interview</a><br>
+    <a href="#y4">Year 4 — Long-only mid-horizon equity</a><br>
+    <a href="#y5">Year 5 — Long-only mid-frequency equity</a>
   </nav>
 
   <!-- YEAR 1 -->
@@ -240,14 +246,142 @@
     </table>
   </section>
 
+  <!-- YEAR 4 -->
+  <section class="year-block" id="y4">
+    <h2 class="year-title">Year 4 — Long-only mid-horizon equity: ML scores, constrained books</h2>
+    <p class="year-goal">Extra year, not a replacement. Own stocks for weeks to a few months; no borrowed-share shorts; beat a named benchmark after costs. Machine-learning scores go into a constrained optimizer. Prerequisites: Year 2 validation and Year 3 Q1 portfolio math.</p>
+
+    <div class="q-title">Q1 · The mandate, the data, and the classic baselines</div>
+    <table>
+      <tr><td class="u">121</td><td>The long-only mid-horizon mandate: benchmark, active return, tracking error, information ratio vs Sharpe</td><td class="src">Grinold-Kahn; QEPM</td></tr>
+      <tr><td class="u">122</td><td>Universe construction: point-in-time membership, IPOs, delistings, survivorship bias</td><td class="src">Bali-Engle-Murray</td></tr>
+      <tr><td class="u">123</td><td>Corporate actions &amp; the return you actually earn: splits, dividends, total return</td><td class="src">Bali-Engle-Murray</td></tr>
+      <tr><td class="u">124</td><td>The cross-section as the unit of observation: characteristics today → residual return next month</td><td class="src">Fama-MacBeth 1973</td></tr>
+      <tr><td class="u">125</td><td>Classic factor I — momentum (12-1) and time-series trend</td><td class="src">Jegadeesh-Titman 1993</td></tr>
+      <tr><td class="u">126</td><td>Classic factor II — value, and value + momentum</td><td class="src">Fama-French; AMP 2013</td></tr>
+      <tr><td class="u">127</td><td>Classic factor III — quality / profitability, investment, low-volatility</td><td class="src">Novy-Marx 2013; AHXZ 2006</td></tr>
+      <tr><td class="u">128</td><td>The factor zoo and publication decay</td><td class="src">McLean-Pontiff 2016; HXZ 2020</td></tr>
+      <tr><td class="u">129</td><td>Building the benchmark you claim to beat: cap-weight vs equal-weight</td><td class="src">Sharpe 1991; QEPM</td></tr>
+      <tr class="chk"><td class="u">130</td><td><strong>Q1 checkpoint</strong> — honest long-only factor notebook: PIT universe, total returns, 12-1 + value, IR vs a named benchmark</td><td class="src">JT; FF; AMP</td></tr>
+    </table>
+
+    <div class="q-title">Q2 · Cross-sectional ML for ranking stocks</div>
+    <table>
+      <tr><td class="u">131</td><td>The monthly prediction target: residual return, rank, or excess vs the benchmark</td><td class="src">Gu-Kelly-Xiu 2020</td></tr>
+      <tr><td class="u">132</td><td>Point-in-time features: lagged returns, fundamentals, revisions — no restated numbers</td><td class="src">Green-Hand-Zhang 2017</td></tr>
+      <tr><td class="u">133</td><td>Information coefficient, IC decay, and matching the rebalance to the decay</td><td class="src">Grinold-Kahn 6</td></tr>
+      <tr><td class="u">134</td><td>Linear cross-sectional models: WLS, industry neutralization, residualizing size and beta</td><td class="src">Fama-MacBeth; GKX linear</td></tr>
+      <tr><td class="u">135</td><td>Tree models on the cross-section: GBDT as a regressor vs a ranker</td><td class="src">Gu-Kelly-Xiu 2020</td></tr>
+      <tr><td class="u">136</td><td>Learning-to-rank: pairwise / listwise losses that match "who beats whom"</td><td class="src">LambdaMART</td></tr>
+      <tr><td class="u">137</td><td>Cross-sectional CV that respects time <em>and</em> names</td><td class="src">AFML 7</td></tr>
+      <tr><td class="u">138</td><td>Combining ML scores with classic factors: stacking, IC-weighting, orthogonalization</td><td class="src">Grinold-Kahn 11–14</td></tr>
+      <tr><td class="u">139</td><td>When ML adds nothing: small monthly samples, regime breaks, feature death</td><td class="src">GKX 2020; McLean-Pontiff</td></tr>
+      <tr class="chk"><td class="u">140</td><td><strong>Q2 checkpoint</strong> — leakage-free monthly ranker vs linear and 12-1; defend or kill</td><td class="src">Gu-Kelly-Xiu</td></tr>
+    </table>
+
+    <div class="q-title">Q3 · Optimization: turning a score into a long-only book</div>
+    <table>
+      <tr><td class="u">141</td><td>From score to weight without an optimizer: top-N, quantile tilts, rank-weighted</td><td class="src">QEPM; Grinold-Kahn</td></tr>
+      <tr><td class="u">142</td><td>Active weights and the one-period utility: like more, minus risk, minus costs</td><td class="src">Grinold-Kahn 2, 14</td></tr>
+      <tr><td class="u">143</td><td>Long-only as a constraint: what you lose vs long-short (transfer coefficient)</td><td class="src">Grinold-Kahn 14–15</td></tr>
+      <tr><td class="u">144</td><td>Risk models the optimizer trusts: fundamental vs statistical vs shrinkage</td><td class="src">Grinold-Kahn 3</td></tr>
+      <tr><td class="u">145</td><td>Linear constraints real books have: sector, name, beta, turnover, name count</td><td class="src">Boyd-Vandenberghe</td></tr>
+      <tr><td class="u">146</td><td>Cost-aware optimization and the capacity curve</td><td class="src">Boyd et al. 2017</td></tr>
+      <tr><td class="u">147</td><td>Multi-period rebalancing: when <em>not</em> to trade</td><td class="src">Boyd 2017; Gârleanu-Pedersen 2013</td></tr>
+      <tr><td class="u">148</td><td>Convex optimization toolkit: QP / SOCP, what a solver can certify</td><td class="src">Boyd-Vandenberghe</td></tr>
+      <tr><td class="u">149</td><td>Robust / resampled optimization: noisy inputs, brittle MVO</td><td class="src">Michaud; Ledoit-Wolf</td></tr>
+      <tr class="chk"><td class="u">150</td><td><strong>Q3 checkpoint</strong> — Q2 scores + risk model + costs + long-only/sector/beta constraints → a book whose <em>net</em> IR you can defend</td><td class="src">Grinold-Kahn; Boyd</td></tr>
+    </table>
+
+    <div class="q-title">Q4 · Running it, attributing it, and the Year-4 capstone</div>
+    <table>
+      <tr><td class="u">151</td><td>Between rebalances: weight drift, dividends, cash, mid-month corporate actions</td><td class="src">Bali-Engle-Murray</td></tr>
+      <tr><td class="u">152</td><td>Getting into the names: implementation shortfall at a monthly horizon</td><td class="src">Perold 1988</td></tr>
+      <tr><td class="u">153</td><td>Index-futures overlay: long-only stocks + a short index future to control beta</td><td class="src">Hull; Grinold-Kahn</td></tr>
+      <tr><td class="u">154</td><td>Drawdowns you will eat: a long-only book rides market crashes</td><td class="src">McNeil et al.</td></tr>
+      <tr><td class="u">155</td><td>Attribution: Brinson–Fachler, factor, and what the optimizer actually bet</td><td class="src">Brinson 1985/86</td></tr>
+      <tr><td class="u">156</td><td>Capacity, crowding, and the live-vs-paper gap for slow equity</td><td class="src">McLean-Pontiff; Korajczyk-Sadka</td></tr>
+      <tr><td class="u">157</td><td>Pre-register the research: write the kill criteria before you look</td><td class="src">AFML; template</td></tr>
+      <tr><td class="u">158</td><td>Failure modes: leaked fundamentals, index-hugging, hidden beta, overfit optimizer</td><td class="src">synthesis</td></tr>
+      <tr><td class="u">159</td><td>Overlays a real book meets: 130/30, restricted lists, tax-aware, ESG screens</td><td class="src">Jacobs-Levy</td></tr>
+      <tr class="exit"><td class="u">160</td><td><strong>Year-4 exit — Capstone:</strong> PIT universe → walk-forward ML ranker → constrained long-only optimizer → net IR vs a named benchmark → capacity + attribution + proceed/kill memo</td><td class="src">everything</td></tr>
+    </table>
+  </section>
+
+  <!-- YEAR 5 -->
+  <section class="year-block" id="y5">
+    <h2 class="year-title">Year 5 — Long-only mid-frequency equity: daily scores, cost-first books</h2>
+    <p class="year-goal">Extra year, not a replacement. Same long-only + ML + optimizer job as Year 4, on an hours-to-days clock. Costs and ADV caps are first-order. Prerequisites: Year 4 mandate/optimizer, Year 2 validation and impact, Year 3 execution.</p>
+
+    <div class="q-title">Q1 · The faster mandate and short-horizon baselines</div>
+    <table>
+      <tr><td class="u">161</td><td>Mid-frequency vs mid-horizon: same long-only rules, different clock; costs as a first-order term</td><td class="src">Grinold-Kahn; Q1 lab</td></tr>
+      <tr><td class="u">162</td><td>The clock of a trading day: open, continuous, close auction, overnight</td><td class="src">Heston-Korajczyk-Sadka 2010; LPS 2019</td></tr>
+      <tr><td class="u">163</td><td>Liquidity as a membership rule: ADV, spread, days-to-trade</td><td class="src">Amihud 2002</td></tr>
+      <tr><td class="u">164</td><td>Short-horizon baseline I — 1–5 day cross-sectional reversal, long-only</td><td class="src">Jegadeesh 1990; Lehmann 1990</td></tr>
+      <tr><td class="u">165</td><td>Short-horizon baseline II — residual / industry-neutral reversal</td><td class="src">Blitz-Huij-Martens</td></tr>
+      <tr><td class="u">166</td><td>Event baseline — post-earnings announcement drift (PEAD)</td><td class="src">Bernard-Thomas 1989/90</td></tr>
+      <tr><td class="u">167</td><td>Overnight and close-auction effects: who you hold through the close</td><td class="src">Lou-Polk-Skouras 2019</td></tr>
+      <tr><td class="u">168</td><td>News and text at a daily horizon (ranker, not sentiment theater)</td><td class="src">Loughran-McDonald; Tetlock</td></tr>
+      <tr><td class="u">169</td><td>Combining short-horizon baselines; multiple testing with more trials</td><td class="src">Harvey-Liu-Zhu</td></tr>
+      <tr class="chk"><td class="u">170</td><td><strong>Q1 checkpoint</strong> — daily long-only from reversal + PEAD; net IR vs a named benchmark; costs first</td><td class="src">Jegadeesh; Bernard-Thomas</td></tr>
+    </table>
+
+    <div class="q-title">Q2 · Daily / multi-day ML ranking</div>
+    <table>
+      <tr><td class="u">171</td><td>The 1–5 day prediction target: next-day residual, open-to-close, or a short triple-barrier</td><td class="src">AFML 3</td></tr>
+      <tr><td class="u">172</td><td>Point-in-time daily features — no same-day close in a close-to-close score</td><td class="src">AFML 2</td></tr>
+      <tr><td class="u">173</td><td>IC decay over hours and days</td><td class="src">Grinold-Kahn 6</td></tr>
+      <tr><td class="u">174</td><td>Overlapping daily labels and uniqueness</td><td class="src">AFML 4</td></tr>
+      <tr><td class="u">175</td><td>Tree models on the daily cross-section: GBDT as regressor vs ranker</td><td class="src">Gu-Kelly-Xiu methods</td></tr>
+      <tr><td class="u">176</td><td>Short return-paths as features without becoming DeepLOB</td><td class="src">units 071–072</td></tr>
+      <tr><td class="u">177</td><td>Event-aware ML: flag earnings/news days</td><td class="src">Bernard-Thomas; AFML 17</td></tr>
+      <tr><td class="u">178</td><td>Two clocks, one research book: daily ML + Year-4 monthly scores</td><td class="src">Grinold-Kahn 11–14</td></tr>
+      <tr><td class="u">179</td><td>When daily ML is just reversal in costume</td><td class="src">synthesis</td></tr>
+      <tr class="chk"><td class="u">180</td><td><strong>Q2 checkpoint</strong> — leakage-free daily ranker vs reversal and PEAD; defend or kill</td><td class="src">AFML 3–4, 7</td></tr>
+    </table>
+
+    <div class="q-title">Q3 · Optimization when you trade every day</div>
+    <table>
+      <tr><td class="u">181</td><td>Turnover is the strategy: why the Year-4 optimizer, run daily, goes broke</td><td class="src">Boyd et al. 2017</td></tr>
+      <tr><td class="u">182</td><td>Daily utility with a hard participation cap (slice of ADV)</td><td class="src">Almgren; Grinold-Kahn</td></tr>
+      <tr><td class="u">183</td><td>Intraday vs close-only rebalance</td><td class="src">Cartea; Boyd</td></tr>
+      <tr><td class="u">184</td><td>Temporary impact on a daily trade list (square-root law)</td><td class="src">Almgren 2005</td></tr>
+      <tr><td class="u">185</td><td>Liquidity-aware risk: names that look diversifying until you exit</td><td class="src">Amihud; Kyle</td></tr>
+      <tr><td class="u">186</td><td>Beta control without shorts: daily index-futures overlay</td><td class="src">unit 153; Hull</td></tr>
+      <tr><td class="u">187</td><td>Multi-period daily: Gârleanu–Pedersen with a 1–5 day half-life</td><td class="src">GP 2013; Boyd 2017</td></tr>
+      <tr><td class="u">188</td><td>Auction-aware execution: how much of the list goes to the close</td><td class="src">Perold; Kissell</td></tr>
+      <tr><td class="u">189</td><td>Capacity is smaller than Year 4: the AUM curve at daily turnover</td><td class="src">Korajczyk-Sadka</td></tr>
+      <tr class="chk"><td class="u">190</td><td><strong>Q3 checkpoint</strong> — daily scores + ADV caps + impact + optional futures hedge; defend <em>net</em> IR</td><td class="src">Boyd; Almgren</td></tr>
+    </table>
+
+    <div class="q-title">Q4 · Running a daily long-only book and the Year-5 capstone</div>
+    <table>
+      <tr><td class="u">191</td><td>Overnight gap risk: you are long into the open</td><td class="src">Lou-Polk-Skouras 2019</td></tr>
+      <tr><td class="u">192</td><td>Corporate actions and dividends on a daily book</td><td class="src">Bali-Engle-Murray</td></tr>
+      <tr><td class="u">193</td><td>Live-vs-paper at this clock: stale scores, late features, dropped prints</td><td class="src">unit 101</td></tr>
+      <tr><td class="u">194</td><td>Attribution for a daily long-only: selection vs timing vs cost vs beta</td><td class="src">Brinson; Grinold-Kahn</td></tr>
+      <tr><td class="u">195</td><td>Crowding and the reversal crowded-trade</td><td class="src">McLean-Pontiff</td></tr>
+      <tr><td class="u">196</td><td>Pre-register the daily capstone: kill criteria before you look</td><td class="src">AFML; template</td></tr>
+      <tr><td class="u">197</td><td>Failure modes: same-day leak, ADV-blind optimizer, closet indexer, cost-free Sharpe</td><td class="src">synthesis</td></tr>
+      <tr><td class="u">198</td><td>Two-sleeve NAV: Year-4 monthly + Year-5 daily, one long-only book</td><td class="src">Grinold-Kahn</td></tr>
+      <tr><td class="u">199</td><td>Overlays: 130/30 or futures-hedged synthetic market-neutral (cash stays long-only)</td><td class="src">Jacobs-Levy</td></tr>
+      <tr class="exit"><td class="u">200</td><td><strong>Year-5 exit — Capstone:</strong> liquid PIT universe → 1–5 day ML ranker → ADV-and-cost-aware long-only optimizer → net IR vs a named benchmark → capacity vs Year 4 → attribution + proceed/kill memo</td><td class="src">everything</td></tr>
+    </table>
+  </section>
+
   <div class="callout">
     <strong>Interview prep runs the whole way.</strong> From Year 1: weekly mental-math + brainteasers
-    and 3–5 LeetCode problems. Year 3 Q4 is the concentration, not the start.
+    and 3–5 LeetCode problems. Year 3 Q4 is the concentration, not the start. Years 4–5 are extra
+    calendar after that gauntlet — the two long-only books you want to run, not a shortcut around
+    Years 1–3.
   </div>
 
   <nav class="nav-links">
     <ul>
       <li><a href="study-roadmap.html">Study roadmap (summary)</a></li>
+      <li><a href="long-only-mid-horizon.html">Year 4 mandate (weeks–months)</a></li>
+      <li><a href="long-only-mid-frequency.html">Year 5 mandate (hours–days)</a></li>
       <li><a href="../index.html">Home</a></li>
     </ul>
   </nav>

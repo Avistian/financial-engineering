@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — Long-only mid-horizon equity</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  </style>
+</head>
+<body>
+<article>
+  <h1>Long-only mid-horizon equity</h1>
+  <p class="subtitle">Reference · the Year 4 mandate in plain words · units 121–160</p>
+
+  <p>
+    Everyday picture: once a month you look at a list of stocks, give each a score
+    ("how much I like this one versus the others"), an optimizer turns those scores into
+    a shopping cart that is allowed only to <em>own</em> shares, you hold until next month,
+    and you are judged on whether that cart beat a named index after costs.
+  </p>
+  <p>
+    This sheet is the map, not the lessons. Years 1–3 stay required. Year 4 is
+    <strong>extra calendar</strong> aimed at this slower book. The same long-only
+    + ML + optimizer job on an hours-to-days clock is
+    <a href="long-only-mid-frequency.html">Year 5</a>. Full unit list:
+    <a href="curriculum.html#y4">curriculum Year 4</a>.
+  </p>
+
+  <h2>Words (same breath as first use)</h2>
+  <table>
+    <thead><tr><th>Word</th><th>What it literally means here</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Long-only</strong></td><td>You only own shares. You never borrow shares to bet they fall (<strong>short</strong>).</td></tr>
+      <tr><td><strong>Mid-horizon</strong></td><td>Hold for weeks to a few months. Lesson 001 called this <em>low frequency / factor investing</em>, not "mid-frequency" (minutes–days).</td></tr>
+      <tr><td><strong>Benchmark</strong></td><td>The comparison basket you claim to beat (often the same stocks, cap-weighted).</td></tr>
+      <tr><td><strong>Active return</strong></td><td>Your return minus the benchmark's return. The extra (or missing) piece.</td></tr>
+      <tr><td><strong>Tracking error</strong></td><td>How much that extra piece bounces — the volatility of active return.</td></tr>
+      <tr><td><strong>Information ratio (IR)</strong></td><td>Active return ÷ tracking error. "How much beat-the-index did I get per unit of being different from the index?"</td></tr>
+      <tr><td><strong>Sharpe ratio</strong></td><td>Extra return over cash ÷ how hard the book bounces. A long-only book can have a fine Sharpe just by riding the market.</td></tr>
+      <tr><td><strong>Beta</strong></td><td>How hard the book rides the market tide. Unhedged long-only ≈ beta near 1.</td></tr>
+      <tr><td><strong>Score / signal</strong></td><td>A number per stock today: how much you like it versus the others. ML produces scores; it does not produce holdings by itself.</td></tr>
+      <tr><td><strong>Optimizer</strong></td><td>A program that turns scores into holdings under rules (no shorts, sector caps, "don't trade too much").</td></tr>
+      <tr><td><strong>Information coefficient (IC)</strong></td><td>How well today's scores line up with next period's residual returns. High IC + many names = the Fundamental Law (unit 084).</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The one pipeline Year 4 builds</h2>
+  <pre>named universe (point-in-time)
+    → features (no restated numbers)
+    → ML ranker (walk-forward, not i.i.d. CV)
+    → score
+    → constrained optimizer (long-only + risk + costs)
+    → holdings
+    → hold until next rebalance
+    → net IR vs the named benchmark
+    → capacity + attribution + proceed/kill</pre>
+  <p>
+    Machine learning is the <em>scoring</em> step. Optimization is the
+    <em>holdings</em> step. Skipping either is a different, weaker job
+    (a factor tilt with no model, or a model whose top-N you buy by hand).
+  </p>
+
+  <h2>How you keep score</h2>
+  <p>
+    Tiny numbers. Index +10%, you +12% after costs → active return = +2%.
+    If that extra piece has bounced at 4% a year, IR ≈ 2 / 4 = 0.5.
+    Same year, the market was +10% and you rode it: your Sharpe can look
+    fine even if you added nothing. <strong>IR is the exam; Sharpe is the
+    alibi.</strong>
+  </p>
+  <p>
+    If the index is −20% and you are −18%, you still beat it. That is the
+    mandate, not a failed signal. A PM who forbids shorts will live through
+    crashes with you.
+  </p>
+
+  <h2>The four quarters</h2>
+  <table>
+    <thead><tr><th>Q</th><th>Units</th><th>One skill</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td>121–130</td><td>State the mandate and beat (or honestly match) classic baselines: momentum, value, quality. Build a universe that does not quietly drop the losers.</td></tr>
+      <tr><td>Q2</td><td>131–140</td><td>A monthly ML ranker that respects time. Beat a linear model and 12-1 momentum, or kill the net.</td></tr>
+      <tr><td>Q3</td><td>141–150</td><td>Turn that score into a long-only book with a risk model, costs, and real constraints. Write the optimizer down.</td></tr>
+      <tr><td>Q4</td><td>151–160</td><td>Run it: fills, drift, crashes, attribution, capacity. Capstone defended to a PM who only allows longs.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Why Years 1–3 still come first</h2>
+  <ul>
+    <li><strong>007 / 128</strong> — searching many characteristics is the same multiple-testing trap with a slower clock.</li>
+    <li><strong>047 / 135</strong> — gradient-boosted trees are the first ML ranker, not a new invention.</li>
+    <li><strong>051–060</strong> — walk-forward / CPCV / PBO / deflated Sharpe. Monthly data gives you <em>fewer</em> independent bets, so the honesty bar gets stricter, not looser.</li>
+    <li><strong>081–090</strong> — mean-variance, cleaned covariance, the Fundamental Law, costs. Year 4 Q3 is those tools with a no-short constraint bolted on.</li>
+  </ul>
+
+  <div class="trap">
+    <strong>Trap.</strong> Treating a long-only backtest's Sharpe as proof of skill.
+    Most of that number is the market tide (beta). A second trap: leaking restated
+    fundamentals (the company "always had" this year's earnings in the 2014 feature).
+    A third: letting the optimizer hug the index so tracking error looks tiny and IR
+    looks stable — you have a closet indexer, not a book. Year 4 units 122, 132, 143,
+    and 158 exist to make those three failure modes boringly obvious.
+  </div>
+
+  <div class="callout">
+    <strong>Sources.</strong> Grinold–Kahn and Qian–Hua–Sorensen for the mandate and
+    the optimizer; Bali–Engle–Murray for the universe; Jegadeesh–Titman / Fama–French /
+    Gu–Kelly–Xiu for the baselines you must beat or match; Boyd
+    <em>Multi-Period Trading via Convex Optimization</em> for cost-aware rebalancing.
+    All of them are in <code>RESOURCES.md</code>.
+  </div>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="curriculum.html#y4">Year 4 in the full curriculum</a></li>
+      <li><a href="long-only-mid-frequency.html">Year 5 mandate (hours–days)</a></li>
+      <li><a href="study-roadmap.html">Study roadmap</a></li>
+      <li><a href="../TEMPLATE_PORTFOLIO.md">Portfolio template (long/short and long-only variant)</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>

@@ -3,16 +3,19 @@
 Agent-facing plan for lesson sequencing. The student-facing version is
 [reference/curriculum.html](./reference/curriculum.html).
 
-**Pace:** ~1.5–2 hours/day **baseline** · ~600–700 hours/year · **~2,000 hours over 3 years.**
-Center of gravity: **Quant Researcher / systematic alpha** (stats, ML, signals, validation,
-backtesting). QT (pricing, microstructure) and QD (systems, latency) are covered to the depth a
-top QR needs to collaborate and interview — not as separate careers.
+**Pace:** ~1.5–2 hours/day **baseline** · ~600–700 hours/year · **~3,350 hours over 5 years.**
+Years 1–3 are the original systematic-alpha QR track (unchanged). **Years 4–5 are extra
+calendar, not a swap:** two long-only equity books using ML scores and constrained
+optimization — Year 4 at a **weeks-to-months** clock, Year 5 at a **hours-to-days**
+(mid-frequency) clock. QT (pricing, microstructure) and QD (systems, latency) stay in
+Years 1–3 at the depth a top QR needs to collaborate and interview.
 
-### Why 120 units take 3 years (read this if the math looks off)
+### Why 200 units take 5 years (read this if the math looks off)
 
-A common, correct objection: *120 lessons ÷ 365 days ≈ 4 months — so at one lesson/day this is
-a one-year plan, not three.* That objection is right about **reading** and wrong about
-**mastery**. Stop treating a numbered row as "one day."
+A common, correct objection: *200 lessons ÷ 365 days ≈ 7 months — so at one lesson/day this is
+a one-year plan, not five.* That objection is right about **reading** and wrong about
+**mastery**. Stop treating a numbered row as "one day." Years 1–3 are still the original
+~2,000-hour QR track; Years 4–5 add two ~650-hour specializations and do not shorten them.
 
 **A unit ≠ a day.** Each numbered row below is a **unit** = one concept *plus its lab/reproduction
 work plus its quiz/checkpoint*. Units are not uniform:
@@ -21,26 +24,30 @@ work plus its quiz/checkpoint*. Units are not uniform:
 |-----------|--------------------|-------|
 | Concept lesson (read + quiz) | 1–3 sessions | dense in Y1 |
 | Derivation / math unit (prove it, then code it) | 2–5 sessions | Y1 Q2, interview prep |
-| Lab / reproduction unit (build, tune, debug, re-run) | 4–12 sessions | dominant Y2–Y3 |
+| Lab / reproduction unit (build, tune, debug, re-run) | 4–12 sessions | dominant Y2–Y5 |
 | Checkpoint / exit exam | 3–6 sessions | end of each quarter/year |
-| Capstone (project + write-up + defense) | 20–40+ sessions | Y3 Q4 |
+| Capstone (project + write-up + defense) | 20–40+ sessions | Y3 Q4, Y4 Q4, Y5 Q4 |
 
-**Where the ~2,000 hours actually go** (lessons are a small slice of the clock):
+**Where the ~3,350 hours actually go** (lessons are a small slice of the clock):
 
 | Activity | ≈ hours | Share |
 |----------|---------|-------|
-| Lesson content itself (120 × ~0.75h) | ~90 | ~5% |
-| Deep primary-source reading (books + ~40 core papers) | ~350 | ~18% |
-| **Hands-on labs & reproduction** (pricing, ML pipelines, LOB, backtests) | ~850 | ~43% |
-| Checkpoints + year exit exams | ~160 | ~8% |
-| Spaced retrieval / review | ~150 | ~7% |
-| **Interview drilling** (mental math, brainteasers, LeetCode) — runs *throughout*, concentrated in Y3 Q4 | ~200 | ~10% |
-| **Year-3 capstone** (project + write-up + defense) | ~200 | ~10% |
+| Lesson content itself (200 × ~0.75h) | ~150 | ~4% |
+| Deep primary-source reading (books + ~65 core papers) | ~500 | ~15% |
+| **Hands-on labs & reproduction** (pricing, ML pipelines, LOB, backtests, long-only books) | ~1,400 | ~42% |
+| Checkpoints + year exit exams | ~260 | ~8% |
+| Spaced retrieval / review | ~230 | ~7% |
+| **Interview drilling** (mental math, brainteasers, LeetCode) — runs *throughout*, concentrated in Y3 Q4 | ~200 | ~6% |
+| **Year-3 capstone** (general systematic-alpha defense) | ~200 | ~6% |
+| **Year-4 capstone** (long-only mid-horizon ML + optimizer, defended) | ~150 | ~4% |
+| **Year-5 capstone** (long-only mid-frequency ML + optimizer, defended) | ~150 | ~4% |
 
-**Density curve (front-loaded learning, back-loaded building):**
+**Density curve (front-loaded learning, back-loaded building, then a mandate year):**
 - **Year 1** — concept- and derivation-dense. Units arrive ~2–3/week. This is the only phase where "lessons/week" is the right mental model. You are buying vocabulary, the stochastic-calculus toolkit, and *evaluation discipline*.
 - **Year 2** — reproduction-heavy. ~1 unit/week; each is days of feature engineering, model fitting, and — above all — validation. This is the heart of the QR craft.
 - **Year 3** — build- and interview-dominated. Portfolio construction, execution, systems awareness, then the interview gauntlet and a capstone whose calendar is set by experiments and writing, not reading.
+- **Year 4** — mandate-specific, also reproduction-heavy. Same validation bar as Year 2, now aimed at a **long-only, weeks-to-months equity book** whose scores come from ML and whose holdings come from a constrained optimizer.
+- **Year 5** — the same long-only + ML + optimizer job on a **hours-to-days** clock (this course's mid-frequency). Costs and execution are first-order; capacity is smaller; you have more independent bets. Do **not** skip here from Year 1: the data hygiene, CPCV/PBO, Grinold–Kahn math, and Year 4's mandate language live upstream.
 
 **Unit numbering:** Year N → units `(N-1)*40 + 001` … `(N-1)*40 + 040`.
 **Rule:** finish each quarter's checkpoint before advancing. A unit is "done" when its lab runs
@@ -274,6 +281,196 @@ Trading* · Cartea-Jaimungal-Penalva full text · *Designing Data-Intensive Appl
 
 ---
 
+## Year 4 — Long-only mid-horizon equity: ML scores, constrained books (Units 121–160)
+
+**This year is extra time, not a replacement.** Years 1–3 stay required. Year 4 takes that
+toolkit and aims it at one mandate:
+
+> Own stocks for **weeks to a few months**. Do not borrow shares to bet they fall
+> (**long-only**). Beat a **stated benchmark** after costs. Turn a machine-learning
+> *score* (a number per stock: how much you like it versus the others) into holdings
+> with an optimizer that respects real constraints (no shorts, sector caps, name caps,
+> turnover, a risk model).
+
+Everyday picture: each month you rank a list of stocks, the optimizer decides *how much*
+of the ones you like you can actually own without breaking the rules, you hold until the
+next rebalance, and you are judged on **how much you beat the index**, not on a
+market-neutral Sharpe. Lesson 001 called this bucket **low frequency / factor investing**.
+The Q1 lab's one-day dollar-neutral book is a different job (it shorts). Year 5 is the
+long-only version of that faster clock. This year is the slower book.
+
+**Prerequisite:** Year 3 Q1 (units 081–090) and Year 2 Q2 (units 051–060) in particular.
+Unit 084's Fundamental Law and unit 047's GBDT are the on-ramps, not substitutes.
+
+**Goal:** ship a point-in-time, walk-forward, cost-aware long-only book whose
+**information ratio** versus a named benchmark you can defend — including an honest
+account of what the optimizer was not allowed to do (no shorts), and of how much of
+the raw return is just the market tide (**beta**).
+
+### Q1 · The mandate, the data, and the classic baselines (Units 121–130)
+| # | Unit topic | Primary source | Lab / deliverable |
+|---|-----------|----------------|-------------------|
+| 121 | The long-only mid-horizon mandate: benchmark, active return, tracking error, information ratio vs Sharpe | Grinold-Kahn Ch.1–2, 4–5 ★; Qian-Hua-Sorensen Ch.1–2 ★ | Compute Sharpe *and* IR on a toy long-only book vs an equal-weight and a cap-weight benchmark |
+| 122 | Universe construction: point-in-time membership, IPOs, delistings, survivorship bias | Bali-Engle-Murray Ch.1–2 ★; López de Prado (data pitfalls) | Rebuild a 20-year universe two ways (survivors-only vs point-in-time); show the fake premium |
+| 123 | Corporate actions & the return you actually earn: splits, dividends, spinoffs, total return | Bali-Engle-Murray; CRSP methodology notes | Reconstruct total-return series; show a price-only backtest lie |
+| 124 | The cross-section as the unit of observation: characteristics today, residual return next month | Fama-MacBeth 1973 ★; Cochrane *Asset Pricing* Ch.12 | Fama–MacBeth on one toy characteristic; report the average slope and its t |
+| 125 | Classic factor I — momentum: 12-1 cross-section and time-series trend | Jegadeesh-Titman 1993 ★; Moskowitz-Ooi-Pedersen 2012; Asness-Moskowitz-Pedersen 2013 ★ | 12-1 long-only deciles vs long-short; report IR vs Sharpe; skip-last-month ablation |
+| 126 | Classic factor II — value (book/price, earnings/price) and value+momentum | Fama-French 1992/1993/2015 ★; Asness-Moskowitz-Pedersen 2013 ★ | Value long-only; 50/50 and IC-weighted blend with momentum |
+| 127 | Classic factor III — quality / profitability, investment, low-volatility | Novy-Marx 2013 ★; Fama-French 2015; Ang-Hodrick-Xing-Zhang 2006 ★ | Quality and low-vol long-only; show low-vol is a beta bet unless you neutralize |
+| 128 | The factor zoo and publication decay: which characteristics survive honest tests | Harvey-Liu-Zhu 2016 (re-warm); McLean-Pontiff 2016 ★; Hou-Xue-Zhang 2020 ★ | Screen ~20 characteristics; Bonferroni / BH; measure post-publication fade |
+| 129 | Building the benchmark you claim to beat: cap-weight vs equal-weight, reconstitution, float | Sharpe 1991 ◆; index methodology notes; Qian-Hua-Sorensen | Same book vs EW and vs cap-weight: show why "beat EW" is the easier exam |
+| 130 | **Q1 checkpoint** — honest long-only factor notebook | JT 1993; FF; AMP 2013 | Point-in-time universe + total returns + 12-1 and value, IR vs a named benchmark, multiple-testing note |
+
+### Q2 · Cross-sectional ML for ranking stocks (Units 131–140)
+| # | Unit topic | Primary source | Lab / deliverable |
+|---|-----------|----------------|-------------------|
+| 131 | The prediction target at a monthly horizon: next-month residual, rank, or excess vs the benchmark | Gu-Kelly-Xiu 2020 ★; AFML Ch.3 (contrast with triple-barrier) | Three targets on the same features; compare IC and long-only IR |
+| 132 | Point-in-time features: lagged returns, fundamentals, revisions, industry — no restated numbers | Green-Hand-Zhang 2017 ★; Gu-Kelly-Xiu 2020 ★; Bali-Engle-Murray | Build a PIT feature panel; plant a restated-earnings leak and catch it |
+| 133 | Information coefficient, IC decay, and matching the rebalance to the decay | Grinold-Kahn Ch.6 ★; Qian-Hua-Sorensen | IC by holding week 1…8; pick a rebalance that matches the decay |
+| 134 | Linear cross-sectional models: WLS, industry neutralization, residualizing size and beta | Fama-MacBeth 1973; Gu-Kelly-Xiu linear baseline ★ | Residualize features on industry + size + beta; measure IC lift |
+| 135 | Tree models on the cross-section: GBDT as a regressor vs a ranker | Gu-Kelly-Xiu 2020 ★; Chen-Guestrin / Ke (re-warm 047) | LightGBM on next-month residual vs a linear model; purged walk-forward |
+| 136 | Learning-to-rank for portfolios: pairwise / listwise losses that match "who beats whom" | Burges LambdaMART ◆; Liu LTR survey ◆ | LambdaMART (or LightGBM rank) vs MSE on the same panel; compare top-decile IR |
+| 137 | Cross-sectional CV that respects time *and* names: year-blocks, purging, no future firm | AFML Ch.7 ★; Gu-Kelly-Xiu appendix | i.i.d. K-fold (leaks) vs walk-forward year-blocks; document the fake lift |
+| 138 | Combining ML scores with classic factors: stacking, IC-weighting, orthogonalization | Grinold-Kahn Ch.11–14 ★; unit 049 | Blend linear + GBDT + 12-1; measure *incremental* IR, not just raw IR |
+| 139 | When ML adds nothing: small monthly samples, regime breaks, feature death | Gu-Kelly-Xiu 2020 (what actually worked); McLean-Pontiff 2016 | Kill your own model on a 2015–2020 holdout; write the autopsy |
+| 140 | **Q2 checkpoint** — leakage-free monthly ranker | Gu-Kelly-Xiu; AFML 7 | Features → GBDT → walk-forward IC/IR vs linear and 12-1; defend or kill |
+
+### Q3 · Optimization: turning a score into a long-only book (Units 141–150)
+| # | Unit topic | Primary source | Lab / deliverable |
+|---|-----------|----------------|-------------------|
+| 141 | From score to weight *without* an optimizer: top-N, quantile tilts, rank-weighted | Grinold-Kahn; Qian-Hua-Sorensen; `TEMPLATE_PORTFOLIO.md` | Top-50 vs rank-weight vs z-score tilt vs the same-score long-short; IR and turnover |
+| 142 | Active weights and the one-period utility: more of what you like, minus risk, minus costs | Grinold-Kahn Ch.2, 14 ★; Markowitz (re-warm 081) | Solve a 10-name toy by hand, then as a quadratic program |
+| 143 | Long-only as a constraint: why the optimizer clips, and what you lose vs long-short | Grinold-Kahn Ch.14–15 ★; Jacobs-Levy 130/30 ◆ | Same alpha, long-only vs long-short vs 130/30; measure the transfer coefficient |
+| 144 | Risk models the optimizer trusts: fundamental (Barra-style) vs statistical vs shrinkage | Grinold-Kahn Ch.3 ★; units 082–083 | Plug three risk models into the same QP; compare active risk vs realized tracking error |
+| 145 | Linear constraints real books have: sector, name, beta, turnover, number of names | Grinold-Kahn; Boyd-Vandenberghe (selected) ★; CVXPY | Add constraints one by one; watch tracking error and IR move |
+| 146 | Cost-aware optimization: spread + impact, a turnover penalty, the capacity curve | Grinold-Kahn; Boyd et al. 2017 ★; unit 088 | Net IR vs turnover penalty; AUM at which monthly long-only IR hits your hurdle |
+| 147 | Multi-period rebalancing: when *not* to trade (decaying alpha, today's cost) | Boyd et al. 2017 ★; Gârleanu-Pedersen 2013 ★ | Myopic vs multi-period with decaying alpha; count the skipped trades |
+| 148 | Convex optimization toolkit: QP / SOCP, what stays convex, what a solver can promise | Boyd-Vandenberghe ★; OSQP / Clarabel docs | Formulate the book as a QP; show a non-convex variant that the solver cannot certify |
+| 149 | Robust / resampled optimization: inputs are noisy, naïve MVO is brittle | Michaud; Ledoit-Wolf (re-warm); Fabozzi *Robust PO* ◆ | Perturb alphas; compare naïve MVO vs shrinkage vs resampled vs a simple tilt |
+| 150 | **Q3 checkpoint** — scores → constrained long-only book | Grinold-Kahn; Boyd 2017 | Optimizer takes Q2 scores + a risk model + costs + long-only/sector/beta constraints; defend *net* IR |
+
+### Q4 · Running it, attributing it, and the Year-4 capstone (Units 151–160)
+| # | Unit topic | Primary source | Lab / deliverable |
+|---|-----------|----------------|-------------------|
+| 151 | Between rebalances: weight drift, dividends, cash, corporate actions mid-month | Bali-Engle-Murray; CRSP notes | Simulate drift between monthly rebalances; split P&L into selection vs interaction |
+| 152 | Getting into the names: implementation shortfall at a monthly horizon | Perold 1988 ★; Almgren-Chriss (re-warm 091–093) | TWAP the monthly trade list; paper IR vs net IR after shortfall |
+| 153 | Index-futures overlay: long-only stocks + a short index future to control beta | Hull (futures mechanics); Grinold-Kahn | Same stock book, unhedged vs futures-hedged; report Sharpe *and* IR |
+| 154 | Drawdowns you will eat: a long-only book rides market crashes | units 085–089; McNeil-Frey-Embrechts | 2008 and 2020 on long-only vs hedged; write the one-page client memo |
+| 155 | Attribution: Brinson–Fachler, factor, and "what the optimizer actually bet" | Brinson-Hood-Beebower 1986 ★; Brinson-Fachler 1985 ★; Grinold-Kahn | Attribute a year of active return to allocation, selection, interaction, and beta |
+| 156 | Capacity, crowding, and the live-vs-paper gap for slow equity | Korajczyk-Sadka; McLean-Pontiff; unit 088 | Scale AUM; find where net IR hits the hurdle; document crowding |
+| 157 | Pre-register the research: write the kill criteria *before* you look | AFML research process; `TEMPLATE_PORTFOLIO.md` | One-page pre-registration of the capstone (universe, target, constraints, kill rules) |
+| 158 | Failure modes specific to this mandate: leaked fundamentals, index-hugging, hidden beta, overfit optimizer | synthesis of 121–157 | Plant four bugs in a notebook; find them unaided |
+| 159 | Overlays a real book meets: 130/30, restricted lists, tax-aware, ESG screens | Jacobs-Levy ◆; tax-aware / restricted-list notes | Add a restricted list and a 130/30 sleeve; measure IR and turnover change |
+| 160 | **Q4 / Year-4 exit — Capstone** | everything in 121–159; Y2 validation; Y3 Q1 | **End-to-end long-only book**: PIT universe → features → walk-forward ML ranker → constrained optimizer (risk + costs + no shorts) → net IR vs a named benchmark → capacity + attribution + proceed/kill memo, defended as to a PM who only allows longs |
+
+**Year 4 exit criterion:** you can stand in front of a PM who **forbids shorts** and defend a
+weeks-to-months equity book whose edge is a walk-forward ML rank, whose holdings come from a
+constrained optimizer you can write down, and whose success metric is **net information ratio
+versus a named benchmark** — plus an honest sentence on how much of the raw return is beta,
+what you lose by not shorting, and the AUM at which costs kill the edge.
+
+**◆ Optional (Year 4):** Cochrane *Asset Pricing* (full) · Fabozzi *Robust Portfolio
+Optimization and Management* · Israel-Kelly-Moskowitz AQR practitioner papers · tax-lot /
+after-tax long-only (only after the pre-tax capstone is honest).
+
+---
+
+## Year 5 — Long-only mid-frequency equity: daily scores, cost-first books (Units 161–200)
+
+**This year is extra time, not a replacement.** Years 1–4 stay required. Year 5 takes the
+Year 4 mandate (long-only, beat a named benchmark, ML score → constrained optimizer) and
+moves the clock from **weeks** to **hours and days** — what Lesson 001 called
+**mid-frequency**.
+
+> Own stocks for **hours to a few days**. Do not borrow shares to bet they fall
+> (**long-only**). Beat a **stated benchmark** after costs. The same ML-then-optimize
+> pipeline, but **trading costs are the same order as the edge** (the Q1 lab already
+> showed this at a one-day hold). You get more independent bets than Year 4; you pay
+> for them with turnover.
+
+Everyday picture: each afternoon you re-score the list, the optimizer is allowed only
+to own shares and is not allowed to take more than a small slice of each name's daily
+volume, you may hold overnight, and you are judged on **how much you beat the index
+after the bill for trading**, not on a paper Sharpe.
+
+**Prerequisite:** Year 4 (especially 121, 141–150, 153) plus Year 2 Q2 (validation),
+Year 2 Q3 (impact / ADV), and Year 3 Q2 (execution). Unit 164's reversal is the Q1
+lab's `rev5` without the shorts.
+
+**Goal:** ship a liquid, walk-forward, **cost-first** long-only book at a 1–5 day hold
+whose **net information ratio** versus a named benchmark you can defend — including
+how much of the paper IR died in the spread and the impact, and the AUM at which a
+daily book dies sooner than Year 4's monthly book.
+
+### Q1 · The faster mandate and short-horizon baselines (Units 161–170)
+| # | Unit topic | Primary source | Lab / deliverable |
+|---|-----------|----------------|-------------------|
+| 161 | Mid-frequency vs mid-horizon: same long-only rules, different clock; costs as a first-order term | Lesson 001; Grinold-Kahn (turnover); `TEMPLATE_PORTFOLIO.md` | Same scores, daily vs monthly rebalance; *net* IR after costs |
+| 162 | The clock of a trading day: open, continuous session, close auction, overnight — which return you earn | Heston-Korajczyk-Sadka 2010 ★; Lou-Polk-Skouras 2019 ★ | Split open-to-close vs close-to-open P&L on a long-only book |
+| 163 | Liquidity as a membership rule: ADV, spread, days-to-trade — who you are allowed to own | Amihud 2002 ★; Korajczyk-Sadka | Same signal, liquid-only vs all names; show the fake IR from illiquids |
+| 164 | Short-horizon baseline I — cross-sectional reversal (1–5 day), long-only | Jegadeesh 1990 ★; Lehmann 1990 ★; Q1 lab `rev5` | Long-only top-decile reversal vs long-short; net of costs |
+| 165 | Short-horizon baseline II — residual / industry-neutral reversal and residual momentum | Blitz-Huij-Martens ◆; Da-Qian-Warachka ◆ | Raw vs residual reversal; long-only IR |
+| 166 | Event baseline — post-earnings announcement drift (PEAD), revisions, upgrades | Bernard-Thomas 1989/1990 ★; Livnat-Mendenhall | Long-only PEAD on a point-in-time earnings calendar; skip the timestamp leak |
+| 167 | Overnight and close-auction effects: who you hold through the close | Lou-Polk-Skouras 2019 ★; Bogousslavsky ◆ | Hold-through-close vs flatten-at-close; net IR |
+| 168 | News and text at a daily horizon (re-warm 075–076 as a ranker, not sentiment theater) | Loughran-McDonald; Tetlock 2007 ◆ | Next-day residual from a filing/news feature; long-only top-N |
+| 169 | Combining short-horizon baselines; multiple testing when you have more trials | Harvey-Liu-Zhu (re-warm); unit 128 | Screen ~15 daily signals; BH; keep only what survives |
+| 170 | **Q1 checkpoint** — daily long-only from reversal + PEAD | JT-short; Bernard-Thomas | Liquid PIT universe, net IR vs a named benchmark, costs first, multiple-testing note |
+
+### Q2 · Daily / multi-day ML ranking (Units 171–180)
+| # | Unit topic | Primary source | Lab / deliverable |
+|---|-----------|----------------|-------------------|
+| 171 | The prediction target at 1–5 days: next-day residual, open-to-close, or a short triple-barrier | AFML Ch.3 ★; contrast with unit 131 | Three daily targets on the same features; compare IC and long-only IR |
+| 172 | Point-in-time daily features: lagged residuals, volume shocks, range, overnight gap — no same-day close in a close-to-close score | AFML Ch.2 ★; unit 132 | Plant a same-day-close leak; catch it |
+| 173 | IC decay over hours and days: when a daily score dies | Grinold-Kahn Ch.6 ★; unit 133 | IC at close+1h, +1d, +5d; pick a hold that matches the decay |
+| 174 | Overlapping daily labels and uniqueness (re-warm 038–039) | AFML Ch.4 ★ | Uniqueness weights on 5-day labels; unweighted vs weighted IC |
+| 175 | Tree models on the daily cross-section: GBDT as regressor vs ranker | Gu-Kelly-Xiu methods ★; unit 135 | Daily LightGBM vs linear vs 5-day reversal; purged walk-forward |
+| 176 | Short return-*paths* as features without becoming DeepLOB: aggregates vs a 20-day sequence | units 071–072; keep tabular unless sequence wins honestly | Path features vs aggregates; honest temporal split |
+| 177 | Event-aware ML: flag earnings/news days so the model does not treat them as ordinary Tuesdays | Bernard-Thomas; AFML Ch.17 | Model with/without event flags; leftover PEAD |
+| 178 | Two clocks, one research book: combining daily ML with Year-4 monthly scores | Grinold-Kahn Ch.11–14 ★ | Daily sleeve + monthly sleeve, both long-only; incremental IR |
+| 179 | When daily ML is just reversal in costume | synthesis of 164–175 | Residualize the ML score on 5-day reversal; leftover IR |
+| 180 | **Q2 checkpoint** — leakage-free daily ranker | AFML 3–4, 7; unit 175 | Features → GBDT → walk-forward IC/IR vs reversal and PEAD; defend or kill |
+
+### Q3 · Optimization when you trade every day (Units 181–190)
+| # | Unit topic | Primary source | Lab / deliverable |
+|---|-----------|----------------|-------------------|
+| 181 | Turnover is the strategy: why the Year-4 optimizer, run daily, goes broke | Boyd et al. 2017 ★; unit 146 | Monthly-tuned QP run every day; show cost death |
+| 182 | Daily utility with a hard participation cap: do not take more than X% of ADV | Almgren; Grinold-Kahn; unit 064 | Participation constraint; names you wanted but could not buy |
+| 183 | Intraday vs close-only rebalance: two optimizations per day or one | Cartea et al.; Boyd 2017 | Close-only vs open+close rebalance; net IR |
+| 184 | Temporary impact on a daily trade list: the square-root law at this size | Almgren et al. 2005 ★; unit 064 | Paper vs impact-adjusted IR as AUM grows |
+| 185 | Liquidity-aware risk: names that look diversifying until you have to exit | Amihud 2002; Kyle (re-warm 067) | Stressed 5-day liquidation of the long-only book |
+| 186 | Beta control without shorts: a daily index-futures overlay on a high-turnover stock book | unit 153; Hull | Unhedged vs daily-hedged; Sharpe vs IR; futures roll cost |
+| 187 | Multi-period daily: Gârleanu–Pedersen with a 1–5 day half-life | Gârleanu-Pedersen 2013 ★; Boyd 2017 ★ | Myopic daily vs smoothed; count the turnover you skipped |
+| 188 | Auction-aware execution: how much of the trade list goes to the close | Perold 1988; Kissell ◆ | Close-auction vs TWAP the list; implementation shortfall |
+| 189 | Capacity is smaller than Year 4: the AUM curve at daily turnover | unit 156; Korajczyk-Sadka | Capacity curve, daily long-only vs monthly long-only, same capital |
+| 190 | **Q3 checkpoint** — daily scores → ADV-capped, impact-aware, optionally futures-hedged book | Boyd; Almgren | Defend *net* IR; show the AUM where it dies |
+
+### Q4 · Running a daily long-only book and the Year-5 capstone (Units 191–200)
+| # | Unit topic | Primary source | Lab / deliverable |
+|---|-----------|----------------|-------------------|
+| 191 | Overnight gap risk: you are long into the open | Lou-Polk-Skouras 2019; unit 154 | Overnight vs intraday contribution; a gap-day autopsy |
+| 192 | Corporate actions and dividends on a daily book (more events per hold) | unit 151; Bali-Engle-Murray | Miss a split; show the P&L lie |
+| 193 | Live-vs-paper at this clock: stale scores, late features, dropped prints | unit 101; AFML point-in-time | Delay features by one bar; measure IR death |
+| 194 | Attribution for a daily long-only: selection vs timing vs cost vs beta | Brinson 1985/86; Grinold-Kahn | Attribute a quarter of daily active return |
+| 195 | Crowding and the reversal crowded-trade: when everyone fades yesterday | Lou-Polk; McLean-Pontiff | Post-2009 reversal fade; write the memo |
+| 196 | Pre-register the daily capstone: kill criteria before you look | unit 157; `TEMPLATE_PORTFOLIO.md` | One-page pre-registration (universe, hold, ADV cap, kill rules) |
+| 197 | Failure modes: same-day leak, ADV-blind optimizer, closet indexer, cost-free Sharpe | synthesis of 161–196 | Plant four bugs in a notebook; find them unaided |
+| 198 | Two-sleeve NAV: Year-4 monthly + Year-5 daily, one long-only book | Grinold-Kahn blend | Combine sleeves; joint IR, correlation of actives, capacity |
+| 199 | Overlays: 130/30 or futures-hedged "synthetic market-neutral" while cash stays long-only | Jacobs-Levy ◆; unit 153 | Same names, three mandates; what IR and Sharpe each claim |
+| 200 | **Q4 / Year-5 exit — Capstone** | everything in 161–199; Y4; Y2 validation | **End-to-end daily long-only book**: liquid PIT universe → 1–5 day ML ranker → ADV-and-cost-aware optimizer (no shorts) → net IR vs a named benchmark → capacity vs the Year-4 book → attribution + proceed/kill memo, defended as to a PM who only allows longs and rebalances often |
+
+**Year 5 exit criterion:** you can stand in front of a PM who **forbids shorts** and
+**rebalances on a days-not-months clock** and defend a long-only book whose edge is a
+walk-forward daily/multi-day ML rank, whose holdings come from an optimizer that
+respects ADV and impact, and whose success metric is **net information ratio versus a
+named benchmark** — plus honest sentences on overnight gap risk, how much paper IR
+died in costs, and why this book's capacity is smaller than Year 4's.
+
+**◆ Optional (Year 5):** Kissell *The Science of Algorithmic Trading* · full Tetlock /
+news-alpha literature after the PEAD baseline is honest · overnight-only or
+open-to-close-only specialist sleeves (only after the close-to-close capstone is honest).
+
+---
+
 ## Interview prep runs the WHOLE way, not just Y3 Q4
 
 Y3 Q4 is the *concentration*, not the start. From Year 1, keep a standing weekly habit
@@ -288,8 +485,11 @@ beats a Year-3 cram.
 ## Currency rule (quarterly)
 
 At the **start of each quarter**, spend one session checking whether the *frontier* units
-(tabular foundation models, deep LOB, RL for execution, backtest-overfitting tooling) have a new
-SOTA or a newly-exposed failure mode. Update [RESOURCES.md](./RESOURCES.md) and the affected unit
-rows. The **core canon** (Shreve, AFML, Grinold-Kahn, Almgren-Chriss, Cont microstructure) is
-stable — do not churn it. Only promote a new paper to ★ if it sets SOTA, exposes a real failure
-mode, or is a baseline you will be measured against.
+(tabular foundation models, deep LOB, RL for execution, backtest-overfitting tooling,
+cross-sectional ML for monthly *and* daily equity) have a new SOTA or a newly-exposed
+failure mode. Update [RESOURCES.md](./RESOURCES.md) and the affected unit rows. The
+**core canon** (Shreve, AFML, Grinold-Kahn, Qian-Hua-Sorensen, Almgren-Chriss, Cont
+microstructure, Gu-Kelly-Xiu as the monthly ML baseline, Jegadeesh/Lehmann +
+Bernard-Thomas as the daily baselines) is stable — do not churn it. Only promote a new
+paper to ★ if it sets SOTA, exposes a real failure mode, or is a baseline you will be
+measured against.
