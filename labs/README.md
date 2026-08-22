@@ -122,6 +122,13 @@ secure LOBSTER / Databento / the FI-2010 benchmark before Unit 062 (tracked in `
   re-weighting *real-world* paths by the Girsanov factor `Z = e^{−θW_T−½θ²T}` to recover the identical
   price; finally show `N(d₂) = 56%` is a pricing weight, not the `74%` real-world chance of exercise
   (Lesson 015).
+- `0016-black-scholes-pde.ipynb` — *derive the PDE, then state Feynman–Kac*: apply Itô to `V(t,S)`
+  under `Q` and read the three `dt` pieces off the Greeks; recover the PDE as the `dt` coefficient of
+  the discounted price; confirm the closed form's residual is machine-zero on a grid; produce the
+  three damaged residuals on purpose (μ in the PDE → `+6.368`, drop curvature → `−3.752`, drop
+  funding → `+0.523`); price the same call by Monte-Carlo under `Q` and watch it land on `10.4506`;
+  then check a one-step local `p*`-average — the PDE as a tiny tree — recovers today's value
+  (Lesson 016).
 
 _More labs are added as lessons are published (see the per-lesson lab links on the home page)._
 

@@ -1,5 +1,5 @@
 {
-  "version": 12,
+  "version": 13,
   "lessons": [
     {
       "id": 1,
@@ -156,6 +156,16 @@
       "checkpoint": false,
       "labPath": "labs/0015-risk-neutral-pricing.ipynb",
       "title": "Risk-Neutral Pricing & the Girsanov Theorem",
+      "published": true
+    },
+    {
+      "id": 16,
+      "slug": "0016-black-scholes-pde-feynman-kac",
+      "year": 1,
+      "quarter": 2,
+      "checkpoint": false,
+      "labPath": "labs/0016-black-scholes-pde.ipynb",
+      "title": "The Black–Scholes PDE & Feynman–Kac",
       "published": true
     }
   ]

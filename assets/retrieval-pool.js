@@ -796,6 +796,68 @@
       ],
       correct: "a",
       explain: "N(d\u2082) = Q(S_T > K). The real-world chance uses \u03bc in place of r and is generally different \u2014 74% vs 56% in the lesson's example. Quoting one for the other is a professional-grade error."
+    },
+
+    // ---- L016: Black-Scholes PDE & Feynman-Kac ----
+    {
+      id: "l016-pde-r-not-mu", lesson: 16, quarter: "Q2", concept: "bs-pde", misconception: true,
+      question: "The Black\u2013Scholes PDE uses the cash rate r, not the real drift \u03bc, because:",
+      options: [
+        { label: "hedge cancels \u03bc \u2014 a riskless book earns only r", value: "a" },
+        { label: "traders assume the stock itself grows at rate r", value: "b" },
+        { label: "Girsanov erases volatility, so only r remains", value: "c" },
+        { label: "the terminal payoff is written in terms of r only", value: "d" }
+      ],
+      correct: "a",
+      explain: "Shorting V_s shares subtracts \u03bc S V_s from both sides. After that the book is riskless, so no-arbitrage pins its return at r. Putting \u03bc in the PDE is the continuous-time face of simulating with \u03bc."
+    },
+    {
+      id: "l016-ito-curvature", lesson: 16, quarter: "Q2", concept: "ito-correction",
+      question: "In the Black\u2013Scholes PDE, the term \u00bd \u03c3\u00b2 S\u00b2 V_ss is:",
+      options: [
+        { label: "It\u00f4 leftover from the option's curvature", value: "a" },
+        { label: "cash-rate carry on the shares you are holding", value: "b" },
+        { label: "the funding cost of the option's own price", value: "c" },
+        { label: "the real-world risk premium, just rewritten", value: "d" }
+      ],
+      correct: "a",
+      explain: "It is \u00bd b\u00b2 f_xx with b = \u03c3 S and f = V. A call is convex (V_ss > 0), so the leftover is a lift \u2014 the opposite sign of the \u2212\u00bd\u03c3\u00b2 drag on log S."
+    },
+    {
+      id: "l016-feynman-kac", lesson: 16, quarter: "Q2", concept: "feynman-kac",
+      question: "Feynman\u2013Kac, specialised to this market, says the PDE solution V(t, s) equals:",
+      options: [
+        { label: "the discounted Q-average of the finish-line payoff", value: "a" },
+        { label: "the real-world forecast of the option's payout", value: "b" },
+        { label: "the stock price minus the discounted strike K", value: "c" },
+        { label: "the residual of a delta-hedged book after a day", value: "d" }
+      ],
+      correct: "a",
+      explain: "V(t, s) = E_Q[e^{-r(T-t)} (S_T \u2212 K)\u207a | S_t = s]. The PDE and the average are the same object \u2014 two machines, one number."
+    },
+    {
+      id: "l016-terminal", lesson: 16, quarter: "Q2", concept: "terminal-condition", misconception: true,
+      question: "The condition V(T, s) = (s \u2212 K)\u207a is called terminal because it:",
+      options: [
+        { label: "pins the surface at expiry, a finish line", value: "a" },
+        { label: "sets today's price equal to the payoff now", value: "b" },
+        { label: "forces the hedge ratio \u0394 to equal one", value: "c" },
+        { label: "makes the discounted stock a martingale", value: "d" }
+      ],
+      correct: "a",
+      explain: "The PDE is a motion rule and needs a finish, not a start. Writing V(0, s) = (s \u2212 K)\u207a would describe a ticket that has already expired."
+    },
+    {
+      id: "l016-residual", lesson: 16, quarter: "Q2", concept: "pde-residual",
+      question: "At S = 100 the curvature term is +3.752. Dropping it from the PDE leaves a residual of:",
+      options: [
+        { label: "\u22123.752 \u2014 ordinary calculus, no It\u00f4 lift", value: "a" },
+        { label: "+6.368 \u2014 the \u03bc \u2212 r premium on the delta", value: "b" },
+        { label: "+0.523 \u2014 funding cost of the option itself", value: "c" },
+        { label: "\u22126.414 \u2014 raw time-decay with nothing else", value: "d" }
+      ],
+      correct: "a",
+      explain: "Each damaged residual equals the term you left out. Drop +3.752 and the budget that summed to zero sums to \u22123.752. Put \u03bc in and the leftover is +6.368; drop funding and it is +0.523."
     }
   ];
 })(window);

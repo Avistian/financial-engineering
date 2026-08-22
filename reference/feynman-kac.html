@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — The Black–Scholes PDE &amp; Feynman–Kac</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    code { font-size: 0.85em; }
+  </style>
+</head>
+<body>
+<article>
+  <h1>The Black–Scholes PDE &amp; Feynman–Kac</h1>
+  <p class="subtitle">Reference · print-friendly cheat sheet · Units 016–020 (Year 1 Q2)</p>
+
+  <p>
+    Why a differential equation and a discounted average are the same price. Taught in
+    <a href="../lessons/0016-black-scholes-pde-feynman-kac.html">Lesson 016</a>; source Shreve II
+    Ch. 6. Builds on <a href="girsanov.html">Lesson 015</a> (the $Q$-price) and
+    <a href="ito-lemma.html">Lesson 013</a> (Itô on a function of an Itô process).
+  </p>
+
+  <h2>The price as a surface</h2>
+  <p>
+    <code>V(t, s)</code> is the option's value when the clock says <code>t</code> and the share
+    is at <code>s</code>. Three slopes: <strong>delta</strong> <code>V<sub>s</sub></code> (space),
+    <strong>gamma</strong> <code>V<sub>ss</sub></code> (curvature), <strong>theta</strong>
+    <code>V<sub>t</sub></code> (time).
+  </p>
+
+  <h2>Itô under Q, then the hedge</h2>
+  <div class="formula">dS = r S dt + σ S dW̃</div>
+  <div class="formula">dV = (V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub>) dt + σ S V<sub>s</sub> dW̃</div>
+  <p>
+    Book <code>Π = V − V<sub>s</sub> S</code> (long one option, short delta shares). The
+    <code>dW̃</code> cancels, and so does the <code>r S V<sub>s</sub></code> carry:
+    <code>dΠ = (V<sub>t</sub> + ½ σ² S² V<sub>ss</sub>) dt</code>. A book with no random kick
+    is riskless.
+  </p>
+
+  <h2>The Black–Scholes PDE</h2>
+  <div class="formula">V<sub>t</sub> + r S V<sub>s</sub> + ½ σ² S² V<sub>ss</sub> − r V = 0</div>
+  <p>
+    Forced by <code>dΠ = r Π dt</code> (no free lunch). Equivalently: the discounted price
+    <code>e<sup>−rt</sup>V</code> is a <code>Q</code>-martingale, so its <code>dt</code>
+    coefficient is zero. The real-world drift <code>μ</code> never appears — it cancels in the
+    hedge, the same way <code>p</code> never entered the two-state recipe.
+  </p>
+  <table>
+    <thead><tr><th>Term</th><th>At (t=0, S=100, K=100, r=5%, σ=20%, T=1)</th><th>Dollars / year</th></tr></thead>
+    <tbody>
+      <tr><td><code>V<sub>t</sub></code> (theta)</td><td>the option ages</td><td>−6.414</td></tr>
+      <tr><td><code>r S V<sub>s</sub></code></td><td>carry on Δ = 0.6368 shares</td><td>+3.184</td></tr>
+      <tr><td><code>½ σ² S² V<sub>ss</sub></code></td><td>Itô leftover, Γ = 0.01876</td><td>+3.752</td></tr>
+      <tr><td><code>− r V</code></td><td>funding V = 10.4506</td><td>−0.523</td></tr>
+      <tr><td><strong>sum</strong></td><td>the residual</td><td><strong>0.000</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Terminal and edge conditions</h2>
+  <table>
+    <thead><tr><th>Where</th><th>Condition</th><th>Plain meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Finish line</td><td><code>V(T, s) = (s − K)<sup>+</sup></code></td><td>at expiry the ticket <em>is</em> its payoff</td></tr>
+      <tr><td>Share worthless</td><td><code>V(t, 0) = 0</code></td><td>a call on nothing is nothing</td></tr>
+      <tr><td>Share huge</td><td><code>V ≈ s − K e<sup>−r(T−t)</sup></code></td><td>almost a forward; subtract only the PV of K</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Feynman–Kac</h2>
+  <div class="formula">
+    u<sub>t</sub> + a u<sub>x</sub> + ½ b² u<sub>xx</sub> − r u = 0,&nbsp;&nbsp; u(T, x) = g(x)
+    &nbsp;&nbsp;⟺&nbsp;&nbsp;
+    u(t, x) = E[ e<sup>−r(T−t)</sup> g(X<sub>T</sub>) | X<sub>t</sub> = x ]
+  </div>
+  <p>
+    with <code>dX = a dt + b dW</code>. Specialise to <code>a = r s</code>, <code>b = σ s</code>,
+    <code>g(s) = (s − K)<sup>+</sup></code>, expectation under <code>Q</code>: the PDE
+    <em>is</em> Lesson 015's pricing formula. Two numerical machines, one number — a tree (or
+    a finite-difference grid) and a Monte-Carlo average must agree.
+  </p>
+
+  <h2>Call formula (the one case with a closed form)</h2>
+  <div class="formula">C = S N(d<sub>1</sub>) − K e<sup>−rτ</sup> N(d<sub>2</sub>)</div>
+  <p>
+    <code>d<sub>1</sub> = [ln(S/K) + (r + ½σ²)τ] / (σ√τ)</code>,
+    <code>d<sub>2</sub> = d<sub>1</sub> − σ√τ</code>, <code>τ = T − t</code>.
+    Delta <code>N(d<sub>1</sub>)</code>, gamma <code>n(d<sub>1</sub>)/(S σ √τ)</code>.
+    The <code>N(·)</code> is there because a change of variables turns the PDE into the
+    <strong>heat equation</strong> <code>u<sub>τ</sub> = ½ σ² u<sub>xx</sub></code>, whose
+    kernel is Gaussian.
+  </p>
+
+  <h2>Six traps</h2>
+  <ol>
+    <li><strong>μ in the PDE.</strong> Residual <code>(μ − r) S V<sub>s</sub> = +6.37</code> at the running point. A forecast, not a price.</li>
+    <li><strong>Drop ½σ²S²V<sub>ss</sub>.</strong> Ordinary calculus. Residual <code>−3.75</code>.</li>
+    <li><strong>Payoff as a starting condition.</strong> The PDE runs backward from date T.</li>
+    <li><strong>Drop −rV.</strong> Claiming the ticket sits on the books for free. Residual <code>+0.52</code>.</li>
+    <li><strong>Reading the PDE as a forecast.</strong> It uses r because it is a pricing identity.</li>
+    <li><strong>American ticket, European solver.</strong> Early exercise is a free boundary.</li>
+  </ol>
+
+  <nav class="nav-links">
+    <ul>
+      <li><a href="../lessons/0016-black-scholes-pde-feynman-kac.html">← Lesson 016</a></li>
+      <li><a href="girsanov.html">Risk-neutral pricing &amp; Girsanov</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>
