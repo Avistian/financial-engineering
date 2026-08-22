@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Study Roadmap — Quant Research (3-year)</title>
+  <title>Study Roadmap — Quant Research (4-year)</title>
   <link rel="stylesheet" href="../assets/lesson.css">
   <style>
     table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 1rem 0; }
@@ -15,13 +15,17 @@
 <body>
 <article>
   <h1>Study Roadmap</h1>
-  <p class="subtitle">Reference · the 3-year plan at a glance · print-friendly</p>
+  <p class="subtitle">Reference · the 4-year plan at a glance · print-friendly</p>
 
   <p>
-    Center of gravity: <strong>Quantitative Researcher / systematic alpha</strong>. The one skill
-    that outranks all others: <strong>not fooling yourself</strong> — leakage-free pipelines,
-    purged/embargoed CV, CPCV, PBO, deflated Sharpe. Full detail:
+    Center of gravity: <strong>Quantitative Researcher / systematic alpha</strong>, then a fourth
+    year aimed at a <strong>long-only, mid-horizon stock book</strong> (ML scores + constrained
+    optimization). The one skill that outranks all others: <strong>not fooling yourself</strong> —
+    leakage-free pipelines, purged/embargoed CV, CPCV, PBO, deflated Sharpe. Years 1–3 are
+    unchanged; Year 4 is extra time. Full detail:
     <a href="curriculum.html">the expert curriculum</a>.
+    Mandate in plain words:
+    <a href="long-only-mid-horizon.html">Year 4 sheet</a>.
   </p>
 
   <h2>The arc</h2>
@@ -43,17 +47,22 @@
         <td>Alpha, execution, systems &amp; the interview</td>
         <td>Construct a denoised, cost-aware portfolio; model joint losses with copulas (not just correlation); compare Almgren-Chriss vs an RL execution agent; pass the interview gauntlet; defend an end-to-end capstone to a PM.</td>
       </tr>
+      <tr>
+        <td class="yr">Year 4</td>
+        <td>Long-only mid-horizon equity: ML scores, constrained books</td>
+        <td>Build a point-in-time stock universe; beat classic factors (momentum, value, quality) as baselines; train a walk-forward monthly ranker; turn scores into a long-only book with a cost-aware optimizer; defend <em>net information ratio versus a named benchmark</em>.</td>
+      </tr>
     </tbody>
   </table>
 
   <h2>Quarters</h2>
   <table>
-    <thead><tr><th>Q</th><th>Year 1</th><th>Year 2</th><th>Year 3</th></tr></thead>
+    <thead><tr><th>Q</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>Year 4</th></tr></thead>
     <tbody>
-      <tr><td>Q1</td><td>Markets &amp; statistical foundations</td><td>Financial ML II — features &amp; ensembles</td><td>Portfolio construction &amp; risk</td></tr>
-      <tr><td>Q2</td><td>Stochastic calculus &amp; pricing</td><td><strong>Backtesting &amp; the war on overfitting</strong></td><td>Execution, market making &amp; RL</td></tr>
-      <tr><td>Q3</td><td>Time series &amp; volatility</td><td>Market microstructure &amp; LOB</td><td>Research infra &amp; latency awareness</td></tr>
-      <tr><td>Q4</td><td>Financial ML I — data &amp; labeling</td><td>Deep learning &amp; NLP for markets</td><td>Interview mastery &amp; capstone</td></tr>
+      <tr><td>Q1</td><td>Markets &amp; statistical foundations</td><td>Financial ML II — features &amp; ensembles</td><td>Portfolio construction &amp; risk</td><td>Mandate, PIT data, classic factors</td></tr>
+      <tr><td>Q2</td><td>Stochastic calculus &amp; pricing</td><td><strong>Backtesting &amp; the war on overfitting</strong></td><td>Execution, market making &amp; RL</td><td>Cross-sectional ML ranking</td></tr>
+      <tr><td>Q3</td><td>Time series &amp; volatility</td><td>Market microstructure &amp; LOB</td><td>Research infra &amp; latency awareness</td><td>Constrained long-only optimization</td></tr>
+      <tr><td>Q4</td><td>Financial ML I — data &amp; labeling</td><td>Deep learning &amp; NLP for markets</td><td>Interview mastery &amp; capstone</td><td>Run, attribute, Year-4 capstone</td></tr>
     </tbody>
   </table>
 
@@ -61,12 +70,13 @@
   <ul>
     <li><strong>Interview drilling</strong> — weekly from Year 1: mental math, brainteasers, and LeetCode. Concentrated, not started, in Year 3 Q4.</li>
     <li><strong>Failure-mode discipline</strong> — every method is learned with the way it breaks.</li>
-    <li><strong>Quarterly currency check</strong> — refresh the frontier (TFMs, deep LOB, RL) each quarter; leave the canon stable.</li>
+    <li><strong>Quarterly currency check</strong> — refresh the frontier (TFMs, deep LOB, RL, monthly cross-sectional ML) each quarter; leave the canon stable.</li>
   </ul>
 
   <nav class="nav-links">
     <ul>
-      <li><a href="curriculum.html">Full curriculum (all 120 units)</a></li>
+      <li><a href="curriculum.html">Full curriculum (all 160 units)</a></li>
+      <li><a href="long-only-mid-horizon.html">Year 4 mandate (plain-language sheet)</a></li>
       <li><a href="../index.html">Home</a></li>
     </ul>
   </nav>

@@ -15,10 +15,11 @@ exactly what you are standing on.
 - Reproduce a **microstructure result** (OFI→impact, a Hawkes intensity, a DeepLOB-style predictor) with correct temporal splits and honest limitations.
 - Construct a **denoised, cost-aware portfolio** (RMT / Ledoit-Wolf) from multiple signals and report net Sharpe and capacity; stress joint losses with **copulas**, not just linear correlation.
 - **Pass the interview gauntlet**: mental math, probability/market-making games, stochastic-calculus derivations, and LeetCode-style DP/graphs under pressure.
-- Ship a **capstone**: an end-to-end research project presented as if defending it to a portfolio manager.
+- Ship a **Year-3 capstone**: an end-to-end research project presented as if defending it to a portfolio manager.
+- Ship a **Year-4 capstone** (after the offer-level track): a point-in-time, walk-forward, cost-aware **long-only** stock book — ML ranker → constrained optimizer → **net information ratio versus a named benchmark** — defended to a PM who forbids shorts. Plain-language map: [reference/long-only-mid-horizon.html](./reference/long-only-mid-horizon.html).
 
 ## Constraints
-- **Pace:** ~1.5–2 hours/day, sustained, over **~3 years** (~2,000 hours). Higher daily intensity than a 1h/day plan; extra time on strong days goes to labs/reproduction, never to skipping exit criteria. See [CURRICULUM.md](./CURRICULUM.md).
+- **Pace:** ~1.5–2 hours/day, sustained, over **~4 years** (~2,700 hours). Years 1–3 are the original ~2,000-hour QR track (unchanged). **Year 4 is extra calendar**, not a swap: a long-only, mid-horizon equity book whose scores come from ML and whose holdings come from a constrained optimizer. Higher daily intensity than a 1h/day plan; extra time on strong days goes to labs/reproduction, never to skipping exit criteria. See [CURRICULUM.md](./CURRICULUM.md). Do not skip to Year 4 from Year 1 — the validation and portfolio math live in Years 2–3.
 - **Starting point:** solid undergrad math (calculus, linear algebra, basic probability) but **no measure theory / SDEs**; **strong programmer** (Python + C++/Rust, data structures, systems); **little to no finance/markets** knowledge. Year 1 therefore rebuilds markets from zero and bridges into stochastic calculus, while labs move fast because you can code.
 - **Stack:** Python-first for all research/ML/backtesting labs. C++/Rust appear only in the Year-3 low-latency *systems-awareness* track — enough to speak the language and reason about latency, not to become an HFT core dev.
 - Ground every claim in high-trust sources ([RESOURCES.md](./RESOURCES.md)) and reproducible experiments. A unit is "done" only when its lab runs and its quiz/checkpoint passes.
