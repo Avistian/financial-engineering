@@ -20,8 +20,8 @@
   <p>
     Center of gravity: <strong>Quantitative Researcher / systematic alpha</strong>, then extra
     years aimed at <strong>long-only stock books</strong> (ML scores + constrained
-    optimization) — Year 4 on a weeks-to-months clock, Year 5 on an hours-to-days
-    (mid-frequency) clock — then Year 6, the <strong>data kit and going-live desk</strong>.
+    optimization). Year 4 builds the store and the monthly book; Year 5 defends it and
+    researches the daily book; Year 6 defends the daily book and goes live.
     The one skill that outranks all others: <strong>not fooling
     yourself</strong> — leakage-free pipelines, purged/embargoed CV, CPCV, PBO, deflated
     Sharpe. Years 1–3 are unchanged; Years 4–6 are extra time. Full detail:
@@ -56,18 +56,18 @@
       </tr>
       <tr>
         <td class="yr">Year 4</td>
-        <td>Long-only mid-horizon equity: ML scores, constrained books</td>
-        <td>Build a point-in-time stock universe; beat classic factors (momentum, value, quality) as baselines; train a walk-forward monthly ranker; turn scores into a long-only book with a cost-aware optimizer; defend <em>net information ratio versus a named benchmark</em>.</td>
+        <td>Honest store, then the monthly long-only book</td>
+        <td>Build a point-in-time store (as-of keys); beat classic factors as baselines; train a walk-forward monthly ranker; turn scores into a constrained long-only book. The full PM defense of that book is Year 5 Q1.</td>
       </tr>
       <tr>
         <td class="yr">Year 5</td>
-        <td>Long-only mid-frequency equity: daily scores, cost-first books</td>
-        <td>Filter by liquidity; beat 1–5 day reversal and PEAD after costs; train a walk-forward daily ranker; turn scores into a long-only book that respects ADV and impact; defend <em>net IR</em> and show why this book's capacity is smaller than Year 4's.</td>
+        <td>Defend the monthly book; research the daily book</td>
+        <td>Run, attribute, and defend the monthly book; then filter by liquidity, beat 1–5 day reversal and PEAD after costs, train a daily ranker, and turn scores into an ADV-aware long-only book.</td>
       </tr>
       <tr>
         <td class="yr">Year 6</td>
-        <td>Data kit and going live: store, paper loop, tiny live book</td>
-        <td>Build a point-in-time store that both clocks share; run the same functions live as in the backtest; paper-trade with a ledger that adds up and a kill switch that fires; defend twenty paper or tiny-live days.</td>
+        <td>Defend the daily book; paper and live</td>
+        <td>Defend the daily book on net IR; run the same functions live as in the backtest; paper-trade with a ledger that adds up and a kill switch that fires; twenty paper or tiny-live days.</td>
       </tr>
     </tbody>
   </table>
@@ -85,18 +85,16 @@
 
   <h2>Quarters — Years 4–6 (extra calendar)</h2>
   <table>
-    <thead><tr><th>Q</th><th>Year 4 · weeks–months</th><th>Year 5 · hours–days</th><th>Year 6 · data + desk</th></tr></thead>
+    <thead><tr><th>Q</th><th>Year 4 · store + monthly</th><th>Year 5 · defend monthly; daily research</th><th>Year 6 · defend daily; desk</th></tr></thead>
     <tbody>
-      <tr><td>Q1</td><td>Mandate, PIT data, classic factors</td><td>Faster mandate, liquidity, reversal + PEAD</td><td>Desk tables, as-of keys, feature store</td></tr>
-      <tr><td>Q2</td><td>Monthly cross-sectional ML ranking</td><td>Daily / multi-day ML ranking</td><td>Same functions live as in the backtest</td></tr>
-      <tr><td>Q3</td><td>Constrained long-only optimization</td><td>Daily optimizer: ADV caps, impact, futures overlay</td><td>Broker, paper loop, kill switch</td></tr>
-      <tr><td>Q4</td><td>Run, attribute, Year-4 capstone</td><td>Gaps, two-sleeve NAV, Year-5 capstone</td><td>Monitoring, incidents, twenty-day capstone</td></tr>
+      <tr><td>Q1</td><td>Data kit: tables, as-of keys, feature store</td><td>Run, attribute, defend the monthly book</td><td>Run, attribute, defend the daily book</td></tr>
+      <tr><td>Q2</td><td>Mandate, classic factors</td><td>Faster mandate, liquidity, reversal + PEAD</td><td>Same functions live as in the backtest</td></tr>
+      <tr><td>Q3</td><td>Monthly cross-sectional ML ranking</td><td>Daily / multi-day ML ranking</td><td>Broker, paper loop, kill switch</td></tr>
+      <tr><td>Q4</td><td>Constrained long-only optimization</td><td>Daily optimizer: ADV caps, impact</td><td>Monitoring, incidents, twenty-day capstone</td></tr>
     </tbody>
   </table>
   <p>
-    Recommended order (not the unit numbers): Years 1–3 →
-    <strong>201–210 (data kit)</strong> → Year 4 → Year 5 →
-    <strong>211–240 (prod parity, paper, small live)</strong>.
+    Study order is the unit numbers: Years 1–3 → 121–240.
     Lesson-by-lesson teaching plans (what each unit must teach; labs not written yet):
     <a href="year-4-lessons.html">Year 4</a> ·
     <a href="year-5-lessons.html">Year 5</a> ·

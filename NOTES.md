@@ -5,7 +5,7 @@
 - **Math:** solid undergrad (calculus, linear algebra, basic probability). **No** measure theory or SDEs yet — Year 1 Q2 is the bridge, don't assume it.
 - **Programming:** strong — Python + C++/Rust, data structures, systems. Labs can move fast on code; the learning is in the *finance/stats*, not the syntax.
 - **Finance:** near zero. Year 1 Q1 builds markets vocabulary from scratch; never assume prior market knowledge.
-- **Time:** ~1.5–2 h/day, sustained, **~6-year horizon** (Years 1–3 original QR track + Year 4 long-only mid-horizon + Year 5 long-only mid-frequency + Year 6 data kit and going live).
+- **Time:** ~1.5–2 h/day, sustained, **~6-year horizon** (Years 1–3 original QR track + Year 4 store and monthly long-only book + Year 5 defend monthly / daily research + Year 6 defend daily / go live).
 - **Lab stack:** Python-first (numpy/pandas/scikit-learn/statsmodels/PyTorch). C++/Rust only in the Year-3 systems-awareness track.
 
 ## Teaching preferences
@@ -144,28 +144,37 @@
   long-only job to mid-frequency** (hours–days) as well, then asked for **data-prep and
   everything needed to start trading**, and then asked for a **lesson-by-lesson teaching
   plan only** — do **not** generate labs now.
-- **Year 4 mandate:** own stocks for weeks to a few months; no borrowed-share shorts;
-  beat a *named benchmark* after costs; ML score → constrained optimizer. Exam = **net IR
-  vs the benchmark**. Units 121–160. Sheet: `reference/long-only-mid-horizon.html`.
+- **Year 4:** Q1 is the data kit (units 121–130). Q2–Q4 are the monthly long-only
+  book through the optimizer (131–160). Sheet: `reference/long-only-mid-horizon.html`.
   Teaching plan: `reference/year-4-lessons.html`.
-- **Year 5 mandate:** the same rules on an hours-to-days clock. Costs and ADV caps are
-  first-order; capacity is smaller; overnight gaps matter. Units 161–200. Sheet:
+- **Year 5:** Q1 defends the monthly book (161–170). Q2–Q4 are the same rules on an
+  hours-to-days clock through the daily optimizer (171–200). Sheet:
   `reference/long-only-mid-frequency.html`. Teaching plan: `reference/year-5-lessons.html`.
-- **Year 6 mandate:** the data kit and going-live desk for both clocks. Units 201–240.
-  Teaching plan: `reference/year-6-lessons.html`. **Do 201–210 before Year 4 backtests.**
-  Do 211–240 after there is a book worth paper-trading.
+- **Year 6:** Q1 defends the daily book (201–210). Q2–Q4 are paper and a tiny live
+  desk (211–240). Teaching plan: `reference/year-6-lessons.html`.
+- **Study order is the unit numbers.** The old "do 201–210 before Year 4" exception
+  is gone — that kit is now 121–130.
 - **What did not change:** Years 1–3 (units 001–120) stay in place, in order. Do not skip
   to Year 4, 5, or 6 from Year 1. Y2 Q2 (validation), Y2 Q3 (impact), Y3 Q1 (Grinold–Kahn),
   and Y3 Q2 (execution) are the on-ramps. Year 5 also needs Year 4's mandate language
-  and optimizer (especially 121, 141–150, 153).
+  and optimizer (especially 131, 151–160, 163).
 - **Name the horizon correctly:** everyday "mid-term" = this course's **low frequency**
-  (weeks+) = Year 4. **Mid-frequency** = minutes–days = Year 5 (the Q1 lab's clock,
-  without the shorts).
+  (weeks+) = the monthly book (Year 4 Q2 through Year 5 Q1). **Mid-frequency** =
+  minutes–days = Year 5 Q2 through Year 6 Q1 (the Q1 lab's clock, without the shorts).
 - **No labs authored for 121–240.** The teaching plans are the contract for future
   lesson authors: one skill, ordered beats, trap. Do not generate notebooks until asked.
 - Encoded in `CURRICULUM.md` Years 4–6, both mandate sheets, the three teaching-plan
   pages, `MISSION.md`, and `RESOURCES.md` (QEPM, Gu–Kelly–Xiu, Jegadeesh 1990, Lehmann 1990,
   Bernard–Thomas, Amihud, Lou–Polk–Skouras, Boyd 2017, Gârleanu–Pedersen).
+
+## Standing decision — Years 4–6 unit numbers match study order (from 2026-08-22)
+- The data kit used to be numbered 201–210 (Year 6 Q1) with a note to do it *before*
+  Year 4. That exception was a sequencing bug: anyone following unit numbers would
+  backtest before they had a store.
+- **Fix:** 121–130 is the data kit; 131–170 the monthly book (research through
+  defense); 171–210 the daily book; 211–240 paper and live. Years 1–3 unchanged.
+- Pedagogical order that was already right, and is now also the numbering:
+  foundations → honest store → slower book → faster book → desk.
 
 ## Open questions / parking lot
 - Secure real LOB data (LOBSTER / Databento / FI-2010) before Year 2 Q3.
