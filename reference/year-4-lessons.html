@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Year 4 — what each lesson must teach</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 1rem 0; }
+    th, td { text-align: left; padding: 0.45rem 0.65rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-family: var(--font-sans); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .toc { columns: 2; column-gap: 2rem; font-family: var(--font-sans); font-size: 0.88rem; margin: 1rem 0 2rem; }
+    @media (max-width: 640px) { .toc { columns: 1; } }
+    .unit { margin: 2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .unit h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+    .unit h3 .n { font-family: var(--font-mono); color: var(--accent); margin-right: 0.4rem; }
+    .skill { margin: 0.35rem 0 0.6rem; }
+    .beats { margin: 0.4rem 0 0.8rem; padding-left: 1.2rem; }
+    .beats li { margin: 0.35rem 0; }
+    .chk-unit { background: var(--accent-light); padding: 0.75rem 1rem; border-radius: 4px; }
+    .exit-unit { background: #fef9e7; padding: 0.75rem 1rem; border-radius: 4px; }
+</style>
+</head>
+<body>
+<article>
+  <p class="mission-tag">Reference · lesson-by-lesson teaching plan</p>
+  <h1>Year 4 — what each lesson must teach</h1>
+  <p class="subtitle">Units 121–160 · long-only · weeks to months · teaching contract, no labs yet</p>
+  
+  <p>
+    Everyday picture: once a month you rank stocks, an optimizer turns those ranks into a
+    shopping cart you are allowed only to <em>own</em>, and you are judged on beating a named
+    index after costs. This page is <strong>what each lesson must teach</strong>, in order.
+    Labs are not written yet — the teaching beats are the contract.
+  </p>
+  <p>
+    Years 1–3 stay required. Do the
+    <a href="year-6-lessons.html">Year 6 data kit (201–210)</a>
+    <strong>before</strong> Year 4 backtests, even though those unit numbers come later.
+    Mid-frequency (hours–days) is <a href="year-5-lessons.html">Year 5</a>.
+  </p>
+
+  <nav class="toc">
+    <a href="#u121">121 The long-only mid-horizon mandate</a><br>
+    <a href="#u122">122 Universe construction without quietly dropping losers</a><br>
+    <a href="#u123">123 The return you actually earn: splits, dividends, delistings</a><br>
+    <a href="#u124">124 The cross-section as the unit of observation</a><br>
+    <a href="#u125">125 Classic baseline I — momentum (12-1)</a><br>
+    <a href="#u126">126 Classic baseline II — value, and value plus momentum</a><br>
+    <a href="#u127">127 Classic baseline III — quality, investment, low-volatility</a><br>
+    <a href="#u128">128 The factor zoo and publication decay</a><br>
+    <a href="#u129">129 The benchmark you claim to beat</a><br>
+    <a href="#u130">130 Q1 checkpoint — honest long-only factor notebook</a><br>
+    <a href="#u131">131 The monthly prediction target</a><br>
+    <a href="#u132">132 Point-in-time features — no restated numbers</a><br>
+    <a href="#u133">133 Information coefficient and matching the rebalance to the decay</a><br>
+    <a href="#u134">134 Linear cross-sectional models</a><br>
+    <a href="#u135">135 Trees on the monthly cross-section</a><br>
+    <a href="#u136">136 Learning-to-rank for 'who beats whom'</a><br>
+    <a href="#u137">137 Cross-sectional CV that respects time and names</a><br>
+    <a href="#u138">138 Combining ML scores with classic factors</a><br>
+    <a href="#u139">139 When ML adds nothing</a><br>
+    <a href="#u140">140 Q2 checkpoint — leakage-free monthly ranker</a><br>
+    <a href="#u141">141 From score to weight without an optimizer</a><br>
+    <a href="#u142">142 Active weights and the one-period utility</a><br>
+    <a href="#u143">143 Long-only as a constraint</a><br>
+    <a href="#u144">144 Risk models the optimizer trusts</a><br>
+    <a href="#u145">145 Linear constraints real books have</a><br>
+    <a href="#u146">146 Cost-aware optimization and capacity</a><br>
+    <a href="#u147">147 Multi-period rebalancing: when not to trade</a><br>
+    <a href="#u148">148 Convex optimization toolkit</a><br>
+    <a href="#u149">149 Robust and resampled optimization</a><br>
+    <a href="#u150">150 Q3 checkpoint — scores become a constrained book</a><br>
+    <a href="#u151">151 Between rebalances: drift, dividends, cash</a><br>
+    <a href="#u152">152 Implementation shortfall at a monthly horizon</a><br>
+    <a href="#u153">153 Index-futures overlay to control beta</a><br>
+    <a href="#u154">154 Drawdowns a long-only book will eat</a><br>
+    <a href="#u155">155 Attribution: where the extra return came from</a><br>
+    <a href="#u156">156 Capacity, crowding, live vs paper for slow equity</a><br>
+    <a href="#u157">157 Pre-register the research</a><br>
+    <a href="#u158">158 Failure modes of this mandate</a><br>
+    <a href="#u159">159 Overlays a real book meets</a><br>
+    <a href="#u160">160 Year-4 exit — monthly long-only capstone</a><br>
+  </nav>
+
+  <section class="unit" id="u121">
+    
+    <h3><span class="n">121</span> The long-only mid-horizon mandate</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> State the job in one sentence, and keep score with information ratio, not Sharpe.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Everyday picture: you own a shopping cart of stocks for weeks to months; you never borrow shares to bet they fall. That is <strong>long-only</strong>.</li>
+      <li>Name the <strong>benchmark</strong> — the comparison basket you claim to beat (often the same stocks, cap-weighted). Without a named benchmark the exam is undefined.</li>
+      <li><strong>Active return</strong> is your return minus the benchmark's return. Tiny numbers: index +10%, you +12% → active return = +2%.</li>
+      <li><strong>Tracking error</strong> is how much that extra piece bounces (the volatility of active return).</li>
+      <li><strong>Information ratio (IR)</strong> = active return ÷ tracking error. That is the exam. <strong>Sharpe</strong> = extra return over cash ÷ how hard the whole book bounces — a long-only book can look fine on Sharpe just by riding the market tide (<strong>beta</strong>).</li>
+      <li>Contrast with the Q1 lab: that book was dollar-neutral (dollars long ≈ dollars short). This book is allowed to go up and down with the market. Teach when each exam is the honest one.</li>
+      <li>This clock is weeks-to-months. Lesson 001 called it low frequency / factor investing, not mid-frequency (hours–days).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Treating a long-only Sharpe as proof of skill. Most of that number is beta. The lesson must compute both IR and Sharpe on the same toy book.</div>
+    
+  </section>
+  <section class="unit" id="u122">
+    
+    <h3><span class="n">122</span> Universe construction without quietly dropping losers</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Build the list of stocks you are allowed to own as of this morning, not as of today looking backward.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>universe</strong> is the list of names the book may hold. It changes: companies list (IPO), leave, go bankrupt, get bought.</li>
+      <li><strong>Point-in-time</strong> means using only what a researcher could have known on that morning. The opposite is peeking at who survived until now.</li>
+      <li><strong>Survivorship bias</strong> is the lie you get by studying only the names still alive. Dead names were often the losers; dropping them makes any rule look better.</li>
+      <li>Teach the two rebuilds side by side: survivors-only vs point-in-time membership. The gap is the fake premium.</li>
+      <li>IPOs: a name must not appear before its first trade date. Delistings: the last day still has a return (often ugly). Missing days are not 'drop the row.'</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Building the universe from today's index members and filling history backward. That is the default vendor download, and it is wrong.</div>
+    
+  </section>
+  <section class="unit" id="u123">
+    
+    <h3><span class="n">123</span> The return you actually earn: splits, dividends, delistings</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Turn a vendor price file into the money a holder of the shares would have made.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>split</strong> is the company cutting each share into pieces (2-for-1: you have twice as many, each worth about half). The raw price jumps; your wealth does not.</li>
+      <li>A <strong>dividend</strong> is cash the company pays you for holding the share. The price often drops by about that cash; you still received it.</li>
+      <li><strong>Price return</strong> ignores dividends. <strong>Total return</strong> includes them. A backtest on raw prices will lie — usually by looking too good on names that never paid you cash, or too jumpy on split days.</li>
+      <li>Delist / bankruptcy: the last return is part of the record. Dropping the name the day before the crash is another survivorship lie.</li>
+      <li>Spinoffs and special dividends: same idea — adjust so the series is the holder's wealth, not the ticker print.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A price-only backtest on unadjusted closes. Teach it as a planted lie: same rule, two panels, two Sharpes.</div>
+    
+  </section>
+  <section class="unit" id="u124">
+    
+    <h3><span class="n">124</span> The cross-section as the unit of observation</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Ask 'who beats whom next month?' not 'does this one ticker go up?'</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>characteristic</strong> is a number about a stock today (how cheap, how profitable, how much it already went up).</li>
+      <li>The <strong>cross-section</strong> is the slice across names at one date: 500 numbers today, not 10 years of one name.</li>
+      <li><strong>Residual return</strong> is the part of a name's move left after you subtract the market tide (and, later, industry). That is what a ranker is trying to forecast.</li>
+      <li>Fama–MacBeth in plain words: each month, draw the line 'next month's residual vs today's characteristic'; then average those monthly slopes and ask if the average is noise.</li>
+      <li>One tiny worked slope: 3 names, characteristic 1 / 2 / 3, next residual −1 / 0 / +1 → the line slants up. That is a positive slope, not a trading rule yet.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Pooling every name-day into one giant regression and quoting a t-stat as if you had 100,000 independent bets. You had ~120 months. Unit 009 already warned; teach it again on this object.</div>
+    
+  </section>
+  <section class="unit" id="u125">
+    
+    <h3><span class="n">125</span> Classic baseline I — momentum (12-1)</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Build the 12-1 winner list, long-only, and say what you lose by not shorting losers.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Everyday idea: names that have been winning for a while often keep winning for a few more months.</li>
+      <li><strong>12-1 momentum</strong>: look at the last 12 months of return, drop the most recent month (that month is often a bounce, not a trend), rank names, own the top group.</li>
+      <li>Why skip last month: short-horizon reversal (Year 5) lives there. Mixing it in muddies the baseline.</li>
+      <li>Show long-only deciles and the long-short (own winners, short losers). The short side is often half the old academic story. A long-only book only gets the winner half.</li>
+      <li>Time-series trend (own it vs cash if the name itself is up) is a different rule. Name the difference; do not mix the labels.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Calling any 'what went up, buy it' rule momentum. 12-1, 1-month reversal, and time-series trend are three jobs.</div>
+    
+  </section>
+  <section class="unit" id="u126">
+    
+    <h3><span class="n">126</span> Classic baseline II — value, and value plus momentum</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Define cheap vs expensive with a point-in-time ratio, then combine it with 12-1 without peeking.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Everyday idea: a cheap name is one whose price is small compared with something real about the company (book equity, earnings). <strong>Value</strong> is that comparison.</li>
+      <li>Book/price and earnings/price: define each in words, then as a ratio. The ratio must use the book or earnings that was known that morning (unit 122 / later 204).</li>
+      <li>Fama–French as the baseline you must beat or own honestly — not as a religion. Size (small vs large) sits next to value; teach it as a characteristic, not a vibe.</li>
+      <li>Value and momentum often hedge each other (when one is ugly the other is less ugly). A 50/50 and an IC-weighted blend are two different combines; teach both.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Using this year's 10-K earnings in a 2014 characteristic. That is restatement leakage; it belongs in the same breath as the ratio.</div>
+    
+  </section>
+  <section class="unit" id="u127">
+    
+    <h3><span class="n">127</span> Classic baseline III — quality, investment, low-volatility</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Add profitability and calmness as characteristics, and show that low-vol is often a hidden beta bet.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li><strong>Quality / profitability</strong>: highly profitable, conservative firms. Novy-Marx: gross profit as a characteristic, not a slogan.</li>
+      <li><strong>Investment</strong> (Fama–French five-factor): firms that are pouring money into expansion have historically paid less. Teach the characteristic, then the story, in that order.</li>
+      <li><strong>Low-volatility</strong>: the calmest names have historically paid almost as much as jumpy ones. That is a puzzle, not a free lunch.</li>
+      <li>Neutralize beta (strip the market tide from the score). After that, a lot of the low-vol 'edge' shrinks. The lesson must show the before/after.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Selling low-vol as alpha when the book is just refusing to own high-beta names. Unhedged, you are underweight the market in a specific way.</div>
+    
+  </section>
+  <section class="unit" id="u128">
+    
+    <h3><span class="n">128</span> The factor zoo and publication decay</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Treat a pile of characteristics as a multiple-testing problem, and expect published edges to shrink.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm Harvey–Liu–Zhu (unit 007): if you search 20 characteristics and keep the winner, the t-stat is a max, not a single test.</li>
+      <li>McLean–Pontiff: after a paper comes out, the edge often fades. Crowding and data-mining both do this; teach both stories.</li>
+      <li>Hou–Xue–Zhang: most 'anomalies' do not replicate under one common protocol. The zoo is not a menu of free edges.</li>
+      <li>Bonferroni and Benjamini–Hochberg on the same 20-characteristic screen. They will disagree; teach what each is promising.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Keeping a characteristic because the story is pretty after you saw the t-stat. Pre-commit the list (unit 157 will make this a habit).</div>
+    
+  </section>
+  <section class="unit" id="u129">
+    
+    <h3><span class="n">129</span> The benchmark you claim to beat</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Build the index you will be judged against, and show why beating equal-weight is the easier exam.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Cap-weight vs equal-weight: in cap-weight, bigger companies are a bigger slice. In equal-weight, every name is the same size (you rebalance to keep it that way).</li>
+      <li>Reconstitution: the index committee (or rule) adds and drops names on known dates. Your universe and your benchmark must use the same as-of membership.</li>
+      <li>Float: not every share can trade (insiders, governments). A real cap-weight index uses shares that can trade.</li>
+      <li>Sharpe's arithmetic: after fees, beating the cap-weight market is a zero-sum exam among active managers. Teach why 'I beat the equal-weight basket' is a different, usually easier, claim.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Backtesting against equal-weight and quoting the result as if you beat the S&amp;P 500.</div>
+    
+  </section>
+  <section class="unit" id="u130">
+    <div class="chk-unit">
+    <h3><span class="n">130</span> Q1 checkpoint — honest long-only factor notebook</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Put 121–129 on one page: PIT universe, total returns, 12-1 + value, IR vs a named benchmark, a multiple-testing note.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>The learner rebuilds the universe two ways and shows the fake premium.</li>
+      <li>Total-return vs price-only on the same rule.</li>
+      <li>12-1 and value, long-only, IR and Sharpe vs a named cap-weight and vs equal-weight.</li>
+      <li>A written sentence on how many characteristics were searched.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A checkpoint that only reports the pretty Sharpe.</div>
+    </div>
+  </section>
+  <section class="unit" id="u131">
+    
+    <h3><span class="n">131</span> The monthly prediction target</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Pick one number the model is trying to forecast, and say why the other two are different jobs.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Three candidates: next-month residual return; next-month rank (who beats whom); next-month excess vs the benchmark.</li>
+      <li>Triple-barrier (unit 035) is a path-dependent label for a trade. A monthly residual is a simpler label that matches a monthly rebalance. Teach the contrast; do not throw AFML away.</li>
+      <li>Gu–Kelly–Xiu as the paper that already ran 'ML vs linear' on monthly characteristics. This year must beat or honestly match that kind of baseline, not invent a new exam.</li>
+      <li>A target that includes next month's market tide will teach the model to forecast beta. Residualize first if the mandate is 'who beats whom.'</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Training on next-month raw return and then being surprised the model just bought high-beta names.</div>
+    
+  </section>
+  <section class="unit" id="u132">
+    
+    <h3><span class="n">132</span> Point-in-time features — no restated numbers</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Build a feature table whose every cell could have been known that morning.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Features at this clock: lagged returns, size, value ratios, revisions, industry. Each one gets an as-of rule.</li>
+      <li>Restated fundamentals: the company later changes last year's earnings. A leaked join pastes the new number onto old dates.</li>
+      <li>Plant the leak on purpose (CCC-style restatement) and catch it with a vintage table: what was on the tape as of date D.</li>
+      <li>Industry and country are characteristics too; they must be as-of (reclassifications happen).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 'fundamentals' CSV with one row per name per year and no vintage date. That file cannot support an honest join.</div>
+    
+  </section>
+  <section class="unit" id="u133">
+    
+    <h3><span class="n">133</span> Information coefficient and matching the rebalance to the decay</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Measure how well today's scores line up with future residuals, and pick a hold that matches how fast that line dies.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li><strong>Information coefficient (IC)</strong>: correlation between today's scores and next period's residual returns. High IC means the ranking is informative, not that you have a book yet.</li>
+      <li>IC by holding week 1, 2, … 8. The decay tells you whether monthly rebalance is too slow or too fast for this score.</li>
+      <li>Re-warm the Fundamental Law (unit 084): IR ≈ IC × √breadth × transfer coefficient. Breadth here is ~N names per month, not 10,000 name-days.</li>
+      <li>A score that dies in five days does not belong in a monthly book (send it to Year 5). A score that is still alive at week 8 can sit still.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Rebalancing monthly because 'that is what factor funds do' while the IC is already dead by week two.</div>
+    
+  </section>
+  <section class="unit" id="u134">
+    
+    <h3><span class="n">134</span> Linear cross-sectional models</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Fit a monthly line, after stripping industry, size, and beta from the features.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Weighted least squares in one sentence: names with noisier residuals get less pull on the line.</li>
+      <li>Industry neutralization: subtract the industry average from the feature (or from the residual) so you are not just buying 'all tech.'</li>
+      <li>Residualizing size and beta: the leftover characteristic is what is not already 'it is a small name' or 'it rides the market.'</li>
+      <li>This linear model is the thing the tree model in 135 must beat. Teach it as a respected baseline, not a straw man.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A pooled OLS on the stacked panel with i.i.d. standard errors. The t-stat is a toy.</div>
+    
+  </section>
+  <section class="unit" id="u135">
+    
+    <h3><span class="n">135</span> Trees on the monthly cross-section</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Train a gradient-boosted tree as a regressor and as a ranker, with a walk-forward that does not peek.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm unit 047: a tree asks a sequence of yes/no questions about features. Boosting adds many small trees.</li>
+      <li>Regressor vs ranker: MSE tries to hit the exact residual; a rank objective tries to get the order of names right. The mandate is closer to order.</li>
+      <li>Walk-forward year-blocks: train on years 1–7, test 8; then 1–8, test 9. No i.i.d. K-fold.</li>
+      <li>Gu–Kelly–Xiu: trees helped on monthly characteristics versus a linear model. Teach what they actually did, including the failures.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Tuning hyperparameters on the same years you will quote as out-of-sample (unit 048, again).</div>
+    
+  </section>
+  <section class="unit" id="u136">
+    
+    <h3><span class="n">136</span> Learning-to-rank for 'who beats whom'</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> State pairwise and listwise losses as 'punish a wrong order,' and compare them to MSE on the same panel.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Pairwise: for two names, was the one we liked more actually better next month? A loss that cares about that pair.</li>
+      <li>Listwise: the whole day's ranking is one object. LambdaMART / LightGBM rank as the practical tool.</li>
+      <li>Top-decile IR is the mandate-shaped metric: we only own the names we like most. A model that is great in the middle and wrong at the top is useless here.</li>
+      <li>This is still a score. Holdings come later (141–150).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Optimizing MSE and then being surprised the top 50 names are a mess.</div>
+    
+  </section>
+  <section class="unit" id="u137">
+    
+    <h3><span class="n">137</span> Cross-sectional CV that respects time and names</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Show that ordinary K-fold leaks, and replace it with purged year-blocks.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm AFML 7: overlapping labels and a shared market day mean random K-fold trains on the future.</li>
+      <li>A second leak: the same firm in train and test across a split that ignores time.</li>
+      <li>Walk-forward year-blocks vs i.i.d. K-fold on the same features. The fake lift is the lesson.</li>
+      <li>Embargo: leave a gap after the train window so the last training residual does not share a path with the first test residual.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Purging days but not embargoing the residual overlap. The leak is quieter, not gone.</div>
+    
+  </section>
+  <section class="unit" id="u138">
+    
+    <h3><span class="n">138</span> Combining ML scores with classic factors</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Measure incremental IR: what the blend adds after 12-1 and value are already in the book.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm unit 049 / Grinold 11–14: stacking, IC-weighting, orthogonalizing a new score to the ones you already have.</li>
+      <li>A blend of linear + GBDT + 12-1. The question is not 'is the blend's IR high?' It is 'did the tree add anything the 12-1 did not already give?'</li>
+      <li>Correlation of scores is not correlation of book returns; teach both.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Reporting the blend's raw IR and calling the tree a win when it is 12-1 in costume (Year 5 unit 179 is the daily twin).</div>
+    
+  </section>
+  <section class="unit" id="u139">
+    
+    <h3><span class="n">139</span> When ML adds nothing</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Kill your own monthly model on a holdout and write the autopsy.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Small monthly samples: 10 years × 12 = 120 fits. A flexible tree can memorize regimes.</li>
+      <li>Regime breaks: a rule that worked in 1995–2007 can die after. McLean–Pontiff again.</li>
+      <li>Feature death: a characteristic that was informative becomes crowded. The model will not announce this; the IC will.</li>
+      <li>The required artifact is a written autopsy, not a quieter chart.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Retraining until the holdout looks good. That holdout is then gone.</div>
+    
+  </section>
+  <section class="unit" id="u140">
+    <div class="chk-unit">
+    <h3><span class="n">140</span> Q2 checkpoint — leakage-free monthly ranker</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Defend or kill a walk-forward GBDT against a linear model and 12-1, on IR, with the leak hunt written down.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Features → model → walk-forward IC and long-only IR.</li>
+      <li>Same exam for linear and 12-1.</li>
+      <li>A paragraph that either defends the incremental IR or kills the net.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A checkpoint that only shows the tree's in-sample IC.</div>
+    </div>
+  </section>
+  <section class="unit" id="u141">
+    
+    <h3><span class="n">141</span> From score to weight without an optimizer</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Turn a ranking into holdings three simple ways, and see what an optimizer will later be asked to beat.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Top-N: own the N names you like most, equal weight. Everyday shopping cart.</li>
+      <li>Quantile tilt: own more of the top fifth, less (or none) of the bottom fifth, still long-only.</li>
+      <li>Rank-weight / z-score tilt: size the name by how strong the score is, then clip negatives to zero if you cannot short.</li>
+      <li>Compare turnover and IR of these three to the same-score long-short book. The gap is the long-only tax (143 will name it transfer coefficient).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Jumping to a quadratic program before the learner can do top-N by hand.</div>
+    
+  </section>
+  <section class="unit" id="u142">
+    
+    <h3><span class="n">142</span> Active weights and the one-period utility</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write 'like more of this, minus risk, minus costs' as a function, then solve a 10-name toy by hand and as a QP.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li><strong>Active weight</strong> is how much more (or less) of a name you own than the benchmark does. If the index is 2% of AAA and you own 5%, active weight is +3%.</li>
+      <li>One-period utility in words: expected extra return − λ × risk − costs. λ is how much you hate being different from the index (or how much you hate bounce).</li>
+      <li>The 10-name toy: write the numbers, take the derivative or complete the square, get the weights. Then show the same answer from a quadratic program.</li>
+      <li>Re-warm Markowitz (081): unconstrained MVO is brittle. That is why 144–149 exist.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Maximizing expected return with no risk term and calling it optimization. That is 'buy the highest score until the money is gone.'</div>
+    
+  </section>
+  <section class="unit" id="u143">
+    
+    <h3><span class="n">143</span> Long-only as a constraint</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Show the optimizer clipping negative weights, and measure what you lose versus long-short (transfer coefficient).</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>constraint</strong> is a rule the holdings must obey. 'No negative weights' is the long-only rule.</li>
+      <li>When the unconstrained solution wants to short a name, the constrained solution sets that weight to 0 and dumps the leftover into other names. The book is no longer the score.</li>
+      <li><strong>Transfer coefficient</strong>: how much of the score's ranking survived the rules. 1 means the book matches the score; 0 means the rules ate the idea.</li>
+      <li>Same alpha, three mandates: long-only, long-short, 130/30 (a little short sleeve). Teach 130/30 as an overlay, not the default.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Reporting the unconstrained IR as if it were the long-only book.</div>
+    
+  </section>
+  <section class="unit" id="u144">
+    
+    <h3><span class="n">144</span> Risk models the optimizer trusts</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Plug three risk models into the same utility and compare promised active risk to realized tracking error.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>The optimizer needs a forecast of how names bounce together. That forecast is the <strong>risk model</strong>.</li>
+      <li>Three families: fundamental (Barra-style: industry + style factors), statistical (PCA / shrinkage from 082), and a naive sample covariance.</li>
+      <li>Promised active risk vs realized tracking error. A model that is always '2% active risk' and delivers 6% is not conservative — it is wrong.</li>
+      <li>Re-warm 082–083: cleaned covariance is a risk input, not a trading rule.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Using a 500-name sample covariance with 12 months of daily data and trusting the optimizer's risk number.</div>
+    
+  </section>
+  <section class="unit" id="u145">
+    
+    <h3><span class="n">145</span> Linear constraints real books have</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Add sector, name, beta, turnover, and name-count caps one by one, and watch IR and tracking error move.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Name cap: 'no more than 4% in one stock.' Sector cap: 'no more than 20% in banks.' Beta cap: 'stay near the market tide.'</li>
+      <li>Turnover cap: 'do not trade more than X% of the book this month.' Name count: 'hold between 40 and 80 names.'</li>
+      <li>Each cap is a sentence a PM can say. Teach the sentence, then the inequality.</li>
+      <li>A book that hugs the index to satisfy every cap is a closet indexer (158). Tracking error will look tiny and IR will look stable.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Adding constraints until the book is the benchmark, then celebrating the low tracking error.</div>
+    
+  </section>
+  <section class="unit" id="u146">
+    
+    <h3><span class="n">146</span> Cost-aware optimization and capacity</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Put spread and impact in the utility, and draw net IR against assets under management.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm 088: turnover × spread is the first bill. Impact (064, square-root law) is the bill that grows with size.</li>
+      <li>A turnover penalty is a cheaper cousin of a full impact model. Teach both; use the penalty first.</li>
+      <li><strong>Capacity</strong> is the AUM at which net IR hits your hurdle (often zero). Draw the curve.</li>
+      <li>Boyd et al. 2017 as the clean modern write-up of 'return − risk − costs.'</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A paper IR with zero costs, quoted as the live number.</div>
+    
+  </section>
+  <section class="unit" id="u147">
+    
+    <h3><span class="n">147</span> Multi-period rebalancing: when not to trade</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Show that a decaying score plus today's cost says 'do not fully chase this month's list.'</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Myopic: each month, pretend there is no tomorrow and trade to the new target. That churns.</li>
+      <li>Gârleanu–Pedersen / Boyd multi-period: because the score fades and trading costs money, the right book is between last month's holdings and this month's dream book.</li>
+      <li>Count the skipped trades. That count is the lesson, not a footnote.</li>
+      <li>Half-life of the score (from 133) is an input to this problem, not a separate hobby.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Rebalancing fully to the new target every month 'because the optimizer said so' while IC decay is slow and costs are not.</div>
+    
+  </section>
+  <section class="unit" id="u148">
+    
+    <h3><span class="n">148</span> Convex optimization toolkit</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Say what a QP/SOCP is, why convexity lets a solver certify a solution, and what a non-convex tweak throws away.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Everyday picture: you are standing in a bowl. Any local lowest point is the global lowest point. That is <strong>convex</strong>. A solver can promise it found the bottom.</li>
+      <li>A <strong>quadratic program</strong> has a bowl-shaped objective and straight-line constraints. Long-only + sector caps + a quadratic risk term is a QP.</li>
+      <li>SOCP: a slightly richer bowl (e.g. some impact terms). Teach when you need it.</li>
+      <li>A non-convex variant (a ratio, a cardinality trick without a reformulation) cannot be certified. Show one on purpose.</li>
+      <li>Boyd–Vandenberghe selected chapters; OSQP / Clarabel as the engines, not the idea.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Calling 'we ran scipy.optimize with a random start' an optimal book.</div>
+    
+  </section>
+  <section class="unit" id="u149">
+    
+    <h3><span class="n">149</span> Robust and resampled optimization</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Perturb the scores and show naïve MVO thrashing, then compare shrinkage and a simple tilt.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Inputs are noisy. A 1% change in a score can flip a naïve MVO book. Teach this with a perturbation, not a speech.</li>
+      <li>Resampling (Michaud): average the books from noisy inputs. Shrinkage (Ledoit–Wolf, again): calm the covariance.</li>
+      <li>A simple tilt (141) is often more stable than a fancy robust program. Honesty about that is in-syllabus.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Treating robustness as a reason to skip the QP. Robustness is a test of the QP, not a replacement for stating the utility.</div>
+    
+  </section>
+  <section class="unit" id="u150">
+    <div class="chk-unit">
+    <h3><span class="n">150</span> Q3 checkpoint — scores become a constrained book</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Take the Q2 scores through risk + costs + long-only/sector/beta constraints and defend net IR.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>One written utility. One risk model. One cost model. Constraints listed as sentences.</li>
+      <li>Transfer coefficient vs the unconstrained book.</li>
+      <li>Net IR vs the named benchmark. Capacity sentence.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A checkpoint that reports the unconstrained paper IR.</div>
+    </div>
+  </section>
+  <section class="unit" id="u151">
+    
+    <h3><span class="n">151</span> Between rebalances: drift, dividends, cash</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Follow the book from this close to next month's close without pretending weights stay put.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Weights <strong>drift</strong>: names that went up become a bigger slice even if you do nothing. That is not a trade; it is arithmetic.</li>
+      <li>Dividends arrive as cash. Cash earns (almost) nothing in this mandate unless you say otherwise.</li>
+      <li>A mid-month split or spinoff changes share counts. The wealth series must stay honest (123, again).</li>
+      <li>P&amp;L split into selection (you picked well) vs interaction (drift helped or hurt). Preview of 155.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Marking the month's return as w'r with frozen start-of-month weights and ignoring cash.</div>
+    
+  </section>
+  <section class="unit" id="u152">
+    
+    <h3><span class="n">152</span> Implementation shortfall at a monthly horizon</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Name the gap between the paper book and the fills, and put that gap on the IR.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Perold: <strong>implementation shortfall</strong> is paper return minus live return. Decision price vs arrival vs fills.</li>
+      <li>Re-warm 091–093: TWAP/VWAP the monthly trade list. At this clock you usually have days, not milliseconds.</li>
+      <li>Paper IR vs net IR after shortfall. The lesson is the subtraction.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Assuming a monthly book 'doesn't need execution' because it trades rarely. Rare × large is still a bill.</div>
+    
+  </section>
+  <section class="unit" id="u153">
+    
+    <h3><span class="n">153</span> Index-futures overlay to control beta</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Keep the stock cart long-only and use a short index future to strip the market tide.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>future</strong> is a contract to buy or sell the index later. Short the future ≈ bet the index falls (or hedge a long stock cart).</li>
+      <li>Same names, two books: unhedged (Sharpe is mostly beta) vs hedged (IR and Sharpe should get closer).</li>
+      <li>Roll cost: futures expire; you replace them. That is a small, real leak.</li>
+      <li>This is allowed under a long-only *stock* mandate if the PM says so. Teach it as an overlay, not a sneak-short of names.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Calling the hedged book 'market-neutral alpha' when the hedge is sloppy (wrong beta, wrong index, wrong roll).</div>
+    
+  </section>
+  <section class="unit" id="u154">
+    
+    <h3><span class="n">154</span> Drawdowns a long-only book will eat</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Walk 2008 and 2020 on the unhedged vs hedged book, and write the client memo.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>A <strong>drawdown</strong> is the fall from a peak to a later trough. Long-only unhedged will take the market's drawdown, plus or minus your active return.</li>
+      <li>Re-warm 085–089: copulas and tails if you stress several names together. A Gaussian '−2σ' is not 2008.</li>
+      <li>The memo: what happened, what the mandate promised, what would have been different with the futures overlay.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Killing a good ranker because the unhedged book fell with the market. That is the mandate, not a failed signal — unless IR also died.</div>
+    
+  </section>
+  <section class="unit" id="u155">
+    
+    <h3><span class="n">155</span> Attribution: where the extra return came from</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Split a year of active return into allocation, selection, interaction, and beta.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Brinson–Fachler in words: did you overweight the right industries (allocation), and inside an industry did you pick the right names (selection)? Interaction is the leftover cross term.</li>
+      <li>Factor attribution: how much of the extra return is just value or momentum you already knew you owned.</li>
+      <li>Optimizer-implied bets: the constraints force holdings; those forced bets have P&amp;L too.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A year of 'the book made 2% active' with no sentence about whether it was industry bets or name picks.</div>
+    
+  </section>
+  <section class="unit" id="u156">
+    
+    <h3><span class="n">156</span> Capacity, crowding, live vs paper for slow equity</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Scale AUM until net IR hits the hurdle, and say what crowding does to a published characteristic.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Re-warm 088 / 146. Monthly capacity is larger than daily (Year 5 / 189) because you trade less.</li>
+      <li>Crowding: McLean–Pontiff and Korajczyk–Sadka. Other people's orders are a cost you do not see in a solo backtest.</li>
+      <li>Live-vs-paper: stale membership, late fundamentals, a reconstitution you missed. Preview of Year 6.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Quoting the paper IR at $10M and the capacity story from a different paper at $10B.</div>
+    
+  </section>
+  <section class="unit" id="u157">
+    
+    <h3><span class="n">157</span> Pre-register the research</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Write the kill criteria before looking at results.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Universe, target, constraints, cost model, hurdle IR, what would make you kill the book — on one page, dated, before the run.</li>
+      <li>TEMPLATE_PORTFOLIO.md as the daily cousin; this page is the monthly cousin.</li>
+      <li>Changing the target after seeing IC is a new trial (007, again).</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 'pre-registration' written after the first pretty chart.</div>
+    
+  </section>
+  <section class="unit" id="u158">
+    
+    <h3><span class="n">158</span> Failure modes of this mandate</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Name and plant four bugs: leaked fundamentals, index-hugging, hidden beta, overfit optimizer.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Leaked fundamentals (132). Index-hugging (145). Hidden beta (127 / 131). Overfit optimizer (149 / 048).</li>
+      <li>The learner finds the four bugs in a notebook they did not write. That is the skill.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A 'failure modes' lecture with no planted bugs.</div>
+    
+  </section>
+  <section class="unit" id="u159">
+    
+    <h3><span class="n">159</span> Overlays a real book meets</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Add a restricted list and a 130/30 sleeve, and measure IR and turnover change.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>Restricted list: names you may not own (ESG, compliance, a client ban). The optimizer must treat them as a hard zero.</li>
+      <li>130/30: 130% long, 30% short. A little short sleeve. Not the default mandate.</li>
+      <li>Tax-aware / lots: mentioned as a later overlay (Year 6), not a rewrite of the pre-tax book.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> Building the research book on an unrestricted universe and then dropping names at the end. The scores were wrong for the constrained world.</div>
+    
+  </section>
+  <section class="unit" id="u160">
+    <div class="exit-unit">
+    <h3><span class="n">160</span> Year-4 exit — monthly long-only capstone</h3>
+    <p class="skill"><strong>Teach this one skill:</strong> Defend a PIT, walk-forward, cost-aware long-only book on net IR vs a named benchmark, including beta, the no-short tax, and capacity.</p>
+    <p><strong>What has to be taught, in order:</strong></p>
+    <ol class="beats">
+      <li>End-to-end: universe → features → ranker → constrained optimizer → net IR → capacity → attribution → proceed/kill memo.</li>
+      <li>Defended as to a PM who forbids shorts.</li>
+      <li>This is not the Year-3 capstone and not the Year-5 daily book.</li>
+    </ol>
+    <div class="trap"><strong>Trap to teach, not a footnote.</strong> A capstone that is a long-short notebook with the shorts deleted in the last cell.</div>
+    </div>
+  </section>
+  <nav class="nav-links">
+    <ul>
+      <li><a href="year-5-lessons.html">Year 5 teaching plan (hours–days)</a></li>
+      <li><a href="year-6-lessons.html">Year 6 teaching plan (data + go-live)</a></li>
+      <li><a href="curriculum.html#y4">Year 4 in the unit table</a></li>
+      <li><a href="long-only-mid-horizon.html">Year 4 mandate sheet</a></li>
+      <li><a href="../index.html">Home</a></li>
+    </ul>
+  </nav>
+</article>
+</body>
+</html>
